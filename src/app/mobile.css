@@ -1,0 +1,399 @@
+/* ============================================================
+   MOBILE-FIRST PLAYER UI
+   Score stepper, bottom nav, touch improvements.
+   Admin / owner dashboards are excluded.
+   ============================================================ */
+
+/* ---- Score stepper (PredictionForm) ------------------------------ */
+
+.prediction-stepper {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.prediction-stepper-scores {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+}
+
+.prediction-stepper-sep {
+  color: var(--muted);
+  flex-shrink: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  user-select: none;
+}
+
+.score-step {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 5px;
+  max-width: 140px;
+}
+
+.score-step-label {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.score-step-controls {
+  align-items: stretch;
+  display: flex;
+  width: 100%;
+}
+
+.score-step-btn {
+  align-items: center;
+  background: var(--paper);
+  border: 2px solid var(--black);
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  flex: 1;
+  height: 56px;
+  justify-content: center;
+  touch-action: manipulation;
+  transition: background 100ms, color 100ms, transform 80ms;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.score-step-btn:first-child {
+  border-radius: 10px 0 0 10px;
+  border-right: none;
+}
+
+.score-step-btn:last-child {
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+}
+
+.score-step-btn:active:not(:disabled) {
+  background: var(--black);
+  color: var(--green);
+  transform: scale(0.93);
+}
+
+.score-step-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.32;
+}
+
+.score-step-value {
+  align-items: center;
+  background: white;
+  border: 2px solid var(--black);
+  border-left: none;
+  border-right: none;
+  color: var(--ink);
+  display: flex;
+  flex-shrink: 0;
+  font-family: var(--font-heading, sans-serif);
+  font-size: 1.7rem;
+  font-weight: 900;
+  height: 56px;
+  justify-content: center;
+  min-width: 52px;
+  text-align: center;
+  user-select: none;
+}
+
+.prediction-stepper-save {
+  align-items: center;
+  background: var(--black);
+  border: 2px solid var(--black);
+  border-radius: 10px;
+  color: var(--green);
+  cursor: pointer;
+  display: flex;
+  font-size: 0.85rem;
+  font-weight: 800;
+  gap: 8px;
+  height: 52px;
+  justify-content: center;
+  letter-spacing: 0.05em;
+  max-width: 340px;
+  padding: 0 20px;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  transition: opacity 140ms, transform 80ms;
+  -webkit-tap-highlight-color: transparent;
+  width: 100%;
+}
+
+.prediction-stepper-save:active:not(:disabled) {
+  opacity: 0.82;
+  transform: scale(0.97);
+}
+
+.prediction-stepper-save:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.prediction-stepper-save.saved {
+  background: #0a7c52;
+  border-color: #0a7c52;
+  color: #fff;
+}
+
+.prediction-stepper-save.saving {
+  opacity: 0.6;
+}
+
+.prediction-stepper-msg {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin: 0;
+  text-align: center;
+}
+
+.prediction-stepper-msg.ok { color: #0a7c52; }
+.prediction-stepper-msg.err { color: var(--red); }
+
+.prediction-locked {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.prediction-locked-score {
+  color: var(--ink);
+  font-family: var(--font-heading, sans-serif);
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+/* ---- Mobile bottom navigation ------------------------------------ */
+
+.mobile-bottom-nav {
+  display: none;
+}
+
+.mobile-nav-item-form {
+  display: flex;
+  flex: 1;
+}
+
+/* ---- Global touch improvements ----------------------------------- */
+
+a, button, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button {
+  min-height: 44px;
+}
+
+/* ---- Responsive breakpoints -------------------------------------- */
+
+@media (max-width: 720px) {
+
+  /* Bottom nav */
+  .mobile-bottom-nav {
+    align-items: stretch;
+    background: var(--black);
+    border-top: 2px solid rgba(255,255,255,0.08);
+    bottom: 0;
+    display: flex;
+    gap: 0;
+    justify-content: stretch;
+    left: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    position: fixed;
+    right: 0;
+    z-index: 100;
+  }
+
+  .mobile-nav-item,
+  .mobile-nav-item-form .mobile-nav-item {
+    align-items: center;
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.45);
+    cursor: pointer;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    font-size: 0.63rem;
+    font-weight: 700;
+    gap: 3px;
+    justify-content: center;
+    letter-spacing: 0.04em;
+    min-height: 58px;
+    padding: 8px 4px;
+    text-decoration: none;
+    text-transform: uppercase;
+    touch-action: manipulation;
+    transition: color 100ms;
+    -webkit-tap-highlight-color: transparent;
+    width: 100%;
+  }
+
+  .mobile-nav-item:active,
+  .mobile-nav-item-form .mobile-nav-item:active {
+    color: var(--green);
+  }
+
+  .mobile-nav-item.active {
+    color: var(--green);
+  }
+
+  .mobile-nav-icon-emoji {
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  /* Ensure page content clears the fixed bottom nav */
+  .page {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Match cards */
+  .campaign-match-card {
+    border-radius: 10px;
+    box-shadow: 4px 4px 0 var(--green);
+    margin: 0;
+    padding: 14px 14px 18px;
+    width: 100%;
+  }
+
+  .campaign-match-main {
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) 88px minmax(0, 1fr);
+  }
+
+  .campaign-kickoff strong {
+    font-size: 0.82rem;
+  }
+
+  .campaign-team strong {
+    font-size: 0.76rem;
+    hyphens: auto;
+    word-break: break-word;
+  }
+
+  /* Filter bar — horizontal scroll */
+  .match-filter-bar {
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .match-filter-bar::-webkit-scrollbar { display: none; }
+
+  .filter-pill {
+    flex-shrink: 0;
+    min-height: 40px;
+    padding: 6px 14px;
+    scroll-snap-align: start;
+  }
+
+  /* Forms */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 16px !important;
+    min-height: 48px;
+    width: 100%;
+  }
+
+  /* Auth */
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-panel {
+    display: none;
+  }
+
+  /* Competition center cards */
+  .competition-center-select__list {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 1fr;
+  }
+
+  .competition-center-select__card {
+    min-height: 60px;
+    padding: 14px 16px;
+    width: 100%;
+  }
+
+  /* Leaderboard — hide nationality/center columns */
+  .table th:nth-child(3),
+  .table td:nth-child(3),
+  .table th:nth-child(4),
+  .table td:nth-child(4) {
+    display: none;
+  }
+
+  /* Dashboard stats */
+  .grid.four {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Hero */
+  .hero-inner {
+    flex-direction: column;
+  }
+
+  .poster-card {
+    display: none;
+  }
+
+  /* Topbar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-inner {
+    padding: 0 14px;
+  }
+
+  /* Hide desktop nav links — bottom nav replaces them */
+  .nav > a:not(.primary),
+  .nav > form {
+    display: none;
+  }
+
+  .brand-subtitle {
+    display: none;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 400px) {
+  .campaign-match-main {
+    grid-template-columns: minmax(0, 1fr) 70px minmax(0, 1fr);
+  }
+
+  .score-step-value {
+    font-size: 1.4rem;
+    min-width: 42px;
+  }
+
+  .score-step-btn {
+    height: 50px;
+  }
+}
