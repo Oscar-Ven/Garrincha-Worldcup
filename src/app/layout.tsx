@@ -1,13 +1,20 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, Inter } from "next/font/google";
 import Link from "next/link";
 import { GarrinchaLogo } from "@/components/GarrinchaLogo";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { MobileNav } from "@/components/MobileNav";
 import { getCurrentUser } from "@/lib/auth";
 import { getLocale } from "@/lib/i18n";
 import { t } from "@/lib/translations";
 import { hasDatabaseConfig } from "@/lib/ui-demo-data";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#08eb9a",
+};
 
 const barlowCondensed = Barlow_Condensed({
   subsets: ["latin"],
@@ -131,6 +138,7 @@ export default async function RootLayout({
               </div>
             </div>
           </footer>
+          <MobileNav isLoggedIn={!!user} />
         </div>
       </body>
     </html>
