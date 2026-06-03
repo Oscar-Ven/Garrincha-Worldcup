@@ -126,6 +126,31 @@ function kickoff(matchNo: number): Date {
   }
 }
 
+const centerAdminData: Array<{ email: string; centerName: string }> = [
+  { email: "antwerpen.noord@garrincha.be", centerName: "GARRINCHA Antwerpen Noord" },
+  { email: "antwerpen.zuid@garrincha.be", centerName: "GARRINCHA Antwerpen Zuid" },
+  { email: "charleroi.dampremy@garrincha.be", centerName: "GARRINCHA Charleroi Dampremy" },
+  { email: "charleroi.montignies@garrincha.be", centerName: "GARRINCHA Charleroi Montignies" },
+  { email: "diegem@garrincha.be", centerName: "GARRINCHA Diegem" },
+  { email: "gent.arsenaal@garrincha.be", centerName: "GARRINCHA Gent Arsenaal" },
+  { email: "gent.theloop@garrincha.be", centerName: "GARRINCHA Gent The Loop" },
+  { email: "kortrijk@garrincha.be", centerName: "GARRINCHA Kortrijk" },
+  { email: "luik@garrincha.be", centerName: "GARRINCHA Luik" },
+  { email: "westgate.dilbeek@garrincha.be", centerName: "GARRINCHA Westgate Dilbeek" },
+];
+
+function deriveNickname(centerName: string): string {
+  // Strip "GARRINCHA " prefix
+  return centerName.replace(/^GARRINCHA\s+/, "");
+}
+
+function deriveFullName(email: string): string {
+  // Take the local part before @, split on ".", capitalise each word, append "Admin"
+  const local = email.split("@")[0];
+  const words = local.split(".").map((w) => w.charAt(0).toUpperCase() + w.slice(1));
+  return `${words.join(" ")} Admin`;
+}
+
 async function upsertTeam(name: string, groupName?: string) {
   const fifaCode = codeFor(name);
   const flagCode = fifaCode.length === 3 ? fifaCode : "TBD";
@@ -150,16 +175,20 @@ async function main() {
     throw new Error("DATABASE_URL is required. Set it to the Supabase pooled connection string before seeding.");
   }
 
-  const ownerEmail = process.env.OWNER_EMAIL ?? "owner@garrincha.local";
+  const ownerEmail = process.env.OWNER_EMAIL ?? "wc.garrincha@gmail.com";
   const ownerDisplayName = process.env.OWNER_DISPLAY_NAME ?? "GARRINCHA";
   const ownerPasswordPlain = process.env.OWNER_PASSWORD;
   const adminPasswordPlain = process.env.ADMIN_PASSWORD;
+  const centerAdminPasswordPlain = process.env.CENTER_ADMIN_PASSWORD;
 
   if (!ownerPasswordPlain || ownerPasswordPlain.length < 8) {
     throw new Error("OWNER_PASSWORD must be set in .env (minimum 8 characters).");
   }
   if (!adminPasswordPlain || adminPasswordPlain.length < 8) {
     throw new Error("ADMIN_PASSWORD must be set in .env (minimum 8 characters).");
+  }
+  if (!centerAdminPasswordPlain || centerAdminPasswordPlain.length < 8) {
+    throw new Error("CENTER_ADMIN_PASSWORD must be set in .env (minimum 8 characters).");
   }
 
   const centers = [
@@ -230,6 +259,39 @@ async function main() {
       centerId: center.id,
     },
   });
+
+  const centerAdminPassword = await hash(centerAdminPasswordPlain, 12);
+  for (let i = 0; i < centerAdminData.length; i++) {
+    const { email, centerName } = centerAdminData[i];
+    const adminCenter = await prisma.garrinchaCenter.findFirstOrThrow({
+      where: { name: centerName },
+    });
+    const nickname = deriveNickname(centerName);
+    const fullName = deriveFullName(email);
+    const phoneNumber = `+3200000000${(i + 2).toString().padStart(1, "0")}`;
+    await prisma.user.upsert({
+      where: { email },
+      create: {
+        email,
+        passwordHash: centerAdminPassword,
+        fullName,
+        nickname,
+        dateOfBirth: new Date("1990-01-01T00:00:00.000Z"),
+        phoneNumber,
+        displayName: nickname,
+        nationality: "Belgium",
+        role: Role.CENTER_ADMIN,
+        centerId: adminCenter.id,
+      },
+      update: {
+        passwordHash: centerAdminPassword,
+        role: Role.CENTER_ADMIN,
+        centerId: adminCenter.id,
+        displayName: nickname,
+      },
+    });
+  }
+  console.log("Seeded 10 center admin accounts.");
 
   const teams = new Map<string, Awaited<ReturnType<typeof upsertTeam>>>();
   for (const [groupName, names] of Object.entries(groups)) {
