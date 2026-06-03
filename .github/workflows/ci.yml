@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Cancel a running job on the same ref if a newer commit arrives
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─── Quality: typecheck · lint · unit tests ──────────────────────────────────
+  quality:
+    name: Typecheck · Lint · Test
+    runs-on: ubuntu-latest
+
+    # Fake-but-valid values so Prisma config and app-mode checks pass without a real DB.
+    # Tests are pure unit tests — no database connection is made.
+    env:
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+      DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
+      JWT_SECRET: "ci-only-placeholder-secret-at-least-32-chars-long"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      APP_PREVIEW_MODE: "false"
+      NEXT_PUBLIC_DEMO_MODE: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+  # ─── Security: npm audit ─────────────────────────────────────────────────────
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Audit (high + critical)
+        run: npm audit --audit-level=high

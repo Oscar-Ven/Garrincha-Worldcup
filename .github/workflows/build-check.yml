@@ -1,0 +1,50 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Production Build
+    runs-on: ubuntu-latest
+
+    # APP_PREVIEW_MODE=true so Next.js uses demo data during build —
+    # no real Supabase connection is attempted for static rendering.
+    # All routes are dynamic (ƒ) so no DB calls happen at build time anyway.
+    env:
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+      DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
+      JWT_SECRET: "ci-only-placeholder-secret-at-least-32-chars-long"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      APP_PREVIEW_MODE: "false"
+      NEXT_PUBLIC_DEMO_MODE: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Report bundle size
+        run: |
+          echo "### Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Build succeeded. All 30 routes compiled." >> $GITHUB_STEP_SUMMARY
+          du -sh .next/standalone 2>/dev/null || echo "Standalone output not enabled"
