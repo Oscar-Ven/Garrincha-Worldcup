@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const securityHeaders = [
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -17,7 +18,8 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self'",
-      "connect-src 'self'",
+      // Sentry ingest endpoint for error reporting
+      "connect-src 'self' https://*.ingest.de.sentry.io https://*.ingest.sentry.io",
       "frame-src 'none'",
       "frame-ancestors 'self'",
       "base-uri 'self'",
@@ -39,4 +41,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Sentry project settings — must match the Sentry project created for this app.
+  org: "garrincha-worldcup",
+  project: "garrincha-worldcup",
+
+  // Upload source maps to Sentry during production builds.
+  // SENTRY_AUTH_TOKEN must be set in the build environment.
+  silent: !process.env.CI, // only verbose in CI
+
+  // Automatically tree-shake Sentry debug logging in production bundles.
+  disableLogger: true,
+
+  // Tunnel Sentry requests through the app to avoid ad-blocker interference.
+  tunnelRoute: "/monitoring",
+});
