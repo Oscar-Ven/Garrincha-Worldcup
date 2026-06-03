@@ -21,8 +21,10 @@ Set all variables in **Vercel → Project → Settings → Environment Variables
 | `DATABASE_URL` | Supabase Transaction Pooler URL (port 6543, `pgbouncer=true`) |
 | `DIRECT_URL` | Supabase direct database URL (port 5432) |
 | `JWT_SECRET` | Random secret, minimum 32 characters |
+| `OWNER_EMAIL` | `wc.garrincha@gmail.com` (Super Admin login) |
 | `OWNER_PASSWORD` | Owner account password (seed only) |
-| `ADMIN_PASSWORD` | Admin account password (seed only) |
+| `ADMIN_PASSWORD` | Main admin account password (seed only) |
+| `CENTER_ADMIN_PASSWORD` | Shared initial password for 10 center admin accounts (seed only — replace before public launch) |
 | `NEXT_PUBLIC_APP_URL` | `https://[YOUR-APP-DOMAIN]` |
 | `APP_PREVIEW_MODE` | `false` |
 | `NEXT_PUBLIC_DEMO_MODE` | `false` |
@@ -32,9 +34,9 @@ Set all variables in **Vercel → Project → Settings → Environment Variables
 | Variable | Value |
 |----------|-------|
 | `RESEND_API_KEY` | Resend API key |
-| `EMAIL_FROM` | `Garrincha World Cup Predictions <noreply@[your-domain.com]>` |
+| `EMAIL_FROM` | `Garrincha World Cup Predictions <noreply@garrincha.be>` |
 
-**Email is not live until `[your-domain.com]` is verified in Resend.** See [Resend domain setup](#resend-domain-setup) below.
+**Email is not live until `garrincha.be` is verified in Resend.** See [Resend domain setup](#resend-domain-setup) below.
 
 ### Rate Limiting (Upstash Redis)
 
@@ -104,6 +106,42 @@ Seed only once, after migrations succeed on a fresh database:
 ```powershell
 npm run db:seed
 ```
+
+Seeding creates:
+- Owner/Super Admin: `wc.garrincha@gmail.com` (uses `OWNER_PASSWORD`)
+- Main admin: `admin@garrincha.local` (uses `ADMIN_PASSWORD`)
+- 10 center admins with `@garrincha.be` emails (uses `CENTER_ADMIN_PASSWORD`)
+
+**⚠️ Migration `20260604000000_center_admin_role` must be applied before seeding center admins.** This migration adds the `CENTER_ADMIN` value to the `Role` enum.
+
+Center admin emails:
+- `antwerpen.noord@garrincha.be` → GARRINCHA Antwerpen Noord
+- `antwerpen.zuid@garrincha.be` → GARRINCHA Antwerpen Zuid
+- `charleroi.dampremy@garrincha.be` → GARRINCHA Charleroi Dampremy
+- `charleroi.montignies@garrincha.be` → GARRINCHA Charleroi Montignies
+- `diegem@garrincha.be` → GARRINCHA Diegem
+- `gent.arsenaal@garrincha.be` → GARRINCHA Gent Arsenaal
+- `gent.theloop@garrincha.be` → GARRINCHA Gent The Loop
+- `kortrijk@garrincha.be` → GARRINCHA Kortrijk
+- `luik@garrincha.be` → GARRINCHA Luik
+- `westgate.dilbeek@garrincha.be` → GARRINCHA Westgate Dilbeek
+
+All center admins share `CENTER_ADMIN_PASSWORD` initially. Replace with unique credentials before public launch.
+
+## Admin Hierarchy
+
+| Role | Access |
+|------|--------|
+| `SUPER_ADMIN` | Full platform — all centers, health dashboard, user management |
+| `ADMIN` | Full admin access (legacy main admin) |
+| `CENTER_ADMIN` | Center-scoped — assigned center's QR codes, players, leaderboard only |
+| `USER` | Player — predictions, own profile |
+
+### System Health Dashboard
+
+Route: `/admin/health` — Super Admin only.
+Shows status of Supabase, Resend, Upstash Redis, Vercel, Sentry, Football API, and campaign readiness.
+Never exposes secrets, passwords, API keys, or connection strings.
 
 Re-seeding is idempotent (upsert) but should not be run routinely in production.
 

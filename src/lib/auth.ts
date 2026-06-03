@@ -64,7 +64,7 @@ export async function getSession(): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, secret());
     if (typeof payload.userId !== "string") return null;
-    if (payload.role !== Role.USER && payload.role !== Role.ADMIN && payload.role !== Role.SUPER_ADMIN) return null;
+    if (payload.role !== Role.USER && payload.role !== Role.ADMIN && payload.role !== Role.CENTER_ADMIN && payload.role !== Role.SUPER_ADMIN) return null;
     return { userId: payload.userId, role: payload.role };
   } catch {
     return null;
@@ -81,6 +81,7 @@ export const currentUserSelect = {
   role: true,
   competitionCenterId: true,
   competitionCenterLockedAt: true,
+  firstActivatedAt: true,
   center: {
     select: {
       id: true,
@@ -126,6 +127,26 @@ export async function requireSuperAdmin() {
   const user = await getCurrentUser();
   if (!user || user.role !== Role.SUPER_ADMIN) throw new Error("Super admin access required.");
   return user;
+}
+
+export async function requireCenterAdmin() {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== Role.ADMIN && user.role !== Role.CENTER_ADMIN && user.role !== Role.SUPER_ADMIN)) {
+    throw new Error("Admin access required.");
+  }
+  return user;
+}
+
+export function canManageCenter(user: { role: string; centerId: string }, targetCenterId: string): boolean {
+  if (user.role === "SUPER_ADMIN" || user.role === "ADMIN") return true;
+  if (user.role === "CENTER_ADMIN") return user.centerId === targetCenterId;
+  return false;
+}
+
+export function requireCenterAccess(user: { role: string; centerId: string }, targetCenterId: string): void {
+  if (!canManageCenter(user, targetCenterId)) {
+    throw new Error("You do not have access to this center.");
+  }
 }
 
 export function generateAccessToken(): { raw: string; hash: string } {

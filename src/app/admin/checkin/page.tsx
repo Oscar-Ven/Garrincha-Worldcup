@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { CheckInCodeForm } from "@/components/AdminForms";
 import { DataModeNotice } from "@/components/DataModeNotice";
-import { requireAdmin } from "@/lib/auth";
+import { requireCenterAdmin } from "@/lib/auth";
 import { getActiveSession } from "@/lib/checkin";
 import { getLocale } from "@/lib/i18n";
 import { t } from "@/lib/translations";
@@ -26,7 +26,7 @@ export default async function AdminCheckInPage() {
 
   let admin;
   try {
-    admin = await requireAdmin();
+    admin = await requireCenterAdmin();
   } catch {
     redirect("/admin/login?next=/admin/checkin");
   }

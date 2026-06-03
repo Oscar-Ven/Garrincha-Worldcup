@@ -14,11 +14,13 @@ export default defineConfig({
       // What to measure
       include: ["src/lib/**/*.ts"],
       exclude: [
-        "src/lib/prisma.ts",      // singleton wrapper, no logic to test
-        "src/lib/i18n.ts",        // thin server-only cookie reader
-        "src/lib/flags.ts",       // static lookup table
+        "src/lib/prisma.ts",       // singleton wrapper, no logic to test
+        "src/lib/i18n.ts",         // thin server-only cookie reader
+        "src/lib/flags.ts",        // static lookup table
         "src/lib/translations.ts", // static data
         "src/lib/ui-demo-data.ts", // static demo fixtures
+        "src/lib/health.ts",       // integration-only — requires live DB + external services
+        "src/lib/access-link.ts",  // integration-only — DB + email in one call
       ],
       // Reporters
       reporter: ["text-summary", "json-summary"],

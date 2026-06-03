@@ -1,6 +1,6 @@
 import { calculatePredictionPoints, isPredictionLocked, type Score } from "@/lib/scoring";
 
-export type AppRole = "USER" | "ADMIN" | "SUPER_ADMIN";
+export type AppRole = "USER" | "ADMIN" | "CENTER_ADMIN" | "SUPER_ADMIN";
 
 export type SessionLike = {
   userId: string;
@@ -55,7 +55,7 @@ export function leaderboardDisplayName(user: Pick<LeaderboardInputUser, "id" | "
 }
 
 export function canAccessAdmin(session: SessionLike): RuleResult {
-  if (!session || (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
+  if (!session || (session.role !== "ADMIN" && session.role !== "CENTER_ADMIN" && session.role !== "SUPER_ADMIN")) {
     return { allowed: false, status: 403, reason: "Admin access required." };
   }
 

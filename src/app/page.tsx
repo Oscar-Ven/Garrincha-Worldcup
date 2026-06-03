@@ -6,7 +6,6 @@ import { GarrinchaLogo } from "@/components/GarrinchaLogo";
 import { getLocale } from "@/lib/i18n";
 import { getLeaderboardWithMeta } from "@/lib/leaderboards";
 
-type LeaderboardRow = Awaited<ReturnType<typeof getLeaderboardWithMeta>>["rows"][number];
 import { prisma } from "@/lib/prisma";
 import { t } from "@/lib/translations";
 import { demoCenters, demoLeaderboard, demoMatches, hasDatabaseConfig } from "@/lib/ui-demo-data";
