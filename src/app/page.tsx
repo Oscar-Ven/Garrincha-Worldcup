@@ -13,13 +13,16 @@ import { demoCenters, demoLeaderboard, demoMatches, hasDatabaseConfig } from "@/
 
 export default async function HomePage() {
   const locale = await getLocale();
+
+  const fallback = [demoMatches.length, demoCenters.length, demoLeaderboard] as const;
+
   const [matchCount, centerCount, leaders] = hasDatabaseConfig()
     ? await Promise.all([
         prisma.match.count(),
         prisma.garrinchaCenter.count(),
         getLeaderboardWithMeta().then((m) => m.rows),
-      ])
-    : ([demoMatches.length, demoCenters.length, demoLeaderboard] as [number, number, LeaderboardRow[]]);
+      ]).catch(() => fallback)
+    : fallback;
 
   return (
     <>
