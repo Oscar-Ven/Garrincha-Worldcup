@@ -59,3 +59,22 @@ jobs:
           echo "**URL:** ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.event.workflow_run.head_sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Triggered by:** CI success on \`main\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on commit if deploy failed
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: "${{ github.event.workflow_run.head_sha }}",
+              body: [
+                "## Production deployment failed",
+                "",
+                "The deploy workflow failed for this commit.",
+                "Check the [Actions tab](https://github.com/" + context.repo.owner + "/" + context.repo.repo + "/actions) for details.",
+                "",
+                "No change was made to the live site — the previous deployment is still running.",
+              ].join("\n"),
+            });
