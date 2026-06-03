@@ -49,8 +49,27 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Unit tests
-        run: npm test
+      - name: Unit tests with coverage
+        run: npm run test:coverage
+
+      - name: Coverage report
+        if: always()
+        run: |
+          echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          python3 -c "
+          import json, sys
+          try:
+              d = json.load(open('coverage/coverage-summary.json'))['total']
+              rows = [(k.capitalize(), d[k]['pct']) for k in ['statements','branches','functions','lines']]
+              print('| Metric | Coverage |')
+              print('|--------|----------|')
+              for name, pct in rows:
+                  bar = '🟢' if pct >= 60 else ('🟡' if pct >= 40 else '🔴')
+                  print(f'| {name} | {bar} {pct}% |')
+          except Exception as e:
+              print('Coverage summary not available:', e)
+          " >> $GITHUB_STEP_SUMMARY
 
   # ─── Security: npm audit ─────────────────────────────────────────────────────
   security:
