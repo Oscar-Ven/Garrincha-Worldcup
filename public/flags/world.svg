@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="90" height="60" viewBox="0 0 90 60" role="img" aria-label="Team flag">
+  <rect width="90" height="60" fill="#0c6b4f"/>
+  <path d="M0 0h90v12H0z" fill="#d8a229"/>
+  <path d="M0 48h90v12H0z" fill="#f7f3e8"/>
+  <circle cx="45" cy="30" r="13" fill="#f7f3e8"/>
+  <path d="M45 16v28M31 30h28" stroke="#0c6b4f" stroke-width="4"/>
+</svg>

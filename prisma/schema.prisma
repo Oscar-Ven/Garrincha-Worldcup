@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  FINAL
+}
+
+enum Stage {
+  GROUP
+  ROUND_OF_32
+  ROUND_OF_16
+  QUARTER_FINAL
+  SEMI_FINAL
+  THIRD_PLACE
+  FINAL
+}
+
+model GarrinchaCenter {
+  id              String          @id @default(cuid())
+  name            String          @unique
+  country         String
+  city            String
+  bannerUrl       String?
+  activatedUsers  User[]          @relation("ActivationCenter")
+  competingUsers  User[]          @relation("CompetitionCenter")
+  sessions        CenterSession[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model User {
+  id                          String          @id @default(cuid())
+  email                       String          @unique
+  passwordHash                String?
+  fullName                    String
+  nickname                    String
+  dateOfBirth                 DateTime?
+  phoneNumber                 String
+  displayName                 String?
+  nationality                 String?
+  role                        Role            @default(USER)
+  centerId                    String
+  center                      GarrinchaCenter @relation("ActivationCenter", fields: [centerId], references: [id])
+  firstActivatedAt            DateTime?
+  competitionCenterId         String?
+  competitionCenter           GarrinchaCenter? @relation("CompetitionCenter", fields: [competitionCenterId], references: [id])
+  competitionCenterLockedAt   DateTime?
+  accessTokenHash             String?
+  accessTokenCreatedAt        DateTime?
+  accessTokenRevokedAt        DateTime?
+  lastAccessLinkSentAt        DateTime?
+  predictions                 Prediction[]
+  pointEvents                 PointEvent[]
+  checkIn                     CenterCheckIn?
+  createdAt                   DateTime        @default(now())
+  updatedAt                   DateTime        @updatedAt
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  fifaCode  String   @unique
+  flagUrl   String
+  groupName String?
+  homeGames Match[]  @relation("HomeTeam")
+  awayGames Match[]  @relation("AwayTeam")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Match {
+  id                 String       @id @default(cuid())
+  fifaMatchNo        Int?         @unique
+  stage              Stage
+  venue              String
+  kickoffAt          DateTime
+  status             MatchStatus  @default(SCHEDULED)
+  homeTeamId         String
+  homeTeam           Team         @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeamId         String
+  awayTeam           Team         @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  homeScore          Int?
+  awayScore          Int?
+  finalizedAt        DateTime?
+  scoreSource        String?
+  externalMatchId    String?
+  externalUpdatedAt  DateTime?
+  scoreSyncStatus    String?
+  lastScoreSyncAt    DateTime?
+  predictions        Prediction[]
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@index([kickoffAt])
+  @@index([stage])
+}
+
+model Prediction {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchId       String
+  match         Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  homeScore     Int
+  awayScore     Int
+  pointsAwarded Int       @default(0)
+  calculatedAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([userId, matchId])
+  @@index([matchId])
+}
+
+model PointEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points    Int
+  reason    String
+  awardedBy String?
+  matchId   String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model CenterSession {
+  id        String          @id @default(cuid())
+  centerId  String
+  center    GarrinchaCenter @relation(fields: [centerId], references: [id])
+  code      String          @unique
+  expiresAt DateTime
+  createdBy String
+  createdAt DateTime        @default(now())
+
+  @@index([centerId])
+  @@index([expiresAt])
+}
+
+model CenterCheckIn {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  centerId  String
+  sessionId String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}

@@ -1,0 +1,41 @@
+.next/
+node_modules/
+.env
+.secrets/
+.env*.local
+.npm-cache/
+.postgres-data/
+coverage/
+dist/
+*.tsbuildinfo
+
+# Dev artifacts — screenshots, throwaway scripts, generated PDFs
+ss-*.png
+screenshot*.mjs
+screenshot*.js
+generate-prototype-pdf.mjs
+generate-demo-video.mjs
+garrincha-prototype.pdf
+garrincha-demo.mp4
+proto-*.png
+videos/
+
+# Playwright browser binaries (downloaded on-demand)
+/playwright-report/
+/test-results/
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Log files
+*.log
+demo-server.*.log
+
+# Generated demo video
+demo-video/
+garrincha-demo.mp4
+garrincha-prototype.pdf
+
+# OS artifacts
+.DS_Store
+Thumbs.db
