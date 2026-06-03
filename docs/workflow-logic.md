@@ -67,14 +67,37 @@ Prediction lock: 5 minutes after kickoff
 - Prize winners: top 10 per `competitionCenterId` (owner dashboard)
 - Display name: `nickname` → `fullName` → anonymous fallback (never email)
 
-## 9. Infrastructure
+## 9. Admin Hierarchy
+
+| Role | Who | Access |
+|------|-----|--------|
+| `SUPER_ADMIN` | `wc.garrincha@gmail.com` | Full platform control, health dashboard, all centers |
+| `ADMIN` | `admin@garrincha.local` | Full admin access (legacy main admin) |
+| `CENTER_ADMIN` | 10 `@garrincha.be` accounts | Assigned center only — QR codes, check-in, local leaderboard |
+| `USER` | Players | Predictions, own profile |
+
+Center admin emails (all share `CENTER_ADMIN_PASSWORD` initially):
+- `antwerpen.noord@garrincha.be` → GARRINCHA Antwerpen Noord
+- `antwerpen.zuid@garrincha.be` → GARRINCHA Antwerpen Zuid
+- `charleroi.dampremy@garrincha.be` → GARRINCHA Charleroi Dampremy
+- `charleroi.montignies@garrincha.be` → GARRINCHA Charleroi Montignies
+- `diegem@garrincha.be` → GARRINCHA Diegem
+- `gent.arsenaal@garrincha.be` → GARRINCHA Gent Arsenaal
+- `gent.theloop@garrincha.be` → GARRINCHA Gent The Loop
+- `kortrijk@garrincha.be` → GARRINCHA Kortrijk
+- `luik@garrincha.be` → GARRINCHA Luik
+- `westgate.dilbeek@garrincha.be` → GARRINCHA Westgate Dilbeek
+
+**Pending:** Migration `20260604000000_center_admin_role.sql` adds `CENTER_ADMIN` to the Role enum. Must be applied before seeding center admins.
+
+## 10. Infrastructure
 
 - **Email provider**: Resend — `RESEND_API_KEY` configured. Domain `[your-domain.com]` must be verified in Resend before production email sending.
 - **Database**: Supabase PostgreSQL — connected, migrations and seed applied.
 - **Rate limiting**: Upstash Redis — `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` configured. `checkRateLimit` uses Redis when vars are present, falls back to in-memory otherwise.
 - **App hosting**: Vercel at `https://[YOUR-APP-DOMAIN]`.
 
-## 10. Open Client Decisions
+## 11. Open Client Decisions
 
 - **Link rotation policy**: unclear whether players should be warned before rotation invalidates their saved link; no grace period defined
 - **Admin center override**: `competitionCenterId` lock override is listed as a future feature; scope and authorization level not specified

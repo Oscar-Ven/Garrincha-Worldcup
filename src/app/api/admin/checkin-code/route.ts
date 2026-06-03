@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireCenterAdmin } from "@/lib/auth";
 import { generateSessionCode, getActiveSession, sessionExpiresAt } from "@/lib/checkin";
 import { prisma } from "@/lib/prisma";
 import { rejectCrossOriginRequest } from "@/lib/request-security";
@@ -11,13 +11,18 @@ export async function GET(request: Request) {
 
   let admin;
   try {
-    admin = await requireAdmin();
+    admin = await requireCenterAdmin();
   } catch {
     return NextResponse.json({ error: "Admin access required." }, { status: 403 });
   }
 
   const { searchParams } = new URL(request.url);
   const centerId = searchParams.get("centerId") ?? admin.center.id;
+
+  // CENTER_ADMIN can only query their own center's code
+  if (admin.role === "CENTER_ADMIN" && centerId !== admin.center.id) {
+    return NextResponse.json({ error: "You can only view codes for your assigned center." }, { status: 403 });
+  }
 
   const session = await getActiveSession(centerId);
   if (!session) {
@@ -32,7 +37,7 @@ export async function POST(request: Request) {
 
   let admin;
   try {
-    admin = await requireAdmin();
+    admin = await requireCenterAdmin();
   } catch {
     return NextResponse.json({ error: "Admin access required." }, { status: 403 });
   }
@@ -43,6 +48,14 @@ export async function POST(request: Request) {
   }
 
   const { centerId } = parsed.data;
+
+  // CENTER_ADMIN can only generate codes for their own center
+  if (admin.role === "CENTER_ADMIN" && centerId !== admin.center.id) {
+    return NextResponse.json(
+      { error: "You can only generate codes for your assigned center." },
+      { status: 403 },
+    );
+  }
 
   const center = await prisma.garrinchaCenter.findUnique({ where: { id: centerId } });
   if (!center) {

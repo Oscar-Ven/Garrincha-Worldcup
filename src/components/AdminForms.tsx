@@ -190,7 +190,7 @@ export function UserRoleForm({
   locale,
 }: {
   userId: string;
-  role: "USER" | "ADMIN" | "SUPER_ADMIN";
+  role: "USER" | "ADMIN" | "CENTER_ADMIN" | "SUPER_ADMIN";
   disabled?: boolean;
   locale: Locale;
 }) {
@@ -217,6 +217,7 @@ export function UserRoleForm({
       <select id={`role-${userId}`} name="role" defaultValue={role} disabled={disabled}>
         <option value="USER">{t(locale, "admin.roleUser")}</option>
         <option value="ADMIN">{t(locale, "admin.roleAdmin")}</option>
+        <option value="CENTER_ADMIN">{t(locale, "admin.roleCenterAdmin")}</option>
         <option value="SUPER_ADMIN">{t(locale, "admin.roleSuperAdmin")}</option>
       </select>
       <button className="button dark" type="submit" disabled={disabled}>
