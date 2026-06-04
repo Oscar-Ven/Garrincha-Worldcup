@@ -188,10 +188,14 @@ if (missing.length > 0 || !isUsablePostgresUrl(databaseUrl) || !isUsablePostgres
 const databaseDetails = postgresUrlDetails(databaseUrl);
 const directDetails = postgresUrlDetails(directUrl);
 
+// Runtime-ready = either:
+//   • Transaction Pooler (port 6543, pgbouncer=true)  — Vercel/serverless
+//   • Direct connection  (port 5432)                   — Render/persistent process
 const databaseRuntimeReady =
-  databaseDetails?.kind === "supabase_pooler" &&
-  databaseDetails.port === "6543" &&
-  databaseDetails.hasPgbouncer;
+  (databaseDetails?.kind === "supabase_pooler" &&
+    databaseDetails.port === "6543" &&
+    databaseDetails.hasPgbouncer) ||
+  (databaseDetails?.kind === "supabase_direct" && databaseDetails.port === "5432");
 const directMigrationReady = directDetails?.kind === "supabase_direct" && directDetails.port === "5432";
 
 console.log(`DATABASE_URL_KIND=${databaseDetails?.kind ?? "unknown"}`);
