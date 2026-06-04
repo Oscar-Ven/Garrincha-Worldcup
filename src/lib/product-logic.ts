@@ -42,6 +42,7 @@ export type LeaderboardRow = {
   nationality: string;
   center: string;
   points: number;
+  predictionCount: number;
 };
 
 export function leaderboardDisplayName(user: Pick<LeaderboardInputUser, "id" | "displayName" | "nickname" | "fullName">) {
@@ -140,6 +141,7 @@ export function createLeaderboardRows(users: LeaderboardInputUser[], limit?: num
       points:
         user.predictions.reduce((sum, prediction) => sum + prediction.pointsAwarded, 0) +
         user.pointEvents.reduce((sum, event) => sum + event.points, 0),
+      predictionCount: user.predictions.length,
     }))
     .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
 
