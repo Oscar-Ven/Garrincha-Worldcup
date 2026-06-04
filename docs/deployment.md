@@ -4,28 +4,65 @@
 
 | Service | Role |
 |---------|------|
-| Vercel | App hosting (automatic builds from main branch) |
+| **Render** | App hosting — Web Service (Node.js, persistent process) |
 | Supabase PostgreSQL | Only real database |
 | Resend | Transactional email (permanent access links) |
 | Upstash Redis | Rate limiting (multi-instance safe) |
-| Domain | `https://[YOUR-APP-DOMAIN]` |
+| Sentry | Error monitoring |
+| Domain | TBD — update `NEXT_PUBLIC_APP_URL` once decided |
 
-## Vercel Environment Variables
+## Why Render (not Vercel)
 
-Set all variables in **Vercel → Project → Settings → Environment Variables** for the Production environment.
+Render runs a persistent Node.js process, not serverless functions. This means:
+- The Supabase **direct connection** (port 5432) works without a Transaction Pooler.
+- No cold-start connection exhaustion under load.
+- `DATABASE_URL` and `DIRECT_URL` can both point to the same Supabase direct URL.
+
+## Render Service Configuration
+
+| Setting | Value |
+|---------|-------|
+| Service type | **Web Service** (not Static Site) |
+| Runtime | Node 20 |
+| Region | Frankfurt (eu-central-1 — same region as Supabase project) |
+| Branch | `main` |
+| Build command | See below |
+| Start command | `node .next/standalone/server.js` |
+| Health check path | `/` |
+
+### Build command
+
+```
+npm ci && npm run db:generate && npm run build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static
+```
+
+The `cp` steps are required because Next.js standalone output does not copy static assets automatically.
+
+### npm scripts
+
+```powershell
+npm run start:render   # runs: node .next/standalone/server.js
+```
+
+## Render Environment Variables
+
+Set ALL of the following in **Render dashboard → Service → Environment**. Do not put secrets in `render.yaml`.
 
 ### Required
 
 | Variable | Value |
 |----------|-------|
-| `DATABASE_URL` | Supabase Transaction Pooler URL (port 6543, `pgbouncer=true`) |
-| `DIRECT_URL` | Supabase direct database URL (port 5432) |
+| `NODE_ENV` | `production` |
+| `PORT` | `10000` (Render default — injected automatically) |
+| `HOSTNAME` | `0.0.0.0` |
+| `DATABASE_URL` | Supabase direct connection `postgresql://postgres:PASS@db.ref.supabase.co:5432/postgres` |
+| `DIRECT_URL` | Same as `DATABASE_URL` for Render (persistent process — no pooler needed) |
 | `JWT_SECRET` | Random secret, minimum 32 characters |
-| `OWNER_EMAIL` | `wc.garrincha@gmail.com` (Super Admin login) |
-| `OWNER_PASSWORD` | Owner account password (seed only) |
-| `ADMIN_PASSWORD` | Main admin account password (seed only) |
-| `CENTER_ADMIN_PASSWORD` | Shared initial password for 10 center admin accounts (seed only — replace before public launch) |
-| `NEXT_PUBLIC_APP_URL` | `https://[YOUR-APP-DOMAIN]` |
+| `OWNER_EMAIL` | `wc.garrincha@gmail.com` |
+| `OWNER_PASSWORD` | Owner account password |
+| `ADMIN_PASSWORD` | Main admin password |
+| `CENTER_ADMIN_PASSWORD` | Shared center admin password |
+| `NEXT_PUBLIC_APP_URL` | `https://[your-render-url].onrender.com` (update when custom domain is set) |
 | `APP_PREVIEW_MODE` | `false` |
 | `NEXT_PUBLIC_DEMO_MODE` | `false` |
 
@@ -34,9 +71,9 @@ Set all variables in **Vercel → Project → Settings → Environment Variables
 | Variable | Value |
 |----------|-------|
 | `RESEND_API_KEY` | Resend API key |
-| `EMAIL_FROM` | `Garrincha World Cup Predictions <noreply@garrincha.be>` |
+| `EMAIL_FROM` | `Garrincha World Cup Predictions <noreply@[your-domain.com]>` |
 
-**Email is not live until `garrincha.be` is verified in Resend.** See [Resend domain setup](#resend-domain-setup) below.
+Email is not live until the sending domain is verified in Resend. See [Resend domain setup](#resend-domain-setup) below.
 
 ### Rate Limiting (Upstash Redis)
 
@@ -44,42 +81,31 @@ Set all variables in **Vercel → Project → Settings → Environment Variables
 |----------|-------|
 | `UPSTASH_REDIS_REST_URL` | Upstash REST endpoint |
 | `UPSTASH_REDIS_REST_TOKEN` | Upstash REST token |
-| `REDIS_URL` | Upstash Redis URL (for future use) |
+| `REDIS_URL` | Upstash Redis URL |
 
-Without Upstash vars the app falls back to per-process in-memory rate limiting. For multi-instance Vercel deployments, Upstash is required for correct rate-limit enforcement.
-
-### Monitoring (optional — when ready)
+### Monitoring (Sentry)
 
 | Variable | Value |
 |----------|-------|
-| `SENTRY_DSN` | Sentry project DSN |
-| `NEXT_PUBLIC_SENTRY_DSN` | Same DSN (public) |
+| `NEXT_PUBLIC_SENTRY_DSN` | Sentry DSN |
+| `SENTRY_DSN` | Sentry DSN (server-side) |
+| `SENTRY_ORG` | `garrincha-worldcup` |
+| `SENTRY_PROJECT` | `garrincha-worldcup` |
+| `SENTRY_AUTH_TOKEN` | For source map upload during builds |
 
-## DATABASE_URL — Transaction Pooler
+## Supabase Notes
 
-For Vercel serverless, use the Supabase Transaction Pooler URL (not the direct connection):
-
-```
-postgresql://postgres.[REF]:[PASS]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&sslmode=require
-```
-
-Get it from: Supabase Dashboard → Project → Connect → Transaction Pooler.
-
-The current `.env` may use the direct connection string for both DATABASE_URL and DIRECT_URL. Update DATABASE_URL to the pooler URL before production launch on Vercel.
-
-## Build
-
-Vercel runs `npm run build` automatically:
+On Render, use the **direct connection** for both `DATABASE_URL` and `DIRECT_URL`:
 
 ```
-prisma generate && next build
+postgresql://postgres:PASS@db.cvpfkopixypggzpqjloo.supabase.co:5432/postgres
 ```
 
-**Migrations do NOT run automatically.** This prevents accidental schema changes from CI/CD builds.
+No Transaction Pooler needed — Render's persistent process manages connections directly.
 
 ## Pre-Deployment Checklist
 
-Run locally before every production release:
+Run locally before each release:
 
 ```powershell
 npm run env:check
@@ -89,44 +115,43 @@ npm test
 npm audit --audit-level=high
 ```
 
+Build and verify standalone output:
+
+```powershell
+npm run build
+# Verify .next/standalone/server.js exists
+ls .next/standalone/server.js
+```
+
 ## Migration (Deliberate Release Step)
 
-Apply committed migrations manually before deploying a new schema version:
+Apply committed migrations manually before deploying a schema change:
 
 ```powershell
 npm run db:migrate:deploy
 ```
 
-This uses `DIRECT_URL` via `prisma.config.ts`. Do not run against production unless that is the intended action.
+All 5 migrations are currently applied to the live Supabase database.
 
 ## Seed (First Setup Only)
 
-Seed only once, after migrations succeed on a fresh database:
+Already seeded. Re-seed only on a fresh database:
 
 ```powershell
 npm run db:seed
 ```
 
-Seeding creates:
-- Owner/Super Admin: `wc.garrincha@gmail.com` (uses `OWNER_PASSWORD`)
-- Main admin: `admin@garrincha.local` (uses `ADMIN_PASSWORD`)
-- 10 center admins with `@garrincha.be` emails (uses `CENTER_ADMIN_PASSWORD`)
+## Admin Accounts
 
-**⚠️ Migration `20260604000000_center_admin_role` must be applied before seeding center admins.** This migration adds the `CENTER_ADMIN` value to the `Role` enum.
+| Role | Email | Password source |
+|------|-------|----------------|
+| SUPER_ADMIN | `wc.garrincha@gmail.com` | `OWNER_PASSWORD` env var |
+| ADMIN | `admin@garrincha.local` | `ADMIN_PASSWORD` env var |
+| CENTER_ADMIN (×10) | `*.@garrincha.be` | `CENTER_ADMIN_PASSWORD` env var |
 
-Center admin emails:
-- `antwerpen.noord@garrincha.be` → GARRINCHA Antwerpen Noord
-- `antwerpen.zuid@garrincha.be` → GARRINCHA Antwerpen Zuid
-- `charleroi.dampremy@garrincha.be` → GARRINCHA Charleroi Dampremy
-- `charleroi.montignies@garrincha.be` → GARRINCHA Charleroi Montignies
-- `diegem@garrincha.be` → GARRINCHA Diegem
-- `gent.arsenaal@garrincha.be` → GARRINCHA Gent Arsenaal
-- `gent.theloop@garrincha.be` → GARRINCHA Gent The Loop
-- `kortrijk@garrincha.be` → GARRINCHA Kortrijk
-- `luik@garrincha.be` → GARRINCHA Luik
-- `westgate.dilbeek@garrincha.be` → GARRINCHA Westgate Dilbeek
+All center admin emails: antwerpen.noord, antwerpen.zuid, charleroi.dampremy, charleroi.montignies, diegem, gent.arsenaal, gent.theloop, kortrijk, luik, westgate.dilbeek — all `@garrincha.be`.
 
-All center admins share `CENTER_ADMIN_PASSWORD` initially. Replace with unique credentials before public launch.
+**Replace shared `CENTER_ADMIN_PASSWORD` with individual credentials before public launch.**
 
 ## Admin Hierarchy
 
@@ -134,45 +159,55 @@ All center admins share `CENTER_ADMIN_PASSWORD` initially. Replace with unique c
 |------|--------|
 | `SUPER_ADMIN` | Full platform — all centers, health dashboard, user management |
 | `ADMIN` | Full admin access (legacy main admin) |
-| `CENTER_ADMIN` | Center-scoped — assigned center's QR codes, players, leaderboard only |
+| `CENTER_ADMIN` | Center-scoped — assigned center QR codes, players, leaderboard |
 | `USER` | Player — predictions, own profile |
-
-### System Health Dashboard
-
-Route: `/admin/health` — Super Admin only.
-Shows status of Supabase, Resend, Upstash Redis, Vercel, Sentry, Football API, and campaign readiness.
-Never exposes secrets, passwords, API keys, or connection strings.
-
-Re-seeding is idempotent (upsert) but should not be run routinely in production.
 
 ## Resend Domain Setup
 
 Email is not live until the sending domain is verified.
 
 1. Log in to [resend.com](https://resend.com).
-2. Go to **Domains** → Add `[your-domain.com]`.
+2. Go to **Domains** → Add your domain.
 3. Add the DNS records Resend provides:
-   - **SPF** — TXT record on `[your-domain.com]`
-   - **DKIM** — TXT record on `resend._domainkey.[your-domain.com]`
-   - **DMARC** — TXT record on `_dmarc.[your-domain.com]` (recommended)
+   - **SPF** — TXT record on your domain
+   - **DKIM** — TXT record on `resend._domainkey.yourdomain`
+   - **DMARC** — TXT record on `_dmarc.yourdomain` (recommended)
 4. Wait for domain verification (minutes to a few hours).
-5. Set in Vercel:
+5. Set in Render env vars:
    ```
-   EMAIL_FROM="Garrincha World Cup Predictions <noreply@[your-domain.com]>"
+   EMAIL_FROM="Garrincha World Cup Predictions <noreply@yourdomain>"
    ```
 
-Until verification, players still register and are auto-logged in. They can request a new access link from `/login` once email is live.
+Until verification: use `EMAIL_FROM="onboarding@resend.dev"` for test emails only.
 
-**Temporary testing only:** use `EMAIL_FROM="onboarding@resend.dev"` — this is Resend's built-in test sender, no domain verification required. Not for production.
+## System Health Dashboard
+
+Route: `/admin/health` — Super Admin only.
+
+Shows: Supabase connection status, campaign data counts, Resend/Redis/Vercel/Sentry/Football API config status.
+
+Never exposes secrets, passwords, API keys, or connection strings.
+
+## CI/CD Workflow
+
+| Workflow | Trigger | Action |
+|----------|---------|--------|
+| `ci.yml` | Every push/PR | Typecheck, lint, test, security audit |
+| `build-check.yml` | Push/PR to main or develop | Production build verification |
+| `deploy-render.yml` | CI success on main | Triggers Render deploy hook |
+| `deploy.yml` | — | **Disabled** (Vercel — replaced by Render) |
+| `deploy-staging.yml` | — | **Disabled** (Vercel — replaced by Render) |
+| `preview.yml` | — | **Disabled** (Vercel — replaced by Render) |
+
+### GitHub Secrets required for Render deploy
+
+| Secret | Where to get it |
+|--------|----------------|
+| `RENDER_DEPLOY_HOOK` | Render dashboard → Service → Settings → Deploy Hook |
+| `SENTRY_AUTH_TOKEN` | Sentry dashboard — for source maps in build |
 
 ## Upstash Redis — Rate Limiting
 
-The app checks for `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` at runtime. When present, rate limiting uses Upstash fixed-window counters across all Vercel instances. When absent, it falls back to per-process in-memory (development safe, not production-safe for multi-instance).
-
-## Workflow
-
-1. Confirm Vercel env vars are set correctly.
-2. Run `npm run db:migrate:deploy` for any schema changes.
-3. Deploy to Vercel.
-4. Run `npm run db:seed` only if setting up a fresh database.
-5. Verify registration, access links, predictions, admin scores, leaderboards.
+The app checks `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` at runtime.  
+When present → Redis-backed rate limiting across all instances.  
+When absent → per-process in-memory fallback (development only).

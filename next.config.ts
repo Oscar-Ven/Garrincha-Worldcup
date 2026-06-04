@@ -30,6 +30,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Standalone output bundles the app + Node.js server into .next/standalone/
+  // Required for Render Web Service deployment.
+  output: "standalone",
   experimental: {},
   async headers() {
     return [
@@ -50,8 +53,11 @@ export default withSentryConfig(nextConfig, {
   // SENTRY_AUTH_TOKEN must be set in the build environment.
   silent: !process.env.CI, // only verbose in CI
 
-  // Automatically tree-shake Sentry debug logging in production bundles.
-  disableLogger: true,
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
 
   // Tunnel Sentry requests through the app to avoid ad-blocker interference.
   tunnelRoute: "/monitoring",

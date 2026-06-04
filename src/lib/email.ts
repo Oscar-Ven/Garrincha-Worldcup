@@ -1,4 +1,5 @@
 import "server-only";
+import { isPlaceholderValue } from "@/lib/app-mode";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -34,7 +35,9 @@ export interface AccessLinkEmailPayload {
  * health checks without exposing the key values themselves.
  */
 export function isEmailConfigured(): boolean {
-  return !!(process.env.RESEND_API_KEY?.trim() && process.env.EMAIL_FROM?.trim());
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  const from = process.env.EMAIL_FROM?.trim();
+  return Boolean(apiKey && from && !isPlaceholderValue(apiKey) && !isPlaceholderValue(from));
 }
 
 // ---------------------------------------------------------------------------
@@ -197,7 +200,7 @@ export async function sendAccessLinkEmail(
   const apiKey = process.env.RESEND_API_KEY?.trim();
 
   // No-provider mode: both env vars must be present to send.
-  if (!from || !apiKey) {
+  if (!isEmailConfigured() || !from || !apiKey) {
     if (process.env.NODE_ENV === "production") {
       console.error(
         "[email] Email NOT sent — RESEND_API_KEY or EMAIL_FROM is not configured.",

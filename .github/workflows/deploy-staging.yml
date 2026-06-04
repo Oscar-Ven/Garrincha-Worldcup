@@ -1,6 +1,7 @@
-name: Deploy Staging
+# DISABLED — Vercel staging deployment replaced by Render.
+# Kept for reference. All jobs are disabled with if: false.
+name: Deploy Staging (Vercel — disabled)
 
-# Deploy develop branch to a Vercel preview environment whenever CI passes.
 on:
   workflow_run:
     workflows: ["CI"]
@@ -13,45 +14,8 @@ concurrency:
 
 jobs:
   deploy-staging:
-    name: Deploy to Vercel (staging)
+    name: Deploy to Vercel (staging) — DISABLED
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
+    if: false   # Disabled: project moved to Render
     steps:
-      - name: Checkout the exact commit CI tested
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-
-      - name: Pull Vercel environment info
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build (Vercel preview)
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy to staging preview
-        id: deploy
-        run: |
-          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
-
-      - name: Summary
-        run: |
-          echo "## Staging Deployment" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**URL:** ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** \`develop\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** \`${{ github.event.workflow_run.head_sha }}\`" >> $GITHUB_STEP_SUMMARY
+      - run: echo "Vercel staging deploy disabled — using Render"
