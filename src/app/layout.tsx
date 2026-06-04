@@ -85,9 +85,9 @@ export default async function RootLayout({
                 <Image
                   src="/garrincha-white.png"
                   alt="GARRINCHA"
-                  height={18}
-                  width={108}
-                  style={{ height: 18, width: "auto" }}
+                  height={26}
+                  width={156}
+                  style={{ height: 26, width: "auto" }}
                   priority
                 />
               </Link>
