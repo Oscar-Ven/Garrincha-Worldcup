@@ -4069,6 +4069,270 @@ body:has(.landing-root) .btm-nav-garrincha{ display: none !important; }
 
 .prose-page ul { padding-left: 20px; }
 
+/* ============================================================
+   PUBLIC PAGE DESKTOP LAYOUT
+   Auth pages, leaderboards, legal pages — proper desktop sizing
+   ============================================================ */
+
+/* Public page container — replaces the mobile-only auth-page on desktop */
+.pub-page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px 80px;
+}
+
+/* On mobile the site-topbar is hidden, so auth pages need their own header */
+.pub-header {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+/* The main content card */
+.pub-card {
+  width: 100%;
+  max-width: 560px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: 36px 32px 32px;
+}
+
+/* Hero variant with green gradient */
+.pub-page-hero {
+  background: radial-gradient(120% 70% at 50% 0%, #16331F, var(--bg) 55%);
+}
+
+/* Wide variant for leaderboard */
+.pub-page-wide {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 48px 28px 80px;
+}
+
+/* Leaderboard-specific desktop layout */
+.lb-page {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.lb-page-header {
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+  padding: 48px 0 32px;
+}
+
+.lb-page-header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.lb-page-header h1 {
+  font-family: var(--f-disp);
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 0.95;
+  color: var(--green);
+  margin: 8px 0 0;
+}
+
+.lb-page-body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 28px 80px;
+}
+
+/* Auth page on desktop — centered card */
+@media (min-width: 641px) {
+  .auth-page {
+    align-items: center;
+    padding: 80px 28px 60px;
+  }
+
+  .auth-page > * {
+    width: 100%;
+    max-width: 520px;
+  }
+
+  /* auth-header spans full card width */
+  .auth-header {
+    max-width: 520px;
+    width: 100%;
+  }
+
+  /* Remove mobile full-height constraint from player pages */
+  .g-scroll[style*="height: 100vh"] {
+    height: auto !important;
+    overflow-y: visible !important;
+  }
+}
+
+/* Leaderboard page — fix mobile overflow container on desktop */
+@media (min-width: 641px) {
+  .screen-header {
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+    padding: 32px 0 24px;
+  }
+
+  .screen-header-row {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  .screen-header-title {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+  }
+}
+
+/* ============================================================
+   SITE TOPBAR — desktop always visible, shown on non-landing pages
+   ============================================================ */
+
+/* Topbar is hidden by default (mobile uses bottom nav) */
+/* and re-enabled at ≥641px in the site-topbar responsive block */
+
+/* Fix: ensure auth pages account for topbar height on desktop */
+@media (min-width: 641px) {
+  .auth-page {
+    padding-top: 40px; /* topbar takes space above */
+  }
+}
+
+/* ============================================================
+   FOOTER — enhanced with all required legal content
+   ============================================================ */
+
+.site-footer-wrap {
+  background: var(--bg-2);
+  border-top: 1px solid var(--line);
+  margin-top: 0;
+}
+
+.site-footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 28px 32px;
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .site-footer-inner {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+}
+
+.site-footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.site-footer-copy {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 480px;
+}
+
+.site-footer-disclaimer {
+  font-size: 11px;
+  color: var(--ink-faint);
+  opacity: 0.6;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 480px;
+  font-style: italic;
+}
+
+.site-footer-legal {
+  font-size: 11px;
+  color: var(--ink-faint);
+  opacity: 0.5;
+  margin: 4px 0 0;
+}
+
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: flex-start;
+}
+
+.site-footer-links a {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.site-footer-links a:hover { color: var(--green); }
+
+.site-footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.site-footer-nav-col h4 {
+  font-family: var(--f-body);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 9.5px;
+  color: var(--ink-faint);
+  margin: 0 0 8px;
+}
+
+.site-footer-nav-col a {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin-bottom: 6px;
+  transition: color 0.15s;
+}
+
+.site-footer-nav-col a:hover { color: var(--green); }
+
+@media (min-width: 768px) {
+  .site-footer-nav {
+    flex-direction: row;
+    gap: 40px;
+  }
+}
+
+.site-footer-bottom {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 28px 24px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+/* Hide old site-footer-wrap on landing page */
+body:has(.landing-root) .site-footer-wrap { display: none !important; }
+body:has(.landing-root) .site-footer-bottom-outer { display: none !important; }
+
 /* ============================================================ */
 
 /* Utility */

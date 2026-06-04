@@ -16,8 +16,6 @@ export const viewport: Viewport = {
   themeColor: "#0A0D0A",
 };
 
-/* next/font self-hosts the regular weights — zero external requests at runtime.
-   The @import in globals.css adds the italic Saira Condensed variant only.     */
 const sairaCondensed = Saira_Condensed({
   subsets: ["latin"],
   weight: ["700", "800", "900"],
@@ -79,10 +77,9 @@ export default async function RootLayout({
     >
       <body>
         <div className="app-shell">
-          {/* ── Desktop topbar — hidden on mobile (bottom nav replaces it) ── */}
+          {/* ── Desktop topbar ── */}
           <header className="site-topbar">
             <div className="site-topbar-inner">
-              {/* Brand */}
               <Link href="/" className="site-topbar-brand" aria-label="GARRINCHA home">
                 <Image
                   src="/garrincha-white.png"
@@ -94,7 +91,6 @@ export default async function RootLayout({
                 />
               </Link>
 
-              {/* Desktop nav links */}
               <nav className="site-topbar-nav" aria-label="Primary navigation">
                 <Link href="/dashboard" className="site-nav-link">{t(locale, "nav.matches")}</Link>
                 <Link href="/leaderboards" className="site-nav-link">{t(locale, "nav.leaderboards")}</Link>
@@ -103,7 +99,6 @@ export default async function RootLayout({
                 )}
               </nav>
 
-              {/* Right side: auth + language */}
               <div className="site-topbar-right">
                 {user ? (
                   <form action="/api/auth/logout" method="post">
@@ -124,28 +119,69 @@ export default async function RootLayout({
 
           {children}
 
-          {/* Footer — only visible on public/player pages, not admin */}
+          {/* ── Footer ── */}
           <footer className="site-footer-wrap">
             <div className="site-footer-inner">
-              <Image
-                src="/garrincha-white.png"
-                alt="GARRINCHA"
-                height={16}
-                width={96}
-                style={{ height: 16, width: "auto", opacity: 0.55 }}
-              />
-              <p className="site-footer-copy">{t(locale, "footer.text")}</p>
-              <div className="site-footer-links">
-                <Link href="/privacy">{t(locale, "footer.privacy")}</Link>
-                <Link href="/terms">{t(locale, "footer.terms")}</Link>
-                <Link href="/admin/login">{t(locale, "nav.admin")}</Link>
-                <a href="https://www.garrincha.be" target="_blank" rel="noopener noreferrer">garrincha.be</a>
+              {/* Brand column */}
+              <div className="site-footer-brand">
+                <Image
+                  src="/garrincha-white.png"
+                  alt="GARRINCHA"
+                  height={16}
+                  width={96}
+                  style={{ height: 16, width: "auto", opacity: 0.6 }}
+                />
+                <p className="site-footer-copy">
+                  www.worldcup-garrincha.com is owned by Garrincha.
+                </p>
+                <p className="site-footer-copy" style={{ marginTop: -4 }}>
+                  {t(locale, "footer.text")}
+                </p>
+                <p className="site-footer-disclaimer">
+                  This campaign is independently operated and is not affiliated with FIFA, UEFA, or any official World Cup organizer unless explicitly stated.
+                </p>
+                <p className="site-footer-legal">Kempes BV · BE0635670989 · ©2026 All rights reserved</p>
               </div>
-              <p className="site-footer-legal">Kempes BV · BE0635670989 · ©2026 All rights reserved</p>
+
+              {/* Nav columns */}
+              <div className="site-footer-nav">
+                <div className="site-footer-nav-col">
+                  <h4>Platform</h4>
+                  <Link href="/">{t(locale, "nav.home")}</Link>
+                  <Link href="/register">{t(locale, "nav.register")}</Link>
+                  <Link href="/login">{t(locale, "nav.login")}</Link>
+                  <Link href="/leaderboards">{t(locale, "nav.leaderboards")}</Link>
+                  <Link href="/dashboard">{t(locale, "nav.matches")}</Link>
+                </div>
+                <div className="site-footer-nav-col">
+                  <h4>Legal</h4>
+                  <Link href="/privacy">{t(locale, "footer.privacy")}</Link>
+                  <Link href="/terms">{t(locale, "footer.terms")}</Link>
+                  <Link href="/legal">Legal Notice</Link>
+                  <Link href="/cookies">Cookie Policy</Link>
+                </div>
+                <div className="site-footer-nav-col">
+                  <h4>GARRINCHA®</h4>
+                  <a href="https://www.garrincha.be" target="_blank" rel="noopener noreferrer">garrincha.be</a>
+                  <a href="https://www.instagram.com/garrincha_belgium/" target="_blank" rel="noopener noreferrer">Instagram</a>
+                  <a href="https://www.facebook.com/garrinchabelgium/" target="_blank" rel="noopener noreferrer">Facebook</a>
+                  <Link href="/admin/login">Admin</Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom strip */}
+            <div className="site-footer-bottom">
+              <span style={{ color: "var(--ink-faint)", fontSize: 11 }}>
+                Kempes BV · BE0635670989 · Kortrijksesteenweg 1166, 9051 Gent, Belgium
+              </span>
+              <span style={{ color: "var(--ink-faint)", fontSize: 11, opacity: 0.55 }}>
+                EN · NL · FR
+              </span>
             </div>
           </footer>
 
-          {/* Mobile bottom nav — auto-hides on /admin and /owner */}
+          {/* Mobile bottom nav */}
           <MobileNav isLoggedIn={!!user} locale={locale} />
         </div>
       </body>
