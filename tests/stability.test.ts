@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { createLeaderboardRows, recalculatePredictionPoints } from "@/lib/product-logic";
+import { finalScoreSchema } from "@/lib/validators";
 
 // Mock must be top-level so Vitest hoists it correctly
 vi.mock("@/lib/prisma", () => ({
@@ -86,8 +88,6 @@ describe("rate limiter", () => {
 
 // ─── Leaderboard row creation ─────────────────────────────────────────────────
 
-import { createLeaderboardRows } from "@/lib/product-logic";
-
 describe("createLeaderboardRows", () => {
   it("sorts by points descending then name ascending", () => {
     const users = [
@@ -137,5 +137,102 @@ describe("health endpoint response shape", () => {
     expect(JSON.stringify(body)).not.toMatch(/UPSTASH_REDIS_REST_TOKEN/);
     expect(JSON.stringify(body)).not.toMatch(/DATABASE_URL/);
     expect(JSON.stringify(body)).not.toMatch(/JWT_SECRET/);
+  });
+});
+
+// ─── Leaderboard tie-break determinism ───────────────────────────────────────
+
+describe("leaderboard tie-break determinism", () => {
+  it("ORM path sorts equal-points users by name ascending", () => {
+    const users = [
+      { id: "c", nickname: "Charlie", fullName: "C", displayName: null, email: "c@x.com",
+        nationality: null, competitionCenter: { name: "X" },
+        predictions: [{ pointsAwarded: 10 }], pointEvents: [] },
+      { id: "a", nickname: "Alice", fullName: "A", displayName: null, email: "a@x.com",
+        nationality: null, competitionCenter: { name: "X" },
+        predictions: [{ pointsAwarded: 10 }], pointEvents: [] },
+      { id: "b", nickname: "Bob", fullName: "B", displayName: null, email: "b@x.com",
+        nationality: null, competitionCenter: { name: "X" },
+        predictions: [{ pointsAwarded: 10 }], pointEvents: [] },
+    ];
+    const rows = createLeaderboardRows(users);
+    expect(rows.map((r) => (r as { name: string }).name)).toEqual(["Alice", "Bob", "Charlie"]);
+  });
+
+  it("user with zero predictions has 0 points", () => {
+    const users = [
+      { id: "1", nickname: "Ana", fullName: "A", displayName: null, email: "a@x.com",
+        nationality: null, competitionCenter: { name: "X" },
+        predictions: [{ pointsAwarded: 5 }], pointEvents: [] },
+      { id: "2", nickname: "Zero", fullName: "Z", displayName: null, email: "z@x.com",
+        nationality: null, competitionCenter: { name: "X" },
+        predictions: [], pointEvents: [] },
+    ];
+    const rows = createLeaderboardRows(users);
+    expect(rows[0].name).toBe("Ana");
+    expect(rows[1].points).toBe(0);
+  });
+
+  it("bonus points are included in total", () => {
+    const users = [
+      { id: "1", nickname: "BonusPlayer", fullName: "B", displayName: null, email: "b@x.com",
+        nationality: null, competitionCenter: { name: "X" },
+        predictions: [{ pointsAwarded: 5 }], pointEvents: [{ points: 3 }] },
+    ];
+    const rows = createLeaderboardRows(users);
+    expect(rows[0].points).toBe(8);
+  });
+});
+
+// ─── Admin score update idempotency ──────────────────────────────────────────
+
+describe("score recalculation idempotency", () => {
+  it("recalculating the same score twice produces identical results", () => {
+    const predictions = [
+      { id: "p1", userId: "u1", homeScore: 2, awayScore: 1 },
+      { id: "p2", userId: "u2", homeScore: 1, awayScore: 0 },
+    ];
+    const finalScore = { homeScore: 1, awayScore: 0 };
+    const run1 = recalculatePredictionPoints({ predictions, finalScore });
+    const run2 = recalculatePredictionPoints({ predictions, finalScore });
+    expect(run1.map((u) => u.pointsAwarded)).toEqual(run2.map((u) => u.pointsAwarded));
+  });
+
+  it("correcting a score updates all predictions correctly", () => {
+    const predictions = [
+      { id: "p1", userId: "u1", homeScore: 2, awayScore: 1 },
+      { id: "p2", userId: "u2", homeScore: 0, awayScore: 0 },
+    ];
+    const run1 = recalculatePredictionPoints({ predictions, finalScore: { homeScore: 2, awayScore: 1 } });
+    expect(run1.find((u) => u.id === "p1")!.pointsAwarded).toBe(5);
+    expect(run1.find((u) => u.id === "p2")!.pointsAwarded).toBe(0);
+
+    const run2 = recalculatePredictionPoints({ predictions, finalScore: { homeScore: 0, awayScore: 0 } });
+    expect(run2.find((u) => u.id === "p1")!.pointsAwarded).toBe(0);
+    expect(run2.find((u) => u.id === "p2")!.pointsAwarded).toBe(5);
+  });
+
+  it("wrong prediction always awards 0 points", () => {
+    const predictions = [{ id: "p1", userId: "u1", homeScore: 1, awayScore: 1 }];
+    const result = recalculatePredictionPoints({ predictions, finalScore: { homeScore: 2, awayScore: 0 } });
+    expect(result[0].pointsAwarded).toBe(0);
+  });
+});
+
+// ─── Admin validator correctness ─────────────────────────────────────────────
+
+describe("finalScoreSchema validation", () => {
+  it("rejects negative scores", () => {
+    expect(finalScoreSchema.safeParse({ homeScore: -1, awayScore: 0 }).success).toBe(false);
+  });
+  it("rejects non-integer scores", () => {
+    expect(finalScoreSchema.safeParse({ homeScore: 1.5, awayScore: 0 }).success).toBe(false);
+  });
+  it("rejects scores over 30", () => {
+    expect(finalScoreSchema.safeParse({ homeScore: 31, awayScore: 0 }).success).toBe(false);
+  });
+  it("accepts valid scores 0-30", () => {
+    expect(finalScoreSchema.safeParse({ homeScore: 3, awayScore: 1 }).success).toBe(true);
+    expect(finalScoreSchema.safeParse({ homeScore: 0, awayScore: 0 }).success).toBe(true);
   });
 });

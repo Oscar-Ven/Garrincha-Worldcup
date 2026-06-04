@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSuperAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { rejectCrossOriginRequest } from "@/lib/request-security";
 
-export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const originError = rejectCrossOriginRequest(_request);
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const originError = rejectCrossOriginRequest(request);
   if (originError) return originError;
 
   let owner;
@@ -12,6 +13,11 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     owner = await requireSuperAdmin();
   } catch {
     return NextResponse.json({ error: "Super admin access required." }, { status: 403 });
+  }
+
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  if (!(await checkRateLimit(`admin-users:${ip}`, 30, 60 * 1000))) {
+    return NextResponse.json({ error: "Too many requests." }, { status: 429 });
   }
 
   const { id } = await params;
