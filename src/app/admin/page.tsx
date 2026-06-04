@@ -69,7 +69,7 @@ export default async function AdminPage() {
           <Link className="button dark" href="/admin/users">{t(locale, "admin.ownerControls")}</Link>
         ) : null}
         {currentAdmin?.role === Role.SUPER_ADMIN || !hasDatabaseConfig() ? (
-          <Link className="button dark" href="/admin/health">System Health</Link>
+          <Link className="button dark" href="/admin/health">{t(locale, "admin.healthTitle")}</Link>
         ) : null}
       </div>
     </main>

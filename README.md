@@ -43,6 +43,7 @@ World Cup 2026 prediction game for GARRINCHA Centers. Players scan a QR code at 
 - Prize rankings: top 10 per competition center (owner dashboard)
 - Admin emergency score correction and bonus points
 - No-database preview/demo mode for UI review
+- Full trilingual support: English / Nederlands / Français (language switcher in top nav)
 
 ## Setup
 

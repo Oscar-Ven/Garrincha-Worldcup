@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { type Locale, t } from "@/lib/translations";
 
 interface Center {
   id: string;
@@ -13,11 +14,13 @@ interface Center {
 interface CompetitionCenterSelectProps {
   centers: Center[];
   activationCenterName: string;
+  locale: Locale;
 }
 
 export default function CompetitionCenterSelect({
   centers,
   activationCenterName,
+  locale,
 }: CompetitionCenterSelectProps) {
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -38,12 +41,12 @@ export default function CompetitionCenterSelect({
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        throw new Error(data?.error ?? "Failed to save your center selection. Please try again.");
+        throw new Error(data?.error ?? t(locale, "dashboard.noCenter"));
       }
 
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+      setError(err instanceof Error ? err.message : t(locale, "dashboard.noCenter"));
       setSelectedId(null);
       setPending(false);
     }
@@ -52,18 +55,14 @@ export default function CompetitionCenterSelect({
   return (
     <div className="competition-center-select">
       <div className="competition-center-select__header">
-        <h2 className="competition-center-select__title">Represent a center</h2>
-        <p className="competition-center-select__subtitle">
-          Choose the GARRINCHA Center you want to represent before predicting.
-        </p>
+        <h2 className="competition-center-select__title">{t(locale, "competition.title")}</h2>
+        <p className="competition-center-select__subtitle">{t(locale, "competition.copy")}</p>
         {activationCenterName && (
           <p className="competition-center-select__activation-note">
-            You were first activated at {activationCenterName}. You may choose any center to compete.
+            {t(locale, "competition.activationNote", { center: activationCenterName })}
           </p>
         )}
-        <p className="competition-center-select__lock-note">
-          You can change your selection before your first prediction. After that, your center is locked.
-        </p>
+        <p className="competition-center-select__lock-note">{t(locale, "competition.lock")}</p>
       </div>
 
       {error && (
@@ -98,7 +97,7 @@ export default function CompetitionCenterSelect({
                 </span>
                 {isSelected && pending && (
                   <span className="competition-center-select__card-saving" aria-live="polite">
-                    Saving…
+                    {t(locale, "competition.choosing")}
                   </span>
                 )}
               </button>

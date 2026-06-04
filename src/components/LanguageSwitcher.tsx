@@ -17,7 +17,7 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
 
   return (
     <div className="language-switcher" aria-label="Language selector">
-      {(["en", "nl"] as const).map((item) => (
+      {(["en", "nl", "fr"] as const).map((item) => (
         <button
           aria-pressed={locale === item}
           className={locale === item ? "active" : ""}

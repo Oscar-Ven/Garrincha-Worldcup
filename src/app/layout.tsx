@@ -78,7 +78,7 @@ export default async function RootLayout({
               <nav className="nav" aria-label="Primary navigation">
                 <Link href="/dashboard">{t(locale, "nav.matches")}</Link>
                 <Link href="/leaderboards">{t(locale, "nav.leaderboards")}</Link>
-                {user?.role === "ADMIN" || user?.role === "SUPER_ADMIN" ? (
+                {user?.role === "ADMIN" || user?.role === "CENTER_ADMIN" || user?.role === "SUPER_ADMIN" ? (
                   <Link href="/admin">{t(locale, "nav.admin")}</Link>
                 ) : null}
                 {user?.role === "SUPER_ADMIN" ? (
@@ -138,7 +138,7 @@ export default async function RootLayout({
               </div>
             </div>
           </footer>
-          <MobileNav isLoggedIn={!!user} />
+          <MobileNav isLoggedIn={!!user} locale={locale} />
         </div>
       </body>
     </html>
