@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getLocale } from "@/lib/i18n";
 import { t } from "@/lib/translations";
 import { LandingClient } from "@/components/LandingClient";
+import { PublicFooter } from "@/components/PublicFooter";
 
 // ── Centers data ─────────────────────────────────────────────────────────────
 const CENTERS_DATA = [
@@ -236,43 +237,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── FOOTER ───────────────────────────────────────────────── */}
-      <footer className="lp-footer">
-        <div className="lp-wrap">
-          <div className="lp-foot-in">
-            <div style={{ maxWidth: 280 }}>
-              <Image src="/garrincha-white.png" alt="GARRINCHA" height={22} width={132} style={{ height: 22, width: "auto", marginBottom: 14 }} />
-              <p style={{ fontSize: 13.5, color: "var(--ink-dim)", lineHeight: 1.5, margin: 0 }}>
-                {t(locale, "ft_about")}
-              </p>
-            </div>
-            <div className="lp-foot-links">
-              <div className="lp-foot-col">
-                <h4>{t(locale, "ft_play")}</h4>
-                <a href="#how">{t(locale, "how_title_label")}</a>
-                <a href="#scoring">{t(locale, "nav_scoring")}</a>
-                <a href="#centers">{t(locale, "nav_centers")}</a>
-                <a href="#prize">{t(locale, "nav_prize")}</a>
-              </div>
-              <div className="lp-foot-col">
-                <h4>{t(locale, "ft_legal")}</h4>
-                <Link href="/terms">{t(locale, "footer.terms")}</Link>
-                <Link href="/privacy">{t(locale, "footer.privacy")}</Link>
-                <Link href="/admin/login">Admin</Link>
-              </div>
-              <div className="lp-foot-col">
-                <h4>{t(locale, "ft_lang")}</h4>
-                <a href="https://www.garrincha.be" target="_blank" rel="noopener noreferrer">garrincha.be</a>
-                <a href="https://www.instagram.com/garrincha_belgium/" target="_blank" rel="noopener noreferrer">Instagram</a>
-              </div>
-            </div>
-          </div>
-          <div className="lp-foot-bottom">
-            <span>{t(locale, "ft_copy")}</span>
-            <span>EN · NL · FR</span>
-          </div>
-        </div>
-      </footer>
+      {/* ── FOOTER — shared PublicFooter component ─────────────── */}
+      <PublicFooter locale={locale} />
     </div>
   );
 }

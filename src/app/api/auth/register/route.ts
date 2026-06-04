@@ -30,29 +30,54 @@ export async function POST(request: NextRequest) {
     nickname,
     phoneNumber,
     activationCode,
+    centerId: directCenterId,
     dateOfBirth,
     nationality,
   } = parsed.data;
 
   try {
-    const session = await prisma.centerSession.findFirst({
-      where: {
-        code: activationCode,
-        expiresAt: { gt: new Date() },
-      },
-    });
+    // ── Resolve center ──────────────────────────────────────────────────────
+    // 1. QR-code registration: validate activation code from centerSession
+    // 2. Direct registration: use centerId provided directly by the user
+    let resolvedCenterId: string;
 
-    if (!session) {
+    if (activationCode && activationCode.length > 0) {
+      // QR-based: validate code against centerSession
+      const session = await prisma.centerSession.findFirst({
+        where: { code: activationCode, expiresAt: { gt: new Date() } },
+      });
+      if (!session) {
+        return NextResponse.json(
+          { error: "Invalid or expired QR code. Please rescan at a GARRINCHA Center." },
+          { status: 422 }
+        );
+      }
+      resolvedCenterId = session.centerId;
+    } else if (directCenterId) {
+      // Direct registration: verify centerId exists
+      const center = await prisma.garrinchaCenter.findUnique({
+        where: { id: directCenterId },
+        select: { id: true },
+      });
+      if (!center) {
+        return NextResponse.json(
+          { error: "Please select a valid GARRINCHA Center." },
+          { status: 422 }
+        );
+      }
+      resolvedCenterId = directCenterId;
+    } else {
       return NextResponse.json(
-        { error: "Please scan the QR code at a GARRINCHA Center to start." },
+        { error: "Please select a GARRINCHA Center to register." },
         { status: 422 }
       );
     }
 
+    // ── Create user ─────────────────────────────────────────────────────────
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json(
-        { error: "Registration could not be completed." },
+        { error: "An account with this email already exists. Request your access link to continue." },
         { status: 400 }
       );
     }
@@ -66,7 +91,7 @@ export async function POST(request: NextRequest) {
         phoneNumber,
         nationality: nationality ?? null,
         dateOfBirth: dateOfBirth ?? null,
-        centerId: session.centerId,
+        centerId: resolvedCenterId,
         firstActivatedAt: new Date(),
         passwordHash: null,
         role: Role.USER,
@@ -74,14 +99,13 @@ export async function POST(request: NextRequest) {
     });
 
     await rotateAndSendAccessLink(user.id, email, getLocaleFromRequest(request));
-
     await createSession({ userId: user.id, role: user.role });
 
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[auth/register]", err);
     return NextResponse.json(
-      { error: "Registration is not available. Connect the database." },
+      { error: "Registration is not available. Please try again later." },
       { status: 503 }
     );
   }

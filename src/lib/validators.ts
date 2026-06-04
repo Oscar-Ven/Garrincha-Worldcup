@@ -20,7 +20,8 @@ export const registerSchema = z.object({
   email: z.string().trim().email().toLowerCase(),
   fullName: z.string().trim().min(2).max(120),
   nickname: z.string().trim().min(2).max(50),
-  activationCode: z.string().trim().min(1).max(16).toUpperCase(),
+  activationCode: z.string().trim().max(16).toUpperCase().optional(),
+  centerId: z.string().trim().min(1).optional(), // for direct registration
   phoneNumber: z.string().trim().min(6).max(32),
   dateOfBirth: z.coerce.date().optional(),
   nationality: z.string().trim().max(80).optional(),
