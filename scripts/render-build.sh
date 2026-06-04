@@ -27,7 +27,11 @@ echo "[2/5] Installing dependencies (npm ci --legacy-peer-deps)"
 # Use npm ci for reproducible installs from the lockfile.
 # --legacy-peer-deps is required because @sentry/nextjs has peer dep
 # conflicts with some packages in this project.
-npm ci --legacy-peer-deps
+#
+# NPM_CONFIG_PRODUCTION=false ensures devDependencies are installed even when
+# NODE_ENV=production. Next.js build tools (tailwindcss, postcss, etc.) are
+# devDependencies and must be present during the build step.
+NPM_CONFIG_PRODUCTION=false npm ci --legacy-peer-deps
 
 # ── Next.js build (includes prisma generate internally) ─────────
 # npm run build = "prisma generate && next build"
