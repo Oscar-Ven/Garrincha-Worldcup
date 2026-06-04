@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getLeaderboardWithMeta } from "@/lib/leaderboards";
 import { hasDatabaseConfig } from "@/lib/app-mode";
 import { demoLeaderboard } from "@/lib/ui-demo-data";
@@ -82,32 +83,17 @@ export default async function LeaderboardsPage() {
               </p>
             </div>
 
-            {/* Right — trophy (same as matches) */}
-            <div className="mc-hero-visual" aria-hidden>
-              <div className="mc-trophy-glow" />
-              <div className="mc-trophy-icon">
-                <svg viewBox="0 0 120 160" width="120" height="160" className="mc-trophy-svg" aria-hidden>
-                  <defs>
-                    <linearGradient id="lbTrophyGold" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#F5C242"/><stop offset="50%" stopColor="#E0A92E"/><stop offset="100%" stopColor="#F5C242"/>
-                    </linearGradient>
-                    <filter id="lbGlow">
-                      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                    </filter>
-                  </defs>
-                  <ellipse cx="60" cy="28" rx="32" ry="10" fill="url(#lbTrophyGold)" filter="url(#lbGlow)" opacity="0.9"/>
-                  <path d="M28 28 Q20 60 35 80 Q48 95 60 95 Q72 95 85 80 Q100 60 92 28Z" fill="url(#lbTrophyGold)" opacity="0.85"/>
-                  <path d="M28 35 Q8 45 12 65 Q14 75 28 72" fill="none" stroke="url(#lbTrophyGold)" strokeWidth="6" strokeLinecap="round"/>
-                  <path d="M92 35 Q112 45 108 65 Q106 75 92 72" fill="none" stroke="url(#lbTrophyGold)" strokeWidth="6" strokeLinecap="round"/>
-                  <rect x="53" y="95" width="14" height="28" rx="3" fill="url(#lbTrophyGold)" opacity="0.8"/>
-                  <rect x="38" y="120" width="44" height="10" rx="4" fill="url(#lbTrophyGold)" opacity="0.9"/>
-                  <rect x="33" y="130" width="54" height="8" rx="4" fill="url(#lbTrophyGold)"/>
-                  <circle cx="60" cy="58" r="16" fill="none" stroke="url(#lbTrophyGold)" strokeWidth="1.5" opacity="0.5"/>
-                  <ellipse cx="60" cy="58" rx="16" ry="6" fill="none" stroke="url(#lbTrophyGold)" strokeWidth="1" opacity="0.4"/>
-                  <line x1="60" y1="42" x2="60" y2="74" stroke="url(#lbTrophyGold)" strokeWidth="1" opacity="0.4"/>
-                </svg>
-              </div>
+            {/* Right — trophy */}
+            <div className="mc-hero-visual">
+              <div className="mc-trophy-glow" aria-hidden />
+              <Image
+                src="/images/world-cup-trophy.png"
+                alt="FIFA World Cup trophy"
+                width={150}
+                height={220}
+                className="mc-trophy-img"
+                priority
+              />
             </div>
           </div>
 
