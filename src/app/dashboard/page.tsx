@@ -87,12 +87,12 @@ export default async function DashboardPage() {
 
       {/* Activation status notice */}
       <section className="dashboard-notice dashboard-notice--activation">
-        <span>First activation at <strong>{activationCenterName}</strong></span>
+        <span>{t(locale, "dashboard.activationNotice", { center: activationCenterName })}</span>
       </section>
 
       {/* Remote access notice */}
       <section className="dashboard-notice dashboard-notice--remote">
-        <span>Remote access enabled. Use your personal email link anytime.</span>
+        <span>{t(locale, "dashboard.remoteAccess")}</span>
       </section>
 
       {/* Competition center selection or status */}
@@ -101,16 +101,15 @@ export default async function DashboardPage() {
           <CompetitionCenterSelect
             centers={centers}
             activationCenterName={activationCenterName}
+            locale={locale}
           />
         </section>
       ) : (
         <section className="dashboard-notice dashboard-notice--competition-center">
-          <span>
-            You are representing <strong>{competitionCenterName}</strong>.
-          </span>
+          <span>{t(locale, "dashboard.representing", { center: competitionCenterName ?? "" })}</span>
           {competitionCenterLocked && (
             <span className="dashboard-notice__lock">
-              {" "}Your center is locked after your first prediction.
+              {" "}{t(locale, "dashboard.centerLocked")}
             </span>
           )}
         </section>

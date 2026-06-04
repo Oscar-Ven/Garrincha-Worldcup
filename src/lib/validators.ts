@@ -50,7 +50,7 @@ export const bonusSchema = z.object({
 });
 
 export const userRoleSchema = z.object({
-  role: z.enum(["USER", "ADMIN", "SUPER_ADMIN"]),
+  role: z.enum(["USER", "ADMIN", "CENTER_ADMIN", "SUPER_ADMIN"]),
 });
 
 export const checkInSchema = z.object({

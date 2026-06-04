@@ -197,9 +197,10 @@ describe("bonus validation", () => {
 });
 
 describe("user role validation", () => {
-  it("accepts all valid roles", () => {
+  it("accepts all valid roles including CENTER_ADMIN", () => {
     expect(userRoleSchema.safeParse({ role: "USER" }).success).toBe(true);
     expect(userRoleSchema.safeParse({ role: "ADMIN" }).success).toBe(true);
+    expect(userRoleSchema.safeParse({ role: "CENTER_ADMIN" }).success).toBe(true);
     expect(userRoleSchema.safeParse({ role: "SUPER_ADMIN" }).success).toBe(true);
   });
 
