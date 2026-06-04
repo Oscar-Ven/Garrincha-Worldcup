@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getLeaderboardWithMeta } from "@/lib/leaderboards";
 import { hasDatabaseConfig } from "@/lib/app-mode";
 import { demoLeaderboard } from "@/lib/ui-demo-data";
@@ -139,22 +138,8 @@ export default async function LeaderboardsPage() {
           </div>
         )}
 
-        {rows.length > 0 ? (
-          <LeaderboardClient rows={rows} total={total} />
-        ) : (
-          <div className="lb-body">
-            <div className="lb-empty-state" style={{ marginTop: 28 }}>
-              <div className="lb-empty-icon">🏆</div>
-              <h3 className="lb-empty-title">Tournament not started yet</h3>
-              <p className="lb-empty-sub">
-                The FIFA World Cup 2026 kicks off on June 11. Register now, predict every match, and climb the leaderboard.
-              </p>
-              <Link href="/register" className="cta cta-green cta-md" style={{ display: "inline-flex", marginTop: 20 }}>
-                Register for free
-              </Link>
-            </div>
-          </div>
-        )}
+        {/* Always render LeaderboardClient — it handles empty state internally */}
+        <LeaderboardClient rows={rows} total={total} />
       </div>
     </div>
   );
