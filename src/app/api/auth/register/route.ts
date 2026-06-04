@@ -1,7 +1,7 @@
 import { Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { createSession } from "@/lib/auth";
-import { rotateAndSendAccessLink } from "@/lib/access-link";
+import { getLocaleFromRequest, rotateAndSendAccessLink } from "@/lib/access-link";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { rejectCrossOriginRequest } from "@/lib/request-security";
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    await rotateAndSendAccessLink(user.id, email);
+    await rotateAndSendAccessLink(user.id, email, getLocaleFromRequest(request));
 
     await createSession({ userId: user.id, role: user.role });
 

@@ -135,14 +135,14 @@ export function LoginForm({ admin = false, locale }: { admin?: boolean; locale: 
   }
 
   if (!admin && magicLinkSent) {
-    return <p className="message success">Check your email for your access link.</p>;
+    return <p className="message success">{t(locale, "auth.requestLinkSent")}</p>;
   }
 
   return (
     <form className="form" onSubmit={onSubmit}>
       {status ? <p className={`message ${status.type}`}>{status.text}</p> : null}
       <label className="field">
-        <span>{admin ? t(locale, "form.email") : "Enter your email to receive a new access link"}</span>
+        <span>{admin ? t(locale, "form.email") : t(locale, "auth.loginPanelCopy")}</span>
         <input name="email" type="email" autoComplete="email" placeholder={admin ? "admin@garrincha.local" : "you@example.com"} required />
       </label>
       {admin && (
@@ -152,7 +152,7 @@ export function LoginForm({ admin = false, locale }: { admin?: boolean; locale: 
         </label>
       )}
       <button className="button primary" type="submit" disabled={pending}>
-        {pending ? t(locale, "form.signingIn") : admin ? t(locale, "form.adminLogin") : t(locale, "nav.login")}
+        {pending ? t(locale, "form.signingIn") : admin ? t(locale, "form.adminLogin") : t(locale, "form.sendLink")}
       </button>
     </form>
   );

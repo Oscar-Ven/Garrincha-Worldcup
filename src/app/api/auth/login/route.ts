@@ -1,6 +1,6 @@
 import { Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-import { rotateAndSendAccessLink } from "@/lib/access-link";
+import { getLocaleFromRequest, rotateAndSendAccessLink } from "@/lib/access-link";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { rejectCrossOriginRequest } from "@/lib/request-security";
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
     if (!user || user.role !== Role.USER) return successResponse;
 
-    await rotateAndSendAccessLink(user.id, user.email);
+    await rotateAndSendAccessLink(user.id, user.email, getLocaleFromRequest(request));
 
     return successResponse;
   } catch (err) {
