@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { MobileNav } from "@/components/MobileNav";
+import { NavLink } from "@/components/NavLink";
 import { PublicFooter } from "@/components/PublicFooter";
 import { getCurrentUser } from "@/lib/auth";
 import { getLocale } from "@/lib/i18n";
@@ -93,13 +94,13 @@ export default async function RootLayout({
               </Link>
 
               <nav className="site-topbar-nav" aria-label="Primary navigation">
-                <Link href="/matches" className="site-nav-link">{t(locale, "nav.matches")}</Link>
-                <Link href="/leaderboards" className="site-nav-link">{t(locale, "nav.leaderboards")}</Link>
+                <NavLink href="/matches" className="site-nav-link">Matches</NavLink>
+                <NavLink href="/leaderboards" className="site-nav-link">Leaderboard</NavLink>
                 {user && (
-                  <Link href="/dashboard" className="site-nav-link">{t(locale, "nav.predict")}</Link>
+                  <NavLink href="/dashboard" className="site-nav-link">{t(locale, "nav.predict")}</NavLink>
                 )}
                 {isAdmin && (
-                  <Link href="/admin" className="site-nav-link">{t(locale, "nav.admin")}</Link>
+                  <NavLink href="/admin" className="site-nav-link">{t(locale, "nav.admin")}</NavLink>
                 )}
               </nav>
 

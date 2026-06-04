@@ -261,9 +261,9 @@ export const demoMatches = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const demoLeaderboard = [
-  { id: "demo-user-1", name: "Ana Martins",   nationality: "Belgium", center: "GARRINCHA Gent Arsenaal",    points: 28 },
-  { id: "demo-user-2", name: "Bilal Haddad",  nationality: "Morocco", center: "GARRINCHA Antwerpen Noord",  points: 24 },
-  { id: "demo-user-3", name: "Clara Janssens",nationality: "Belgium", center: "GARRINCHA Kortrijk",         points: 19 },
+  { id: "demo-user-1", name: "Ana Martins",   nationality: "Belgium", center: "GARRINCHA Gent Arsenaal",    points: 28, predictionCount: 3 },
+  { id: "demo-user-2", name: "Bilal Haddad",  nationality: "Morocco", center: "GARRINCHA Antwerpen Noord",  points: 24, predictionCount: 2 },
+  { id: "demo-user-3", name: "Clara Janssens",nationality: "Belgium", center: "GARRINCHA Kortrijk",         points: 19, predictionCount: 2 },
 ];
 
 export const demoUser = {

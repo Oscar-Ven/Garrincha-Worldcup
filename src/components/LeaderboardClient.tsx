@@ -1,173 +1,383 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
-import { type Locale, t } from "@/lib/translations";
+import Link from "next/link";
+import { CountryFlag } from "@/components/Flag";
+import { isoCodeForNationality } from "@/lib/flags";
 
-type Row = { id: string; name: string; nationality: string; center: string; points: number };
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-const MEDAL_COLOR = ["var(--gold)", "#C8CDD4", "#CD8B5B"];
-const MEDAL_BG    = ["rgba(245,194,66,0.12)", "rgba(200,205,212,0.08)", "rgba(205,139,91,0.08)"];
+export type LbRow = {
+  id: string;
+  name: string;
+  nationality: string;
+  center: string;
+  points: number;
+  predictionCount: number;
+};
 
-function RankRow({ row, rank }: { row: Row; rank: number }) {
-  const medal = rank <= 3 ? MEDAL_COLOR[rank - 1] : null;
-  const bg    = rank <= 3 ? MEDAL_BG[rank - 1] : undefined;
+// ─── Constants ────────────────────────────────────────────────────────────────
 
+const TOTAL_MATCHES = 104;
+
+type FilterValue = "overall" | "nationality";
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+function getInitialColor(id: string): string {
+  const colors = [
+    "#5FE090","#F5C242","#6FB3FF","#FF8C66","#C792EA","#4ED9C0",
+    "#FF9F1C","#78D97C","#FF5A4D","#63b3ed",
+  ];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+
+const IconChevron = () => (
+  <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden>
+    <path d="M3 6l5 5 5-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const IconStar = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </svg>
+);
+
+// ─── Rank badge ───────────────────────────────────────────────────────────────
+
+const RANK_STYLES: Record<number, { bg: string; color: string; border: string }> = {
+  1: { bg: "rgba(245,194,66,0.2)",  color: "#F5C242", border: "1px solid rgba(245,194,66,0.5)" },
+  2: { bg: "rgba(200,200,210,0.14)", color: "#C8CDD4", border: "1px solid rgba(200,200,210,0.4)" },
+  3: { bg: "rgba(205,139,91,0.16)", color: "#CD8B5B", border: "1px solid rgba(205,139,91,0.4)" },
+};
+
+function RankBadge({ rank }: { rank: number }) {
+  const style = RANK_STYLES[rank];
   return (
-    <div
-      className="card rank-row"
-      style={bg ? { background: `linear-gradient(100deg,${bg},transparent)`, borderColor: `${medal}40` } : undefined}
+    <span
+      className="lb-rank-badge"
+      style={style ? { background: style.bg, color: style.color, border: style.border } : undefined}
     >
-      <span className="rank-num" style={{ color: medal ?? "var(--ink-faint)" }}>
-        {rank <= 3 ? ["🥇","🥈","🥉"][rank-1] : rank}
-      </span>
-      <div className="rank-nick" style={{ flex: 1, minWidth: 0 }}>
-        <div className="rank-nick-name">{row.name}</div>
-        <div className="rank-nick-meta">{row.center}</div>
-      </div>
-      <div className="rank-pts-wrap" style={{ textAlign: "right" }}>
-        <div className="rank-pts" style={{ color: medal ?? "var(--green)" }}>{row.points}</div>
-        <div className="rank-pts-unit">pts</div>
+      {rank}
+    </span>
+  );
+}
+
+// ─── Player avatar ────────────────────────────────────────────────────────────
+
+function PlayerAvatar({ name, id }: { name: string; id: string }) {
+  const color = getInitialColor(id);
+  return (
+    <span className="lb-avatar" style={{ background: `${color}22`, border: `1.5px solid ${color}55`, color }}>
+      {initials(name)}
+    </span>
+  );
+}
+
+// ─── Scoring panel ────────────────────────────────────────────────────────────
+
+function ScoringPanel() {
+  return (
+    <div className="mc-scoring-detail">
+      <div className="mc-scoring-grid">
+        {[
+          { pts: 5, label: "Exact score",        desc: "You predicted the exact final score", color: "var(--mc-gold)" },
+          { pts: 3, label: "Result + goal diff",  desc: "Correct outcome and goal difference", color: "var(--mc-gold)" },
+          { pts: 2, label: "Correct result",      desc: "Correct outcome (win/draw/loss)",     color: "var(--mc-green)" },
+          { pts: 0, label: "Wrong prediction",    desc: "Incorrect match outcome",             color: "var(--mc-faint)" },
+        ].map((s) => (
+          <div key={s.pts} className="mc-scoring-row">
+            <span className="mc-scoring-pts" style={{ color: s.color }}>+{s.pts}</span>
+            <div>
+              <div className="mc-scoring-row-label">{s.label}</div>
+              <div className="mc-scoring-row-desc">{s.desc}</div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function PodiumView({ rows }: { rows: Row[] }) {
-  const top  = rows.slice(0, 3);
-  const rest = rows.slice(3);
-  // Order: 2nd, 1st, 3rd for visual podium
-  const order = [top[1], top[0], top[2]].filter(Boolean) as Row[];
-  const heights: Record<number, number> = { 1: 110, 2: 86, 3: 68 };
+// ─── Empty state ──────────────────────────────────────────────────────────────
+
+function EmptyState() {
+  return (
+    <div className="lb-empty-state">
+      <div className="lb-empty-icon">🏆</div>
+      <h3 className="lb-empty-title">Tournament not started yet</h3>
+      <p className="lb-empty-sub">
+        The FIFA World Cup 2026 kicks off on June 11. Register now, predict every match, and climb the leaderboard.
+      </p>
+      <div className="lb-empty-scoring">
+        {[
+          { pts: 5, label: "Exact score" },
+          { pts: 3, label: "Correct result + goal diff" },
+          { pts: 2, label: "Correct result" },
+          { pts: 0, label: "Wrong prediction" },
+        ].map((s) => (
+          <div key={s.pts} className="lb-empty-score-item">
+            <span className="lb-empty-score-pts" style={{ color: s.pts >= 3 ? "var(--mc-gold)" : s.pts === 2 ? "var(--mc-green)" : "var(--mc-faint)" }}>
+              +{s.pts}
+            </span>
+            <span>{s.label}</span>
+          </div>
+        ))}
+      </div>
+      <Link href="/register" className="cta cta-green cta-md" style={{ display: "inline-flex", marginTop: 20 }}>
+        Register for free
+      </Link>
+    </div>
+  );
+}
+
+// ─── Leaderboard table row (desktop) ─────────────────────────────────────────
+
+function TableRow({ row, rank, isTop3 }: { row: LbRow; rank: number; isTop3: boolean }) {
+  const rankStyle = RANK_STYLES[rank];
+  const iso = isoCodeForNationality(row.nationality);
 
   return (
-    <div>
-      {/* Podium top 3 */}
-      {top.length >= 3 && (
-        <div className="podium-wrap">
-          {order.map((p) => {
-            const rank  = rows.indexOf(p) + 1;
-            const color = MEDAL_COLOR[rank - 1] ?? "var(--ink)";
-            return (
-              <div key={p.id} className="podium-player">
-                <div className="podium-nick">{p.name}</div>
-                <div className="podium-pts" style={{ color }}>{p.points} pts</div>
-                <div
-                  className="podium-col"
-                  style={{
-                    height: heights[rank] ?? 68,
-                    background: `linear-gradient(180deg,${color}30,${color}08)`,
-                    border: `1px solid ${color}55`,
-                  }}
-                >
-                  <span className="podium-rank" style={{ color }}>
-                    {["🥇","🥈","🥉"][rank-1]}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+    <tr className={`lb-tr${isTop3 ? " lb-tr--top3" : ""}`}
+      style={rankStyle ? { borderLeft: `3px solid ${rankStyle.color}` } : undefined}>
+      <td className="lb-td lb-td-rank">
+        <RankBadge rank={rank} />
+      </td>
+      <td className="lb-td lb-td-player">
+        <div className="lb-player">
+          <PlayerAvatar name={row.name} id={row.id} />
+          <div className="lb-player-info">
+            <span className="lb-player-name">{row.name}</span>
+            <span className="lb-player-nat">
+              {iso && (
+                <CountryFlag isoCode={iso} label={row.nationality} size="sm" />
+              )}
+              <span>{row.nationality}</span>
+            </span>
+          </div>
         </div>
-      )}
+      </td>
+      <td className="lb-td lb-td-center">
+        <span className="lb-center">{row.center.replace("GARRINCHA ", "")}</span>
+      </td>
+      <td className="lb-td lb-td-preds">
+        <span className="lb-preds">{row.predictionCount} / {TOTAL_MATCHES}</span>
+      </td>
+      <td className="lb-td lb-td-pts">
+        <span className="lb-pts" style={{ color: rank <= 3 ? (rankStyle?.color ?? "var(--mc-gold)") : "var(--mc-gold)" }}>
+          {row.points.toLocaleString()}
+        </span>
+      </td>
+      <td className="lb-td lb-td-change">
+        <span className="lb-change lb-change--neutral">—</span>
+      </td>
+    </tr>
+  );
+}
 
-      {/* Rest of the leaderboard */}
-      {(top.length < 3 ? rows : rest).map((p, i) => (
-        <RankRow key={p.id} row={p} rank={top.length < 3 ? i + 1 : i + 4} />
-      ))}
+// ─── Mobile leaderboard card ──────────────────────────────────────────────────
+
+function MobileCard({ row, rank }: { row: LbRow; rank: number }) {
+  const rankStyle = RANK_STYLES[rank];
+  const iso = isoCodeForNationality(row.nationality);
+
+  return (
+    <div className={`lb-mobile-card${rank <= 3 ? " lb-mobile-card--top3" : ""}`}
+      style={rankStyle ? { borderLeft: `3px solid ${rankStyle.color}` } : undefined}>
+      <RankBadge rank={rank} />
+      <PlayerAvatar name={row.name} id={row.id} />
+      <div className="lb-mobile-info">
+        <span className="lb-player-name">{row.name}</span>
+        <span className="lb-player-nat">
+          {iso && <CountryFlag isoCode={iso} label={row.nationality} size="sm" />}
+          <span>{row.nationality}</span>
+        </span>
+      </div>
+      <div className="lb-mobile-pts">
+        <span className="lb-pts" style={{ color: rank <= 3 ? (rankStyle?.color ?? "var(--mc-gold)") : "var(--mc-gold)" }}>
+          {row.points.toLocaleString()}
+        </span>
+        <span className="lb-change lb-change--neutral">—</span>
+      </div>
     </div>
   );
 }
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export function LeaderboardClient({
   rows,
-  centers,
-  locale,
+  total,
 }: {
-  rows: Row[];
-  centers: { id: string; name: string }[];
-  locale: Locale;
+  rows: LbRow[];
+  total: number;
 }) {
-  const [tab, setTab] = useState<"global" | "center">("global");
-  const [centerFilter, setCenterFilter] = useState<string>("all");
+  const [filter, setFilter] = useState<FilterValue>("overall");
+  const [scoringOpen, setScoringOpen] = useState(false);
+  const [natFilter, setNatFilter] = useState<string>("all");
 
-  const displayRows =
-    tab === "center" && centerFilter !== "all"
-      ? rows.filter((r) => {
-          const centerName = centers.find((c) => c.id === centerFilter)?.name;
-          return centerName ? r.center === centerName : false;
-        })
+  // Available nationalities
+  const nationalities = Array.from(new Set(rows.map((r) => r.nationality).filter(Boolean))).sort();
+
+  // Filtered rows
+  const filteredRows =
+    filter === "nationality" && natFilter !== "all"
+      ? rows.filter((r) => r.nationality === natFilter)
       : rows;
 
+  const FILTER_TABS = [
+    { value: "overall" as const,     label: "Overall",     available: true },
+    { value: "nationality" as const, label: "Nationality",  available: true },
+  ];
+
+  // Disabled (UI-only, no backend yet)
+  const DISABLED_TABS = ["My Center", "Friends", "Groups", "Knockout", "Exact Scores", "This Week"];
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* ── Tabs ── */}
-      <div className="lb-tabs">
+    <div className="lb-body">
+      {/* ── Scoring info card ── */}
+      <div className="mc-scoring-card">
+        <div className="mc-scoring-icon-wrap" aria-hidden>
+          <IconStar />
+        </div>
+        <div className="mc-scoring-text">
+          <div className="mc-scoring-title">Scoring system</div>
+          <div className="mc-scoring-sub">Exact score, goal difference, and match result determine your ranking.</div>
+        </div>
         <button
-          className={`lb-tab${tab === "global" ? " active" : ""}`}
-          onClick={() => setTab("global")}
+          className="mc-scoring-btn"
+          onClick={() => setScoringOpen(!scoringOpen)}
+          aria-expanded={scoringOpen}
+          aria-controls="lb-scoring-panel"
         >
-          {t(locale, "leaderboard.global")}
-        </button>
-        <button
-          className={`lb-tab${tab === "center" ? " active" : ""}`}
-          onClick={() => setTab("center")}
-        >
-          {t(locale, "leaderboard.centers")}
+          View scoring <IconChevron />
         </button>
       </div>
 
-      {/* ── Center filter chips ── */}
-      {tab === "center" && (
-        <div className="g-scroll" style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 6 }}>
-          <button
-            className={`filter-chip${centerFilter === "all" ? " active" : ""}`}
-            onClick={() => setCenterFilter("all")}
-            style={centerFilter === "all" ? { background: "var(--green)", color: "#06210F" } : undefined}
-          >
-            All centers
-          </button>
-          {centers.map((c) => (
+      {scoringOpen && (
+        <div id="lb-scoring-panel">
+          <ScoringPanel />
+        </div>
+      )}
+
+      {/* ── Filter tabs ── */}
+      <div className="mc-filters" role="tablist" aria-label="Leaderboard filters">
+        <div className="mc-filter-row">
+          {FILTER_TABS.map(({ value, label }) => (
             <button
-              key={c.id}
-              className={`filter-chip${centerFilter === c.id ? " active" : ""}`}
-              onClick={() => setCenterFilter(c.id)}
-              style={centerFilter === c.id ? { background: "var(--green)", color: "#06210F" } : undefined}
+              key={value}
+              role="tab"
+              aria-selected={filter === value}
+              className={`mc-filter-btn${filter === value ? " mc-filter-btn--active" : ""}`}
+              onClick={() => setFilter(value)}
             >
-              {c.name.replace("GARRINCHA ", "")}
+              {label}
+            </button>
+          ))}
+          {DISABLED_TABS.map((label) => (
+            <button
+              key={label}
+              role="tab"
+              aria-selected={false}
+              aria-disabled="true"
+              className="mc-filter-btn mc-filter-btn--disabled"
+              title="Coming soon"
+              tabIndex={-1}
+            >
+              {label}
             </button>
           ))}
         </div>
-      )}
+
+        {/* Nationality sub-filter */}
+        {filter === "nationality" && (
+          <div className="mc-filter-row lb-nat-filter">
+            <button
+              className={`mc-filter-btn${natFilter === "all" ? " mc-filter-btn--active" : ""}`}
+              onClick={() => setNatFilter("all")}
+            >
+              All
+            </button>
+            {nationalities.map((nat) => (
+              <button
+                key={nat}
+                className={`mc-filter-btn${natFilter === nat ? " mc-filter-btn--active" : ""}`}
+                onClick={() => setNatFilter(nat)}
+              >
+                {nat}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Leaderboard header ── */}
+      <div className="lb-list-header">
+        <div className="lb-list-title">
+          <span>Leaderboard</span>
+          <span className="lb-participant-count">{total.toLocaleString()} participants</span>
+        </div>
+        <div className="lb-sort-wrap">
+          <select className="mc-sort-select" aria-label="Sort leaderboard" defaultValue="points">
+            <option value="points">Sort by: Points</option>
+          </select>
+        </div>
+      </div>
 
       {/* ── Content ── */}
-      {displayRows.length === 0 ? (
-        <div className="lb-empty" style={{ padding: "40px 20px" }}>
-          <div className="lb-empty-icon">📊</div>
-          <h3 className="disp" style={{ fontSize: 24, color: "var(--ink)", margin: "0 0 8px" }}>
-            {t(locale, "leaderboard.noPlayers")}
-          </h3>
-          <p style={{ fontSize: 14, color: "var(--ink-dim)", margin: "0 0 20px", maxWidth: 320, lineHeight: 1.5 }}>
-            {tab === "center"
-              ? "No players in this center yet."
-              : t(locale, "leaderboard.copy")}
-          </p>
-          <Link href="/register" className="cta cta-green cta-sm btn-auto">
-            {t(locale, "cta_register")}
-          </Link>
-        </div>
+      {filteredRows.length === 0 ? (
+        <EmptyState />
       ) : (
-        <PodiumView rows={displayRows} />
+        <>
+          {/* Desktop table */}
+          <div className="lb-table-wrap">
+            <table className="lb-table" aria-label="Leaderboard">
+              <thead>
+                <tr className="lb-thead-row">
+                  <th className="lb-th lb-th-rank">#</th>
+                  <th className="lb-th lb-th-player">Player</th>
+                  <th className="lb-th lb-th-center">Center</th>
+                  <th className="lb-th lb-th-preds">Predictions</th>
+                  <th className="lb-th lb-th-pts">Points</th>
+                  <th className="lb-th lb-th-change">Change</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRows.map((row, i) => (
+                  <TableRow key={row.id} row={row} rank={i + 1} isTop3={i < 3} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="lb-mobile-list">
+            {filteredRows.map((row, i) => (
+              <MobileCard key={row.id} row={row} rank={i + 1} />
+            ))}
+          </div>
+        </>
       )}
 
-      {/* ── CTA strip ── */}
-      {displayRows.length > 0 && (
-        <div style={{ textAlign: "center", padding: "20px 0 8px", borderTop: "1px solid var(--line)", marginTop: 8 }}>
-          <p style={{ fontSize: 14, color: "var(--ink-dim)", margin: "0 0 14px" }}>
-            Want to climb the leaderboard?
-          </p>
-          <Link href="/register" className="cta cta-green cta-md btn-auto" style={{ display: "inline-flex" }}>
-            {t(locale, "cta_register")}
-          </Link>
+      {/* ── CTA ── */}
+      {filteredRows.length > 0 && (
+        <div className="mc-cta-block">
+          <div className="mc-cta-title">Join the competition.</div>
+          <p className="mc-cta-sub">Register free, predict every match, and climb the leaderboard for your GARRINCHA Center.</p>
+          <div className="mc-cta-btns">
+            <Link href="/register" className="cta cta-green cta-md">Register for free</Link>
+          </div>
         </div>
       )}
     </div>
