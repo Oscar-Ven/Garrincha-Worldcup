@@ -15,8 +15,7 @@ jobs:
     name: Production Build
     runs-on: ubuntu-latest
 
-    # Placeholder CI database values are enough because routes are dynamic
-    # and no real Supabase connection is attempted during the build.
+    # Placeholder CI database values — routes are dynamic so no real DB needed.
     env:
       DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
       DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
@@ -24,6 +23,8 @@ jobs:
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
       APP_PREVIEW_MODE: "false"
       NEXT_PUBLIC_DEMO_MODE: "false"
+      # No SENTRY_AUTH_TOKEN — source map upload is disabled when token is absent.
+      # This mirrors the current Render environment for debugging parity.
 
     steps:
       - name: Checkout
@@ -35,15 +36,14 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Run Render build script (exact Render parity)
+        # Use the same script that runs on Render so CI shows any build failures
+        # with full verbose output (set -euxo pipefail).
+        run: bash scripts/render-build.sh
 
-      - name: Build
-        run: npm run build
-
-      - name: Report bundle size
+      - name: Report
         run: |
           echo "### Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Build succeeded. All routes compiled." >> $GITHUB_STEP_SUMMARY
-          du -sh .next/standalone 2>/dev/null || echo "Standalone output not enabled"
+          echo "Build succeeded via \`scripts/render-build.sh\`." >> $GITHUB_STEP_SUMMARY
+          du -sh .next/standalone 2>/dev/null || true
