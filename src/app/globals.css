@@ -4411,6 +4411,7 @@ body:has(.landing-root) .btm-nav-garrincha{ display: none !important; }
   width: auto;
   max-width: 160px;
   object-fit: contain;
+  background: transparent;
   filter: drop-shadow(0 4px 32px rgba(245,194,66,0.45));
 }
 
