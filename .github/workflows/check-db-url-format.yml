@@ -12,8 +12,7 @@ jobs:
         run: |
           npm install -g vercel@latest -q
           vercel pull --yes --environment=production \
-            --token=${{ secrets.VERCEL_TOKEN }} \
-            --scope=${{ secrets.VERCEL_ORG_ID }} 2>/dev/null
+            --token=${{ secrets.VERCEL_TOKEN }}
 
           DB_URL=$(grep "^DATABASE_URL=" .vercel/.env.production.local 2>/dev/null | cut -d= -f2-)
           if [ -z "$DB_URL" ]; then
