@@ -1,0 +1,113 @@
+name: Sync env vars to Vercel production
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HOW TO USE
+#
+# 1. Add each missing variable as a GitHub Actions secret:
+#      Settings → Secrets → Actions → New repository secret
+#
+#    Required secrets to add (prefix PROD_ to avoid conflicts):
+#      PROD_DATABASE_URL       — Supabase Transaction Pooler URL (port 6543)
+#      PROD_DIRECT_URL         — Supabase direct connection URL (port 5432)
+#      PROD_JWT_SECRET         — long random string (32+ chars)
+#      PROD_NEXT_PUBLIC_APP_URL — https://worldcup-garrincha.com
+#      PROD_EMAIL_FROM         — Garrincha World Cup Predictions <noreply@worldcup-garrincha.com>
+#      PROD_RESEND_API_KEY     — re_...
+#      PROD_UPSTASH_REDIS_REST_URL   — https://...upstash.io
+#      PROD_UPSTASH_REDIS_REST_TOKEN — AX...
+#      PROD_OWNER_PASSWORD     — your owner password
+#      PROD_ADMIN_PASSWORD     — your admin password
+#      PROD_CENTER_ADMIN_PASSWORD — your center admin password
+#
+# 2. Trigger this workflow:
+#      GitHub → Actions → "Sync env vars to Vercel production" → Run workflow
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (list what would be set, don't actually set)"
+        required: false
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+
+jobs:
+  sync:
+    name: Sync env vars to Vercel production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync required env vars
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          # Required prod values (set these as GitHub secrets)
+          PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          PROD_DIRECT_URL: ${{ secrets.PROD_DIRECT_URL }}
+          PROD_JWT_SECRET: ${{ secrets.PROD_JWT_SECRET }}
+          PROD_NEXT_PUBLIC_APP_URL: ${{ secrets.PROD_NEXT_PUBLIC_APP_URL }}
+          PROD_EMAIL_FROM: ${{ secrets.PROD_EMAIL_FROM }}
+          PROD_RESEND_API_KEY: ${{ secrets.PROD_RESEND_API_KEY }}
+          PROD_UPSTASH_REDIS_REST_URL: ${{ secrets.PROD_UPSTASH_REDIS_REST_URL }}
+          PROD_UPSTASH_REDIS_REST_TOKEN: ${{ secrets.PROD_UPSTASH_REDIS_REST_TOKEN }}
+          PROD_OWNER_PASSWORD: ${{ secrets.PROD_OWNER_PASSWORD }}
+          PROD_ADMIN_PASSWORD: ${{ secrets.PROD_ADMIN_PASSWORD }}
+          PROD_CENTER_ADMIN_PASSWORD: ${{ secrets.PROD_CENTER_ADMIN_PASSWORD }}
+        run: |
+          set_env() {
+            local KEY="$1"
+            local VALUE="$2"
+            local TYPE="${3:-encrypted}"
+
+            if [ -z "$VALUE" ]; then
+              echo "SKIP (not provided as GitHub secret): $KEY"
+              return
+            fi
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "DRY_RUN would set: $KEY (length ${#VALUE})"
+              return
+            fi
+
+            # Try to delete existing first (ignore 404), then create
+            curl -s -X DELETE \
+              -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v9/projects/$PROJECT_ID/env/$KEY?teamId=$ORG_ID" \
+              > /dev/null 2>&1 || true
+
+            RESP=$(curl -s -w "\n%{http_code}" -X POST \
+              -H "Authorization: Bearer $VERCEL_TOKEN" \
+              -H "Content-Type: application/json" \
+              "https://api.vercel.com/v10/projects/$PROJECT_ID/env?teamId=$ORG_ID" \
+              -d "{\"key\":\"$KEY\",\"value\":\"$VALUE\",\"target\":[\"production\"],\"type\":\"$TYPE\"}")
+
+            HTTP_CODE=$(echo "$RESP" | tail -1)
+            if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+              echo "SET: $KEY"
+            else
+              echo "ERROR setting $KEY: HTTP $HTTP_CODE"
+            fi
+          }
+
+          echo "=== Syncing to Vercel project $PROJECT_ID ==="
+          echo "DRY_RUN=$DRY_RUN"
+          echo ""
+
+          set_env "DATABASE_URL"                "$PROD_DATABASE_URL"
+          set_env "DIRECT_URL"                  "$PROD_DIRECT_URL"
+          set_env "JWT_SECRET"                  "$PROD_JWT_SECRET"
+          set_env "NEXT_PUBLIC_APP_URL"         "$PROD_NEXT_PUBLIC_APP_URL" "plain"
+          set_env "EMAIL_FROM"                  "$PROD_EMAIL_FROM" "plain"
+          set_env "RESEND_API_KEY"              "$PROD_RESEND_API_KEY"
+          set_env "UPSTASH_REDIS_REST_URL"      "$PROD_UPSTASH_REDIS_REST_URL" "plain"
+          set_env "UPSTASH_REDIS_REST_TOKEN"    "$PROD_UPSTASH_REDIS_REST_TOKEN"
+          set_env "OWNER_PASSWORD"              "$PROD_OWNER_PASSWORD"
+          set_env "ADMIN_PASSWORD"              "$PROD_ADMIN_PASSWORD"
+          set_env "CENTER_ADMIN_PASSWORD"       "$PROD_CENTER_ADMIN_PASSWORD"
+
+          echo ""
+          echo "Done. If not dry run, trigger a new production deployment to pick up changes."

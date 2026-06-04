@@ -98,12 +98,20 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    await rotateAndSendAccessLink(user.id, email, getLocaleFromRequest(request));
-    await createSession({ userId: user.id, role: user.role });
+    // Send access link — non-blocking: user is already created.
+    // If email fails (Resend not configured, domain unverified, etc.)
+    // the user can request a new link from /login.
+    try {
+      await rotateAndSendAccessLink(user.id, email, getLocaleFromRequest(request));
+    } catch (emailErr) {
+      console.error("[auth/register] Email send failed (user created, can request new link):", (emailErr as Error).message);
+    }
 
+    await createSession({ userId: user.id, role: user.role });
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("[auth/register]", err);
+    const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+    console.error("[auth/register] Fatal:", msg);
     return NextResponse.json(
       { error: "Registration is not available. Please try again later." },
       { status: 503 }

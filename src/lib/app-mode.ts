@@ -19,7 +19,9 @@ export function hasUsableDatabaseUrl() {
 
   try {
     const url = new URL(value);
-    return url.protocol === "postgresql:" && Boolean(url.hostname && url.username && url.pathname !== "/");
+    // Accept both postgresql:// (standard) and postgres:// (Supabase/Heroku shortform)
+    const validProtocol = url.protocol === "postgresql:" || url.protocol === "postgres:";
+    return validProtocol && Boolean(url.hostname && url.username && url.pathname !== "/");
   } catch {
     return false;
   }
