@@ -1,111 +1,162 @@
 # Deployment
 
-## Production Stack
+## Production Architecture
 
 | Service | Role |
 |---------|------|
-| **Render** | App hosting — Web Service (Node.js, persistent process) |
+| Vercel | Main Next.js app host |
 | Supabase PostgreSQL | Only real database |
-| Resend | Transactional email (permanent access links) |
-| Upstash Redis | Rate limiting (multi-instance safe) |
-| Sentry | Error monitoring |
-| Domain | TBD — update `NEXT_PUBLIC_APP_URL` once decided |
+| Resend | Transactional access-link email |
+| Upstash Redis | Production rate limiting |
+| Sentry | Error monitoring and source maps |
+| Domain | `https://worldcup-garrincha.com` |
 
-## Why Render (not Vercel)
+Render is not used for the main app. It is reserved only for a possible future background worker, such as football fixture/result sync. See `docs/render-worker.md`.
 
-Render runs a persistent Node.js process, not serverless functions. This means:
-- The Supabase **direct connection** (port 5432) works without a Transaction Pooler.
-- No cold-start connection exhaustion under load.
-- `DATABASE_URL` and `DIRECT_URL` can both point to the same Supabase direct URL.
+## Vercel Project Configuration
 
-## Render Service Configuration
+Use a standard Vercel Next.js project.
 
 | Setting | Value |
 |---------|-------|
-| Service type | **Web Service** (not Static Site) |
-| Runtime | Node 20 |
-| Region | Frankfurt (eu-central-1 — same region as Supabase project) |
-| Branch | `main` |
-| Build command | See below |
-| Start command | `node .next/standalone/server.js` |
-| Health check path | `/` |
+| Framework preset | Next.js |
+| Install command | `npm ci` |
+| Build command | `npm run build` |
+| Output directory | Vercel default |
+| Node.js version | 20 |
 
-### Build command
-
-```
-npm ci && npm run db:generate && npm run build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static
-```
-
-The `cp` steps are required because Next.js standalone output does not copy static assets automatically.
-
-### npm scripts
+`npm run build` runs:
 
 ```powershell
-npm run start:render   # runs: node .next/standalone/server.js
+prisma generate && next build
 ```
 
-## Render Environment Variables
+Migrations do not run during Vercel builds.
 
-Set ALL of the following in **Render dashboard → Service → Environment**. Do not put secrets in `render.yaml`.
+## Vercel Environment Variables
+
+Set all required variables in Vercel project settings for Production. Also set matching Preview values where needed.
 
 ### Required
 
 | Variable | Value |
 |----------|-------|
-| `NODE_ENV` | `production` |
-| `PORT` | `10000` (Render default — injected automatically) |
-| `HOSTNAME` | `0.0.0.0` |
-| `DATABASE_URL` | Supabase direct connection `postgresql://postgres:PASS@db.ref.supabase.co:5432/postgres` |
-| `DIRECT_URL` | Same as `DATABASE_URL` for Render (persistent process — no pooler needed) |
-| `JWT_SECRET` | Random secret, minimum 32 characters |
+| `DATABASE_URL` | Supabase Transaction Pooler URL, port 6543, `pgbouncer=true` |
+| `DIRECT_URL` | Supabase direct database URL, port 5432, migrations only |
+| `JWT_SECRET` | Strong random secret, minimum 32 characters |
 | `OWNER_EMAIL` | `wc.garrincha@gmail.com` |
 | `OWNER_PASSWORD` | Owner account password |
-| `ADMIN_PASSWORD` | Main admin password |
-| `CENTER_ADMIN_PASSWORD` | Shared center admin password |
-| `NEXT_PUBLIC_APP_URL` | `https://[your-render-url].onrender.com` (update when custom domain is set) |
+| `ADMIN_PASSWORD` | Main admin account password |
+| `CENTER_ADMIN_PASSWORD` | Initial shared center admin password |
+| `NEXT_PUBLIC_APP_URL` | `https://worldcup-garrincha.com` |
 | `APP_PREVIEW_MODE` | `false` |
 | `NEXT_PUBLIC_DEMO_MODE` | `false` |
 
-### Email (Resend)
+### Email
 
 | Variable | Value |
 |----------|-------|
 | `RESEND_API_KEY` | Resend API key |
-| `EMAIL_FROM` | `Garrincha World Cup Predictions <noreply@[your-domain.com]>` |
+| `EMAIL_FROM` | `Garrincha World Cup Predictions <noreply@worldcup-garrincha.com>` |
 
-Email is not live until the sending domain is verified in Resend. See [Resend domain setup](#resend-domain-setup) below.
+The sender domain must be verified in Resend before production email delivery.
 
-### Rate Limiting (Upstash Redis)
+### Rate Limiting
 
 | Variable | Value |
 |----------|-------|
 | `UPSTASH_REDIS_REST_URL` | Upstash REST endpoint |
 | `UPSTASH_REDIS_REST_TOKEN` | Upstash REST token |
-| `REDIS_URL` | Upstash Redis URL |
+| `REDIS_URL` | Upstash Redis URL, optional/future use |
 
-### Monitoring (Sentry)
+Without Upstash, rate limiting falls back to in-memory counters and is not production-safe across multiple instances.
+
+### Monitoring
 
 | Variable | Value |
 |----------|-------|
 | `NEXT_PUBLIC_SENTRY_DSN` | Sentry DSN |
-| `SENTRY_DSN` | Sentry DSN (server-side) |
+| `SENTRY_DSN` | Sentry DSN |
 | `SENTRY_ORG` | `garrincha-worldcup` |
 | `SENTRY_PROJECT` | `garrincha-worldcup` |
-| `SENTRY_AUTH_TOKEN` | For source map upload during builds |
+| `SENTRY_AUTH_TOKEN` | Required only for source map upload during builds |
 
-## Supabase Notes
+### Football Data
 
-On Render, use the **direct connection** for both `DATABASE_URL` and `DIRECT_URL`:
+Football API sync is optional/future. Manual admin score entry works without it.
 
+| Variable | Value |
+|----------|-------|
+| `FOOTBALL_DATA_PROVIDER` | Provider name, optional |
+| `FOOTBALL_DATA_COMPETITION_CODE` | Competition code, optional |
+| `FOOTBALL_DATA_SEASON` | Season, optional |
+| `FOOTBALL_DATA_API_KEY` | Provider API key, optional |
+
+## Supabase URLs
+
+For Vercel/serverless runtime:
+
+```env
+DATABASE_URL="postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&sslmode=require"
+DIRECT_URL="postgresql://postgres:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres?sslmode=require"
 ```
-postgresql://postgres:PASS@db.cvpfkopixypggzpqjloo.supabase.co:5432/postgres
+
+Use:
+
+- `DATABASE_URL`: Supabase Transaction Pooler for app runtime on Vercel.
+- `DIRECT_URL`: Supabase direct URL for Prisma migrations.
+
+## Migration Release Step
+
+Apply committed migrations deliberately before deploying schema-dependent app changes:
+
+```powershell
+npm run env:check
+npx prisma migrate status
+npm run db:migrate:deploy
 ```
 
-No Transaction Pooler needed — Render's persistent process manages connections directly.
+Do not run migrations from Vercel build commands.
+
+Do not run destructive commands such as:
+
+- `prisma migrate reset`
+- `prisma db push --force-reset`
+- manual SQL deletes/truncates
+
+## Seed
+
+Seed only after migrations succeed, and only for a fresh or intentionally reseeded database:
+
+```powershell
+npm run db:seed
+```
+
+The seed creates centers, teams, match slots, the owner account, main admin account, and center admin accounts.
+
+## CI/CD Workflows
+
+| Workflow | Trigger | Action |
+|----------|---------|--------|
+| `ci.yml` | Push/PR to main or develop | Typecheck, lint, tests, high/critical audit |
+| `build-check.yml` | Push/PR to main or develop | Production build verification |
+| `deploy.yml` | CI success on main | Vercel production deploy |
+| `deploy-staging.yml` | CI success on develop | Vercel preview/staging deploy |
+| `preview.yml` | Non-draft PR | Vercel PR preview deploy |
+| `deploy-render.yml` | Manual only | Disabled; future worker only |
+
+### GitHub Secrets
+
+| Secret | Purpose |
+|--------|---------|
+| `VERCEL_TOKEN` | Vercel CLI auth |
+| `VERCEL_ORG_ID` | Vercel project/org link |
+| `VERCEL_PROJECT_ID` | Vercel project link |
+| `SENTRY_AUTH_TOKEN` | Optional source map upload |
 
 ## Pre-Deployment Checklist
 
-Run locally before each release:
+Run before each production release:
 
 ```powershell
 npm run env:check
@@ -113,101 +164,39 @@ npm run typecheck
 npm run lint
 npm test
 npm audit --audit-level=high
-```
-
-Build and verify standalone output:
-
-```powershell
 npm run build
-# Verify .next/standalone/server.js exists
-ls .next/standalone/server.js
 ```
 
-## Migration (Deliberate Release Step)
+Then verify:
 
-Apply committed migrations manually before deploying a schema change:
+- Registration with a valid center activation code.
+- Access-link email delivery.
+- Login/access-link session creation.
+- Competition center selection.
+- Prediction create/edit/lock behavior.
+- Admin score entry and point recalculation.
+- Global, national, and center leaderboards.
+- Center admin scoped access.
+- Owner dashboard prize rankings.
 
-```powershell
-npm run db:migrate:deploy
-```
+## Domain & DNS Setup
 
-All 5 migrations are currently applied to the live Supabase database.
+See `docs/domain-dns-setup.md` for the complete step-by-step guide covering:
 
-## Seed (First Setup Only)
-
-Already seeded. Re-seed only on a fresh database:
-
-```powershell
-npm run db:seed
-```
-
-## Admin Accounts
-
-| Role | Email | Password source |
-|------|-------|----------------|
-| SUPER_ADMIN | `wc.garrincha@gmail.com` | `OWNER_PASSWORD` env var |
-| ADMIN | `admin@garrincha.local` | `ADMIN_PASSWORD` env var |
-| CENTER_ADMIN (×10) | `*.@garrincha.be` | `CENTER_ADMIN_PASSWORD` env var |
-
-All center admin emails: antwerpen.noord, antwerpen.zuid, charleroi.dampremy, charleroi.montignies, diegem, gent.arsenaal, gent.theloop, kortrijk, luik, westgate.dilbeek — all `@garrincha.be`.
-
-**Replace shared `CENTER_ADMIN_PASSWORD` with individual credentials before public launch.**
-
-## Admin Hierarchy
-
-| Role | Access |
-|------|--------|
-| `SUPER_ADMIN` | Full platform — all centers, health dashboard, user management |
-| `ADMIN` | Full admin access (legacy main admin) |
-| `CENTER_ADMIN` | Center-scoped — assigned center QR codes, players, leaderboard |
-| `USER` | Player — predictions, own profile |
+- GoDaddy records to keep vs. change (A, CNAME, TXT)
+- Vercel domain connection
+- Resend domain verification (SPF, DKIM, DMARC)
+- SPF/DMARC merge caution
+- Vercel environment variable checklist (names only)
+- Post-connection verification steps
 
 ## Resend Domain Setup
 
-Email is not live until the sending domain is verified.
+1. Add `worldcup-garrincha.com` in Resend Dashboard → Domains.
+2. Add the TXT records Resend provides to GoDaddy DNS (DKIM, and SPF/DMARC if required).
+3. Wait for Resend to show domain status as **Verified**.
+4. Set `EMAIL_FROM="Garrincha World Cup Predictions <noreply@worldcup-garrincha.com>"` in Vercel.
 
-1. Log in to [resend.com](https://resend.com).
-2. Go to **Domains** → Add your domain.
-3. Add the DNS records Resend provides:
-   - **SPF** — TXT record on your domain
-   - **DKIM** — TXT record on `resend._domainkey.yourdomain`
-   - **DMARC** — TXT record on `_dmarc.yourdomain` (recommended)
-4. Wait for domain verification (minutes to a few hours).
-5. Set in Render env vars:
-   ```
-   EMAIL_FROM="Garrincha World Cup Predictions <noreply@yourdomain>"
-   ```
+Do not set `EMAIL_FROM` in Vercel before the Resend domain is verified — emails will bounce or be rejected.
 
-Until verification: use `EMAIL_FROM="onboarding@resend.dev"` for test emails only.
-
-## System Health Dashboard
-
-Route: `/admin/health` — Super Admin only.
-
-Shows: Supabase connection status, campaign data counts, Resend/Redis/Vercel/Sentry/Football API config status.
-
-Never exposes secrets, passwords, API keys, or connection strings.
-
-## CI/CD Workflow
-
-| Workflow | Trigger | Action |
-|----------|---------|--------|
-| `ci.yml` | Every push/PR | Typecheck, lint, test, security audit |
-| `build-check.yml` | Push/PR to main or develop | Production build verification |
-| `deploy-render.yml` | CI success on main | Triggers Render deploy hook |
-| `deploy.yml` | — | **Disabled** (Vercel — replaced by Render) |
-| `deploy-staging.yml` | — | **Disabled** (Vercel — replaced by Render) |
-| `preview.yml` | — | **Disabled** (Vercel — replaced by Render) |
-
-### GitHub Secrets required for Render deploy
-
-| Secret | Where to get it |
-|--------|----------------|
-| `RENDER_DEPLOY_HOOK` | Render dashboard → Service → Settings → Deploy Hook |
-| `SENTRY_AUTH_TOKEN` | Sentry dashboard — for source maps in build |
-
-## Upstash Redis — Rate Limiting
-
-The app checks `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` at runtime.  
-When present → Redis-backed rate limiting across all instances.  
-When absent → per-process in-memory fallback (development only).
+See `docs/domain-dns-setup.md` for SPF/DMARC merge rules.

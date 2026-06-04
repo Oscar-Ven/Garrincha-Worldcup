@@ -15,9 +15,9 @@ DATABASE_URL="postgresql://postgres.[REF]:[PASS]@aws-0-[REGION].pooler.supabase.
 DIRECT_URL="postgresql://postgres:[PASS]@db.[REF].supabase.co:5432/postgres"
 ```
 
-DATABASE_URL should use the Transaction Pooler URL for production on Vercel. The current `.env` uses the direct connection for both. Update DATABASE_URL to the pooler URL before production launch.
+**Status: Done.** `DATABASE_URL` has been updated to the Transaction Pooler URL (port 6543, `pgbouncer=true`). `DIRECT_URL` remains the direct connection (port 5432) for migrations. `npm run env:check` reports `SUPABASE_READY=yes`.
 
-Get the pooler URL from: Supabase Dashboard → Project → Connect → Transaction Pooler.
+If the pooler URL ever needs to be regenerated, get it from: Supabase Dashboard → Project → Connect → Transaction Pooler.
 
 ## Safety Rules
 
