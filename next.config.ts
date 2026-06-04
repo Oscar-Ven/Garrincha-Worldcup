@@ -15,9 +15,9 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
-      "font-src 'self'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https://www.garrincha.be",
+      "font-src 'self' https://fonts.gstatic.com",
       // Sentry ingest endpoint for error reporting
       "connect-src 'self' https://*.ingest.de.sentry.io https://*.ingest.sentry.io",
       "frame-src 'none'",

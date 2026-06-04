@@ -16,6 +16,8 @@ export const viewport: Viewport = {
   themeColor: "#0A0D0A",
 };
 
+/* next/font self-hosts the regular weights — zero external requests at runtime.
+   The @import in globals.css adds the italic Saira Condensed variant only.     */
 const sairaCondensed = Saira_Condensed({
   subsets: ["latin"],
   weight: ["700", "800", "900"],
@@ -25,7 +27,7 @@ const sairaCondensed = Saira_Condensed({
 
 const saira = Saira({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["600", "700", "800"],
   variable: "--font-saira",
   display: "swap",
 });
@@ -74,54 +76,76 @@ export default async function RootLayout({
     <html
       lang={locale}
       className={`${sairaCondensed.variable} ${saira.variable} ${hankenGrotesk.variable}`}
-      style={{ background: "var(--bg)" }}
     >
       <body>
         <div className="app-shell">
-          {/* Top nav — hidden on mobile (replaced by bottom nav) */}
-          <header className="topbar" style={{ display: "none" }} aria-hidden="true">
-            <div className="topbar-inner">
-              <Link href="/" style={{ display: "flex", alignItems: "center" }}>
-                <Image src="/garrincha-white.png" alt="GARRINCHA" height={20} width={120} style={{ height: 20, width: "auto" }} />
+          {/* ── Desktop topbar — hidden on mobile (bottom nav replaces it) ── */}
+          <header className="site-topbar">
+            <div className="site-topbar-inner">
+              {/* Brand */}
+              <Link href="/" className="site-topbar-brand" aria-label="GARRINCHA home">
+                <Image
+                  src="/garrincha-white.png"
+                  alt="GARRINCHA"
+                  height={18}
+                  width={108}
+                  style={{ height: 18, width: "auto" }}
+                  priority
+                />
               </Link>
-              <nav style={{ display: "flex", alignItems: "center", gap: 12 }} aria-label="Primary navigation">
-                <Link href="/dashboard" style={{ color: "var(--ink-dim)", fontFamily: "var(--f-disp)", fontStyle: "italic", fontWeight: 900, textTransform: "uppercase", fontSize: 14 }}>{t(locale, "nav.matches")}</Link>
-                <Link href="/leaderboards" style={{ color: "var(--ink-dim)", fontFamily: "var(--f-disp)", fontStyle: "italic", fontWeight: 900, textTransform: "uppercase", fontSize: 14 }}>{t(locale, "nav.leaderboards")}</Link>
+
+              {/* Desktop nav links */}
+              <nav className="site-topbar-nav" aria-label="Primary navigation">
+                <Link href="/dashboard" className="site-nav-link">{t(locale, "nav.matches")}</Link>
+                <Link href="/leaderboards" className="site-nav-link">{t(locale, "nav.leaderboards")}</Link>
                 {isAdmin && (
-                  <Link href="/admin" style={{ color: "var(--ink-dim)", fontFamily: "var(--f-disp)", fontStyle: "italic", fontWeight: 900, textTransform: "uppercase", fontSize: 14 }}>{t(locale, "nav.admin")}</Link>
+                  <Link href="/admin" className="site-nav-link">{t(locale, "nav.admin")}</Link>
                 )}
+              </nav>
+
+              {/* Right side: auth + language */}
+              <div className="site-topbar-right">
                 {user ? (
                   <form action="/api/auth/logout" method="post">
-                    <button type="submit" style={{ background: "none", border: "1.5px solid var(--line-2)", borderRadius: 8, color: "var(--ink-dim)", cursor: "pointer", padding: "8px 14px", fontFamily: "var(--f-disp)", fontStyle: "italic", fontWeight: 900, textTransform: "uppercase", fontSize: 13 }}>{t(locale, "nav.logout")}</button>
+                    <button type="submit" className="site-nav-btn site-nav-btn-ghost">
+                      {t(locale, "nav.logout")}
+                    </button>
                   </form>
                 ) : (
-                  <Link href="/register" style={{ background: "var(--green)", color: "#06210F", borderRadius: 8, padding: "8px 16px", fontFamily: "var(--f-disp)", fontStyle: "italic", fontWeight: 900, textTransform: "uppercase", fontSize: 13 }}>{t(locale, "nav.register")}</Link>
+                  <>
+                    <Link href="/login" className="site-nav-btn site-nav-btn-ghost">{t(locale, "nav.login")}</Link>
+                    <Link href="/register" className="site-nav-btn site-nav-btn-primary">{t(locale, "nav.register")}</Link>
+                  </>
                 )}
                 <LanguageSwitcher locale={locale} />
-              </nav>
+              </div>
             </div>
           </header>
 
           {children}
 
-          {/* Footer */}
-          <footer style={{ background: "var(--bg-2)", borderTop: "1px solid var(--line)", padding: "32px 22px 120px", marginTop: 32 }}>
-            <div style={{ maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
-              <Image src="/garrincha-white.png" alt="GARRINCHA" height={18} width={120} style={{ height: 18, width: "auto", opacity: 0.7 }} />
-              <p style={{ fontSize: 13, color: "var(--ink-faint)", lineHeight: 1.5, margin: 0 }}>
-                {t(locale, "footer.text")}
-              </p>
-              <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-                <Link href="/privacy" style={{ fontSize: 12, color: "var(--ink-faint)" }}>{t(locale, "footer.privacy")}</Link>
-                <Link href="/terms" style={{ fontSize: 12, color: "var(--ink-faint)" }}>{t(locale, "footer.terms")}</Link>
-                <Link href="/admin/login" style={{ fontSize: 12, color: "var(--ink-faint)" }}>{t(locale, "nav.admin")}</Link>
+          {/* Footer — only visible on public/player pages, not admin */}
+          <footer className="site-footer-wrap">
+            <div className="site-footer-inner">
+              <Image
+                src="/garrincha-white.png"
+                alt="GARRINCHA"
+                height={16}
+                width={96}
+                style={{ height: 16, width: "auto", opacity: 0.55 }}
+              />
+              <p className="site-footer-copy">{t(locale, "footer.text")}</p>
+              <div className="site-footer-links">
+                <Link href="/privacy">{t(locale, "footer.privacy")}</Link>
+                <Link href="/terms">{t(locale, "footer.terms")}</Link>
+                <Link href="/admin/login">{t(locale, "nav.admin")}</Link>
+                <a href="https://www.garrincha.be" target="_blank" rel="noopener noreferrer">garrincha.be</a>
               </div>
-              <p style={{ fontSize: 11, color: "var(--ink-faint)", opacity: 0.5, margin: 0 }}>
-                Kempes BV · BE0635670989 · ©2026
-              </p>
+              <p className="site-footer-legal">Kempes BV · BE0635670989 · ©2026 All rights reserved</p>
             </div>
           </footer>
 
+          {/* Mobile bottom nav — auto-hides on /admin and /owner */}
           <MobileNav isLoggedIn={!!user} locale={locale} />
         </div>
       </body>

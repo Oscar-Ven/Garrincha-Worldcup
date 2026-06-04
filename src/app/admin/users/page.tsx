@@ -1,5 +1,7 @@
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { UserRoleForm } from "@/components/AdminForms";
 import { DataModeNotice } from "@/components/DataModeNotice";
 import { requireSuperAdmin } from "@/lib/auth";
@@ -13,25 +15,14 @@ export default async function AdminUsersPage() {
   let ownerId: string | null = null;
 
   if (hasDatabaseConfig()) {
-    try {
-      const owner = await requireSuperAdmin();
-      ownerId = owner.id;
-    } catch {
-      redirect("/admin/login?next=/admin/users");
-    }
+    try { const owner = await requireSuperAdmin(); ownerId = owner.id; }
+    catch { redirect("/admin/login?next=/admin/users"); }
   }
 
   const users = hasDatabaseConfig()
     ? await prisma.user.findMany({
         orderBy: [{ role: "desc" }, { email: "asc" }],
-        select: {
-          id: true,
-          email: true,
-          displayName: true,
-          nationality: true,
-          role: true,
-          center: { select: { name: true } },
-        },
+        select: { id: true, email: true, displayName: true, nationality: true, role: true, center: { select: { name: true } } },
       })
     : demoLeaderboard.map((row, index) => ({
         id: row.id,
@@ -42,50 +33,81 @@ export default async function AdminUsersPage() {
         center: { name: row.center },
       }));
 
+  const ROLE_COLOR: Record<string, string> = {
+    SUPER_ADMIN: "var(--gold)", ADMIN: "var(--green)", CENTER_ADMIN: "var(--info)", USER: "var(--ink-faint)",
+  };
+
   return (
-    <main className="page">
-      <DataModeNotice locale={locale} />
-      <section className="page-header">
-        <span className="eyebrow">{t(locale, "admin.superEyebrow")}</span>
-        <h1>{t(locale, "admin.usersTitle")}</h1>
-        <p>{t(locale, "admin.usersCopy")}</p>
-      </section>
-      <div className="admin-warning">{t(locale, "admin.ownerWarning")}</div>
-      <section className="card">
-        {users.length === 0 ? <div className="empty-state">{t(locale, "admin.noUsers")}</div> : null}
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>{t(locale, "table.player")}</th>
-                <th>{t(locale, "table.center")}</th>
-                <th>{t(locale, "form.nationality")}</th>
-                <th>{t(locale, "admin.role")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id}>
-                  <td>
-                    <strong>{user.displayName || user.email}</strong>
-                    <p className="muted">{user.email}</p>
-                  </td>
-                  <td>{user.center.name}</td>
-                  <td>{user.nationality || "-"}</td>
-                  <td>
-                    <UserRoleForm
-                      userId={user.id}
-                      role={user.role}
-                      disabled={user.id === ownerId}
-                      locale={locale}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="admin-root" style={{ minHeight: "100vh" }}>
+      <aside className="admin-side">
+        <div className="admin-side-top">
+          <Image src="/garrincha-white.png" alt="GARRINCHA" height={20} width={120} style={{ height: 20, width: "auto" }} />
+          <span className="admin-side-tag">ADMIN</span>
         </div>
-      </section>
-    </main>
+        <nav className="admin-side-nav">
+          <Link href="/admin" className="admin-nav-link" style={{ textDecoration: "none" }}><span className="admin-nav-ic">▦</span>Overview</Link>
+          <Link href="/admin/users" className="admin-nav-link active" style={{ textDecoration: "none" }}><span className="admin-nav-ic">👥</span>{t(locale, "admin.usersTitle")}</Link>
+          <Link href="/admin/health" className="admin-nav-link" style={{ textDecoration: "none" }}><span className="admin-nav-ic">🩺</span>{t(locale, "admin.healthTitle")}</Link>
+        </nav>
+        <div className="admin-side-foot">
+          <Link href="/admin" style={{ fontSize: 13, color: "var(--ink-dim)", textDecoration: "none" }}>← Back</Link>
+        </div>
+      </aside>
+      <main className="admin-main">
+        <header className="admin-topbar">
+          <div>
+            <div className="admin-topbar-crumb">{t(locale, "admin.superEyebrow")}</div>
+            <h1 className="admin-topbar-title">{t(locale, "admin.usersTitle")}</h1>
+          </div>
+        </header>
+        <div className="admin-content">
+          <DataModeNotice locale={locale} />
+          {/* Warning */}
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 16px", borderRadius: 12, background: "rgba(245,194,66,0.07)", border: "1px solid rgba(245,194,66,0.25)", fontSize: 13, color: "var(--ink-dim)", lineHeight: 1.5 }}>
+            <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
+            {t(locale, "admin.ownerWarning")}
+          </div>
+
+          <div className="acard" style={{ padding: 0, overflow: "hidden" }}>
+            {users.length === 0 ? (
+              <div style={{ padding: "32px", textAlign: "center", color: "var(--ink-faint)" }}>{t(locale, "admin.noUsers")}</div>
+            ) : (
+              <div className="tbl-scroll">
+                <table className="tbl">
+                  <thead>
+                    <tr>
+                      <th>{t(locale, "table.player")}</th>
+                      <th>{t(locale, "table.center")}</th>
+                      <th className="lb-hide-mobile">{t(locale, "form.nationality")}</th>
+                      <th>{t(locale, "admin.role")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((user) => (
+                      <tr key={user.id}>
+                        <td>
+                          <div style={{ fontWeight: 700, color: "var(--ink)" }}>{user.displayName || user.email}</div>
+                          <div className="muted mono" style={{ marginTop: 2 }}>{user.email}</div>
+                        </td>
+                        <td><span className="muted">{user.center.name}</span></td>
+                        <td className="lb-hide-mobile"><span className="muted">{user.nationality || "—"}</span></td>
+                        <td>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-start" }}>
+                            <span className="apill" style={{ background: `${ROLE_COLOR[user.role]}1f`, color: ROLE_COLOR[user.role], fontSize: 10 }}>
+                              {user.role.replace("_", " ")}
+                            </span>
+                            <UserRoleForm userId={user.id} role={user.role} disabled={user.id === ownerId} locale={locale} />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }
