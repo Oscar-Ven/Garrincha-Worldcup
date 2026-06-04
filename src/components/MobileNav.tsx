@@ -74,9 +74,10 @@ export function MobileNav({ isLoggedIn, locale }: Props) {
     pathname === href || (href !== "/" && pathname.startsWith(href));
 
   const items = [
-    { k: "home", href: "/", icon: "home", label: t(locale, "nav.home") },
-    { k: "predict", href: "/dashboard", icon: "ball", label: t(locale, "nav.predict") },
-    { k: "ranks", href: "/leaderboards", icon: "chart", label: t(locale, "nav.rankings") },
+    { k: "home",    href: "/",            icon: "home",  label: t(locale, "nav.home") },
+    { k: "matches", href: "/matches",     icon: "ball",  label: t(locale, "nav.matches") },
+    { k: "ranks",   href: "/leaderboards",icon: "chart", label: t(locale, "nav.rankings") },
+    ...(isLoggedIn ? [{ k: "predict", href: "/dashboard", icon: "user", label: t(locale, "nav.predict") }] : []),
   ];
 
   return (
@@ -103,10 +104,10 @@ export function MobileNav({ isLoggedIn, locale }: Props) {
             </form>
           </div>
         ) : (
-          <Link href="/login" className={`btm-nav-item${isActive("/login") ? " active" : ""}`}>
-            {isActive("/login") && <span className="btm-nav-dot" />}
-            <NavIcon name="user" on={isActive("/login")} />
-            <span className="btm-nav-label">{t(locale, "nav.login")}</span>
+          <Link href="/register" className={`btm-nav-item${isActive("/register") ? " active" : ""}`}>
+            {isActive("/register") && <span className="btm-nav-dot" />}
+            <NavIcon name="user" on={isActive("/register")} />
+            <span className="btm-nav-label">{t(locale, "nav.register")}</span>
           </Link>
         )}
       </nav>

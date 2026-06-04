@@ -39,10 +39,13 @@ export function MatchFilter({
   matches,
   locale,
   nowISO,
+  readOnly = false,
 }: {
   matches: FilterableMatch[];
   locale: Locale;
   nowISO: string;
+  /** When true, hides prediction forms — used for the public /matches schedule page */
+  readOnly?: boolean;
 }) {
   const [filter, setFilter] = useState<string>("all");
   const now = new Date(nowISO);
@@ -175,33 +178,45 @@ export function MatchFilter({
                   <strong>{match.awayTeam.name}</strong>
                 </div>
               </div>
-              <div className="campaign-prediction-area">
-                <span className="muted">
-                  {prediction ? t(locale, "match.yourPrediction") : t(locale, "match.enterPrediction")}
-                </span>
-                <PredictionForm
-                  matchId={match.id}
-                  locked={locked}
-                  homeScore={prediction?.homeScore}
-                  awayScore={prediction?.awayScore}
-                  locale={locale}
-                />
-                <div className="campaign-match-footer">
-                  {completed ? (
-                    <span className="badge green">
-                      {t(locale, "match.finalScore")}: {match.homeScore} – {match.awayScore}
-                    </span>
-                  ) : null}
-                  {locked && !completed ? (
-                    <span className="badge locked">{t(locale, "match.predictionLocked")}</span>
-                  ) : null}
-                  {prediction ? (
-                    <span className="badge points">
-                      {prediction.pointsAwarded} {t(locale, "match.pointsEarned")}
-                    </span>
-                  ) : null}
+              {/* Score display (always shown when completed) */}
+              {completed && (
+                <div className="campaign-match-score">
+                  <span className="match-score-value">{match.homeScore}</span>
+                  <span className="match-score-sep">–</span>
+                  <span className="match-score-value">{match.awayScore}</span>
                 </div>
-              </div>
+              )}
+
+              {/* Prediction area — hidden in readOnly mode */}
+              {!readOnly && (
+                <div className="campaign-prediction-area">
+                  <span className="muted">
+                    {prediction ? t(locale, "match.yourPrediction") : t(locale, "match.enterPrediction")}
+                  </span>
+                  <PredictionForm
+                    matchId={match.id}
+                    locked={locked}
+                    homeScore={prediction?.homeScore}
+                    awayScore={prediction?.awayScore}
+                    locale={locale}
+                  />
+                  <div className="campaign-match-footer">
+                    {completed ? (
+                      <span className="badge green">
+                        {t(locale, "match.finalScore")}: {match.homeScore} – {match.awayScore}
+                      </span>
+                    ) : null}
+                    {locked && !completed ? (
+                      <span className="badge locked">{t(locale, "match.predictionLocked")}</span>
+                    ) : null}
+                    {prediction ? (
+                      <span className="badge points">
+                        {prediction.pointsAwarded} {t(locale, "match.pointsEarned")}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              )}
             </article>
           );
         })}
