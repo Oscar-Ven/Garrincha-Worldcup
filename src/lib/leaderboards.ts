@@ -79,7 +79,11 @@ export async function getLeaderboard(
     FROM "User" u
     JOIN "GarrinchaCenter" gc ON gc.id = u."competitionCenterId"
     LEFT JOIN (
-      SELECT "userId", SUM("pointsAwarded") AS total, COUNT(*) AS cnt
+      SELECT "userId",
+             SUM("pointsAwarded")                       AS total,
+             COUNT(*)                                    AS cnt,
+             COUNT(*) FILTER (WHERE "pointsAwarded" = 5) AS exact_cnt,
+             COUNT(*) FILTER (WHERE "pointsAwarded" >= 2) AS correct_cnt
       FROM "Prediction"
       GROUP BY "userId"
     ) p ON p."userId" = u.id
@@ -89,7 +93,11 @@ export async function getLeaderboard(
       GROUP BY "userId"
     ) ev ON ev."userId" = u.id
     WHERE u."competitionCenterId" IS NOT NULL
-    ORDER BY points DESC, name ASC
+    ORDER BY
+      points DESC,
+      COALESCE(p.exact_cnt, 0) DESC,
+      COALESCE(p.correct_cnt, 0) DESC,
+      u."createdAt" ASC
     LIMIT ${limit}
   `;
 

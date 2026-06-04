@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireCenterAdmin } from "@/lib/auth";
 import { generateSessionCode, getActiveSession, sessionExpiresAt } from "@/lib/checkin";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { rejectCrossOriginRequest } from "@/lib/request-security";
 import { generateCodeSchema } from "@/lib/validators";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const originError = rejectCrossOriginRequest(request);
   if (originError) return originError;
 
@@ -16,10 +17,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Admin access required." }, { status: 403 });
   }
 
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  if (!(await checkRateLimit(`admin-checkin-code:${ip}`, 60, 60 * 1000))) {
+    return NextResponse.json({ error: "Too many requests." }, { status: 429 });
+  }
+
   const { searchParams } = new URL(request.url);
   const centerId = searchParams.get("centerId") ?? admin.center.id;
 
-  // CENTER_ADMIN can only query their own center's code
   if (admin.role === "CENTER_ADMIN" && centerId !== admin.center.id) {
     return NextResponse.json({ error: "You can only view codes for your assigned center." }, { status: 403 });
   }
@@ -31,7 +36,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ code: session.code, expiresAt: session.expiresAt.toISOString() });
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const originError = rejectCrossOriginRequest(request);
   if (originError) return originError;
 
@@ -42,6 +47,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Admin access required." }, { status: 403 });
   }
 
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  if (!(await checkRateLimit(`admin-checkin-code-gen:${ip}`, 30, 60 * 1000))) {
+    return NextResponse.json({ error: "Too many code generation requests." }, { status: 429 });
+  }
+
   const parsed = generateCodeSchema.safeParse(await request.json());
   if (!parsed.success) {
     return NextResponse.json({ error: "Please specify a valid center." }, { status: 400 });
@@ -49,7 +59,6 @@ export async function POST(request: Request) {
 
   const { centerId } = parsed.data;
 
-  // CENTER_ADMIN can only generate codes for their own center
   if (admin.role === "CENTER_ADMIN" && centerId !== admin.center.id) {
     return NextResponse.json(
       { error: "You can only generate codes for your assigned center." },

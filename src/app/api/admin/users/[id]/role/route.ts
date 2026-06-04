@@ -1,12 +1,13 @@
 import { Role } from "@prisma/client";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireSuperAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { rejectCrossOriginRequest } from "@/lib/request-security";
 import { userRoleSchema } from "@/lib/validators";
 
 export async function PATCH(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const originError = rejectCrossOriginRequest(request);
@@ -17,6 +18,11 @@ export async function PATCH(
     owner = await requireSuperAdmin();
   } catch {
     return NextResponse.json({ error: "Super admin access required." }, { status: 403 });
+  }
+
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  if (!(await checkRateLimit(`admin-users-role:${ip}`, 30, 60 * 1000))) {
+    return NextResponse.json({ error: "Too many requests." }, { status: 429 });
   }
 
   const { id } = await params;
