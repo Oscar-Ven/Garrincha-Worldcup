@@ -1,6 +1,6 @@
-import { readFileSync } from "node:fs";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import dns from "node:dns/promises";
+import { readFileSync } from "node:fs";
 
 const required = [
   "DATABASE_URL",
@@ -41,9 +41,13 @@ function getEnvValue(text, name) {
   return raw;
 }
 
+function hasPlaceholder(value) {
+  return placeholderPatterns.some((pattern) => value.toLowerCase().includes(pattern.toLowerCase()));
+}
+
 function isUsablePostgresUrl(value) {
   if (!value || !value.startsWith("postgresql://")) return false;
-  if (placeholderPatterns.some((pattern) => value.toLowerCase().includes(pattern.toLowerCase()))) return false;
+  if (hasPlaceholder(value)) return false;
 
   try {
     const parsed = new URL(value);
@@ -56,7 +60,7 @@ function isUsablePostgresUrl(value) {
 function safeUrlStatus(value) {
   if (!value) return "missing";
   if (!value.startsWith("postgresql://")) return "not_postgresql";
-  if (placeholderPatterns.some((pattern) => value.toLowerCase().includes(pattern.toLowerCase()))) return "placeholder";
+  if (hasPlaceholder(value)) return "placeholder";
 
   try {
     const parsed = new URL(value);
@@ -87,18 +91,14 @@ function postgresUrlDetails(value) {
 
 function secretStatus(value, minLength) {
   if (!value) return "missing";
-  if (placeholderPatterns.some((pattern) => value.toLowerCase().includes(pattern.toLowerCase()))) {
-    return "placeholder";
-  }
+  if (hasPlaceholder(value)) return "placeholder";
   if (value.length < minLength) return "too_short";
   return "ok";
 }
 
 function appUrlStatus(value) {
   if (!value) return "missing";
-  if (placeholderPatterns.some((pattern) => value.toLowerCase().includes(pattern.toLowerCase()))) {
-    return "placeholder";
-  }
+  if (hasPlaceholder(value)) return "placeholder";
 
   try {
     const parsed = new URL(value);
@@ -110,23 +110,33 @@ function appUrlStatus(value) {
 
 function optionalSecretStatus(value) {
   if (!value) return "missing";
-  if (placeholderPatterns.some((pattern) => value.toLowerCase().includes(pattern.toLowerCase()))) {
-    return "placeholder";
-  }
+  if (hasPlaceholder(value)) return "placeholder";
   return "configured";
 }
 
 function optionalUrlStatus(value, expectedProtocol) {
   if (!value) return "missing";
-  if (placeholderPatterns.some((pattern) => value.toLowerCase().includes(pattern.toLowerCase()))) {
-    return "placeholder";
-  }
+  if (hasPlaceholder(value)) return "placeholder";
 
   try {
     const parsed = new URL(value);
     return expectedProtocol && parsed.protocol !== expectedProtocol ? "wrong_protocol" : "configured";
   } catch {
     return "malformed";
+  }
+}
+
+async function hostResolves(hostname) {
+  try {
+    await Promise.any([dns.resolve4(hostname), dns.resolve6(hostname)]);
+    return true;
+  } catch {
+    try {
+      execFileSync("nslookup", [hostname], { stdio: "pipe", timeout: 5000 });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 
@@ -188,14 +198,10 @@ if (missing.length > 0 || !isUsablePostgresUrl(databaseUrl) || !isUsablePostgres
 const databaseDetails = postgresUrlDetails(databaseUrl);
 const directDetails = postgresUrlDetails(directUrl);
 
-// Runtime-ready = either:
-//   • Transaction Pooler (port 6543, pgbouncer=true)  — Vercel/serverless
-//   • Direct connection  (port 5432)                   — Render/persistent process
 const databaseRuntimeReady =
-  (databaseDetails?.kind === "supabase_pooler" &&
-    databaseDetails.port === "6543" &&
-    databaseDetails.hasPgbouncer) ||
-  (databaseDetails?.kind === "supabase_direct" && databaseDetails.port === "5432");
+  databaseDetails?.kind === "supabase_pooler" &&
+  databaseDetails.port === "6543" &&
+  databaseDetails.hasPgbouncer;
 const directMigrationReady = directDetails?.kind === "supabase_direct" && directDetails.port === "5432";
 
 console.log(`DATABASE_URL_KIND=${databaseDetails?.kind ?? "unknown"}`);
@@ -203,31 +209,13 @@ console.log(`DATABASE_URL_RUNTIME_READY=${databaseRuntimeReady ? "yes" : "no"}`)
 console.log(`DIRECT_URL_KIND=${directDetails?.kind ?? "unknown"}`);
 console.log(`DIRECT_URL_MIGRATION_READY=${directMigrationReady ? "yes" : "no"}`);
 
-try {
-  const directHost = new URL(directUrl).hostname;
-  // Try Node.js dns first (supports IPv4 + IPv6); fall back to nslookup
-  // if the local DNS server refuses Node's queries (ECONNREFUSED) but still
-  // serves system tools — a known issue on some corporate/ISP networks.
-  let dnsOk = false;
-  try {
-    await Promise.any([dns.resolve4(directHost), dns.resolve6(directHost)]);
-    dnsOk = true;
-  } catch {
-    try {
-      execSync(`nslookup ${directHost}`, { stdio: "pipe", timeout: 5000 });
-      dnsOk = true;
-    } catch { /* host genuinely does not resolve */ }
-  }
-  if (!dnsOk) {
-    console.log("DIRECT_URL_DNS=not_resolved");
-    console.log("SUPABASE_READY=no");
-    process.exit(1);
-  }
-  console.log("DIRECT_URL_DNS=resolves");
-  console.log(`SUPABASE_READY=${databaseRuntimeReady && directMigrationReady ? "yes" : "no"}`);
-  if (!databaseRuntimeReady || !directMigrationReady) process.exit(1);
-} catch {
+const directHost = new URL(directUrl).hostname;
+if (!(await hostResolves(directHost))) {
   console.log("DIRECT_URL_DNS=not_resolved");
   console.log("SUPABASE_READY=no");
   process.exit(1);
 }
+
+console.log("DIRECT_URL_DNS=resolves");
+console.log(`SUPABASE_READY=${databaseRuntimeReady && directMigrationReady ? "yes" : "no"}`);
+if (!databaseRuntimeReady || !directMigrationReady) process.exit(1);

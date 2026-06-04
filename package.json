@@ -15,8 +15,7 @@
     "env:check": "node scripts/check-supabase-env.mjs",
     "db:generate": "prisma generate",
     "db:migrate:deploy": "prisma migrate deploy",
-    "db:seed": "node --env-file=.env --import tsx/esm prisma/seed.ts",
-    "start:render": "node .next/standalone/server.js"
+    "db:seed": "node --env-file=.env --import tsx/esm prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.8.0",

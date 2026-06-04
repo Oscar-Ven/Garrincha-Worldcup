@@ -43,6 +43,7 @@ const CATEGORY_ORDER = [
   "Email",
   "Redis",
   "Vercel",
+  "Render",
   "Monitoring",
   "Football API",
   "Security",
@@ -76,8 +77,10 @@ function categorise(check: HealthCheck): Category {
     return "Email";
   if (l.includes("upstash") || l.includes("redis") || l.includes("rate limit"))
     return "Redis";
-  if (l.includes("vercel") || l.includes("deployment") || l.includes("deploy url") || l.includes("environment"))
+  if (l.includes("vercel") || l.includes("main app host") || l.includes("deploy url") || l.includes("environment"))
     return "Vercel";
+  if (l.includes("render"))
+    return "Render";
   if (l.includes("sentry"))
     return "Monitoring";
   if (l.includes("football") || l.includes("provider"))
