@@ -33,8 +33,9 @@ describe("registration validation", () => {
     expect(registerSchema.safeParse({ ...validRegistration, nickname: undefined }).success).toBe(false);
   });
 
-  it("rejects missing activationCode", () => {
-    expect(registerSchema.safeParse({ ...validRegistration, activationCode: undefined }).success).toBe(false);
+  it("allows missing activationCode (direct registration — centerId used instead)", () => {
+    // activationCode is now optional to support direct registration without QR code
+    expect(registerSchema.safeParse({ ...validRegistration, activationCode: undefined }).success).toBe(true);
   });
 
   it("rejects fullName shorter than 2 characters", () => {
