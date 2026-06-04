@@ -58,7 +58,7 @@ export function LandingClient({ locale }: { locale: Locale }) {
     <nav ref={navRef} className={`lp-nav${menuOpen ? " menu-open" : ""}`} id="nav">
       <div className="lp-nav-in">
         {/* Logo */}
-        <a href="#top" aria-label="GARRINCHA home">
+        <a href="#top" aria-label="GARRINCHA home" className="lp-nav-logo">
           <Image src="/garrincha-white.png" alt="GARRINCHA" height={22} width={132} style={{ height: 22, width: "auto" }} />
         </a>
 

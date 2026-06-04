@@ -1,22 +1,15 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { AdminSidebar } from "@/components/AdminSidebar";
 import { requireSuperAdmin } from "@/lib/auth";
 import { getHealthReport, type HealthCheck, type HealthStatus } from "@/lib/health";
 import { hasDatabaseConfig } from "@/lib/ui-demo-data";
 
 const STATUS_COLOR: Record<HealthStatus, string> = {
-  healthy: "var(--green)",
-  warning: "var(--gold)",
-  error: "var(--live)",
-  unconfigured: "var(--ink-faint)",
+  healthy: "var(--green)", warning: "var(--gold)", error: "var(--live)", unconfigured: "var(--ink-faint)",
 };
-
 const STATUS_LABEL: Record<HealthStatus, string> = {
-  healthy: "Operational",
-  warning: "Degraded",
-  error: "Down",
-  unconfigured: "Unconfigured",
+  healthy: "Operational", warning: "Degraded", error: "Down", unconfigured: "Unconfigured",
 };
 
 const CATEGORY_ORDER = ["App","Database","Email","Redis","Vercel","Render","Monitoring","Football API","Security","Other"] as const;
@@ -37,15 +30,14 @@ function categorise(check: HealthCheck): Category {
 }
 
 export default async function AdminHealthPage() {
-  // getLocale needed for cookie context but locale not used in this server component
+  let ownerName: string | null = null;
   if (hasDatabaseConfig()) {
-    try { await requireSuperAdmin(); }
+    try { const owner = await requireSuperAdmin(); ownerName = owner.fullName ?? owner.displayName; }
     catch { redirect("/admin/login?next=/admin/health"); }
   }
 
   let report = await getHealthReport();
-  const isLive = hasDatabaseConfig();
-  if (!isLive) {
+  if (!hasDatabaseConfig()) {
     report = { ...report, checks: report.checks.filter((c) => categorise(c) !== "Database") };
   }
 
@@ -59,21 +51,7 @@ export default async function AdminHealthPage() {
 
   return (
     <div className="admin-root" style={{ minHeight: "100vh" }}>
-      {/* sidebar */}
-      <aside className="admin-side">
-        <div className="admin-side-top">
-          <Image src="/garrincha-white.png" alt="GARRINCHA" height={20} width={120} style={{ height: 20, width: "auto" }} />
-          <span className="admin-side-tag">ADMIN</span>
-        </div>
-        <nav className="admin-side-nav">
-          <Link href="/admin" className="admin-nav-link" style={{ textDecoration: "none" }}><span className="admin-nav-ic">▦</span>Overview</Link>
-          <Link href="/admin/health" className="admin-nav-link active" style={{ textDecoration: "none" }}><span className="admin-nav-ic">🩺</span>System Health</Link>
-        </nav>
-        <div className="admin-side-foot">
-          <Link href="/admin" style={{ fontSize: 13, color: "var(--ink-dim)", textDecoration: "none" }}>← Back to Admin</Link>
-        </div>
-      </aside>
-
+      <AdminSidebar active="/admin/health" isSuperAdmin adminName={ownerName ?? undefined} />
       <main className="admin-main">
         <header className="admin-topbar">
           <div>
@@ -82,24 +60,22 @@ export default async function AdminHealthPage() {
           </div>
           <div className="admin-topbar-right">
             <Link href="/admin/health" className="abtn abtn-ghost" style={{ textDecoration: "none" }}>Refresh</Link>
-            <span className="admin-date-pill">{new Date(report.generatedAt).toLocaleString("en-GB", { timeStyle: "short", dateStyle: "short" })}</span>
+            <span className="admin-date-pill">
+              {new Date(report.generatedAt).toLocaleString("en-GB", { timeStyle: "short", dateStyle: "short" })}
+            </span>
           </div>
         </header>
-
         <div className="admin-content">
-          {/* banner */}
+          {/* Overall banner */}
           <div className="acard health-banner" style={{ borderColor: allOk ? "rgba(95,224,144,.3)" : "rgba(245,194,66,.3)", background: allOk ? "rgba(95,224,144,.06)" : "rgba(245,194,66,.06)" }}>
-            <div className="health-icon" style={{ background: allOk ? "var(--green)" : "var(--gold)" }}>
-              {allOk ? "✓" : "!"}
-            </div>
+            <div className="health-icon" style={{ background: allOk ? "var(--green)" : "var(--gold)" }}>{allOk ? "✓" : "!"}</div>
             <div style={{ flex: 1 }}>
               <div className="disp" style={{ fontSize: 24, color: "var(--ink)" }}>{allOk ? "All systems operational" : "Minor issue detected"}</div>
               <div className="muted">{okCount}/{report.checks.length} services healthy · auto-checked every 60s</div>
             </div>
-            <Link href="/admin/health" className="abtn abtn-ghost" style={{ textDecoration: "none" }}>Refresh</Link>
           </div>
 
-          {/* service grid */}
+          {/* Service grid by category */}
           {Array.from(grouped.entries()).map(([category, checks]) => (
             <div key={category}>
               <div className="label" style={{ fontSize: 9.5, color: "var(--ink-dim)", margin: "4px 0 10px" }}>{category}</div>
