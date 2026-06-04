@@ -123,9 +123,10 @@ button:disabled { cursor: not-allowed; opacity: 0.5; }
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 24px;
+  padding: 10px 24px;
   max-width: 1180px;
   margin: 0 auto;
+  min-height: 54px;
 }
 
 .site-topbar-brand {
@@ -4210,124 +4211,7 @@ body:has(.landing-root) .btm-nav-garrincha{ display: none !important; }
   }
 }
 
-/* ============================================================
-   FOOTER — enhanced with all required legal content
-   ============================================================ */
-
-.site-footer-wrap {
-  background: var(--bg-2);
-  border-top: 1px solid var(--line);
-  margin-top: 0;
-}
-
-.site-footer-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 40px 28px 32px;
-  display: grid;
-  gap: 20px;
-}
-
-@media (min-width: 768px) {
-  .site-footer-inner {
-    grid-template-columns: 1fr auto;
-    align-items: start;
-  }
-}
-
-.site-footer-brand {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.site-footer-copy {
-  font-size: 12.5px;
-  color: var(--ink-faint);
-  line-height: 1.6;
-  margin: 0;
-  max-width: 480px;
-}
-
-.site-footer-disclaimer {
-  font-size: 11px;
-  color: var(--ink-faint);
-  opacity: 0.6;
-  line-height: 1.6;
-  margin: 0;
-  max-width: 480px;
-  font-style: italic;
-}
-
-.site-footer-legal {
-  font-size: 11px;
-  color: var(--ink-faint);
-  opacity: 0.5;
-  margin: 4px 0 0;
-}
-
-.site-footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  align-items: flex-start;
-}
-
-.site-footer-links a {
-  font-size: 12.5px;
-  color: var(--ink-faint);
-  transition: color 0.15s;
-  white-space: nowrap;
-}
-
-.site-footer-links a:hover { color: var(--green); }
-
-.site-footer-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.site-footer-nav-col h4 {
-  font-family: var(--f-body);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 9.5px;
-  color: var(--ink-faint);
-  margin: 0 0 8px;
-}
-
-.site-footer-nav-col a {
-  display: block;
-  font-size: 13px;
-  color: var(--ink-dim);
-  margin-bottom: 6px;
-  transition: color 0.15s;
-}
-
-.site-footer-nav-col a:hover { color: var(--green); }
-
-@media (min-width: 768px) {
-  .site-footer-nav {
-    flex-direction: row;
-    gap: 40px;
-  }
-}
-
-.site-footer-bottom {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 16px 28px 24px;
-  border-top: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 11.5px;
-  color: var(--ink-faint);
-}
+/* ── OLD site-footer-* classes removed — PublicFooter.tsx uses pub-footer-* ── */
 
 /* Landing page has its own PublicFooter inside .landing-root.
    Hide the layout-level footer slot to prevent double footer. */
@@ -4341,70 +4225,85 @@ body:has(.landing-root) .site-footer-bottom-outer { display: none !important; }
    colors, typography. Used in PublicFooter.tsx component.
    ============================================================ */
 
+/* ── Base ── */
 .pub-footer {
   background: var(--bg-2);
   border-top: 1px solid var(--line);
 }
 
-.pub-footer-inner {
+/* ── Main body ── */
+.pub-footer-body {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 48px 28px 40px;
-  display: flex;
-  gap: 48px;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  padding: 52px 28px 44px;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 56px;
+  align-items: start;
 }
 
+/* ── Brand column ── */
 .pub-footer-brand {
-  max-width: 300px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
-.pub-footer-tagline {
-  font-size: 14px;
-  color: var(--ink-dim);
-  line-height: 1.5;
-  margin: 0;
-  font-weight: 600;
-}
-
-.pub-footer-about {
+.pub-footer-desc {
   font-size: 13px;
   color: var(--ink-dim);
-  line-height: 1.55;
+  line-height: 1.6;
   margin: 0;
 }
 
 .pub-footer-disclaimer {
-  font-size: 11.5px;
-  color: var(--ink-faint);
-  line-height: 1.55;
-  margin: 0;
-  font-style: italic;
-}
-
-.pub-footer-legal {
   font-size: 11px;
   color: var(--ink-faint);
-  opacity: 0.55;
+  line-height: 1.6;
   margin: 0;
+  font-style: italic;
+  opacity: 0.75;
 }
 
-.pub-footer-cols {
+/* ── Social icons ── */
+.pub-footer-social {
   display: flex;
-  gap: 40px;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.pub-footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  color: var(--ink-dim);
+  border: 1px solid var(--line);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  text-decoration: none;
+}
+
+.pub-footer-social-link:hover {
+  background: rgba(95,224,144,0.12);
+  color: var(--green);
+  border-color: rgba(95,224,144,0.30);
+}
+
+/* ── Nav columns ── */
+.pub-footer-cols {
+  display: grid;
+  grid-template-columns: 1fr 1.8fr 1fr;
+  gap: 32px;
+  align-items: start;
 }
 
 .pub-footer-col {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  min-width: 120px;
 }
 
 .pub-footer-col h4 {
@@ -4414,41 +4313,111 @@ body:has(.landing-root) .site-footer-bottom-outer { display: none !important; }
   letter-spacing: 0.10em;
   font-size: 9.5px;
   color: var(--ink-faint);
-  margin: 0 0 12px;
+  margin: 0 0 14px;
 }
 
 .pub-footer-col a {
   display: block;
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--ink-dim);
-  margin-bottom: 9px;
+  margin-bottom: 8px;
   transition: color 0.15s;
+  line-height: 1.4;
 }
 
 .pub-footer-col a:hover { color: var(--green); }
 
-.pub-footer-bottom {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 18px 28px 24px;
-  border-top: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 11.5px;
-  color: var(--ink-faint);
+/* ── Centers grid ── */
+.pub-footer-centers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
 }
 
-@media (max-width: 767px) {
-  .pub-footer-inner {
-    padding: 36px 20px 32px;
-    gap: 32px;
+.pub-footer-center-item {
+  font-size: 12px;
+  color: var(--ink-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.5;
+}
+
+.pub-footer-center-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+/* ── Legal strip ── */
+.pub-footer-legal-strip {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 28px 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  line-height: 1.6;
+}
+
+.pub-footer-legal-strip a {
+  color: var(--ink-faint);
+  transition: color 0.15s;
+}
+
+.pub-footer-legal-strip a:hover { color: var(--green); }
+
+.pub-footer-sep {
+  color: var(--line-2);
+  margin: 0 6px;
+  opacity: 0.7;
+}
+
+.pub-footer-lang-hint {
+  font-size: 11px;
+  color: var(--ink-faint);
+  opacity: 0.45;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1060px) {
+  .pub-footer-body {
+    grid-template-columns: 260px 1fr;
+    gap: 40px;
   }
-  .pub-footer-brand { max-width: 100%; }
-  .pub-footer-cols { gap: 28px; }
-  .pub-footer-bottom { padding: 14px 20px 20px; flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+
+@media (max-width: 860px) {
+  .pub-footer-body {
+    grid-template-columns: 1fr;
+    padding: 40px 24px 36px;
+    gap: 36px;
+  }
+  .pub-footer-cols {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 32px;
+  }
+  .pub-footer-col-centers {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 540px) {
+  .pub-footer-body { padding: 32px 20px 28px; }
+  .pub-footer-cols { grid-template-columns: 1fr 1fr; gap: 24px 20px; }
+  .pub-footer-legal-strip { padding: 12px 20px 18px; font-size: 11px; flex-direction: column; gap: 6px; }
+  .pub-footer-lang-hint { display: none; }
+  .pub-footer-sep { margin: 0 4px; }
+  .pub-footer-centers-grid { grid-template-columns: 1fr 1fr; }
 }
 
 /* ============================================================

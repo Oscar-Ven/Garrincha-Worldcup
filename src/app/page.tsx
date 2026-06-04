@@ -5,14 +5,18 @@ import { t } from "@/lib/translations";
 import { LandingClient } from "@/components/LandingClient";
 import { PublicFooter } from "@/components/PublicFooter";
 
-// ── Centers data ─────────────────────────────────────────────────────────────
+// ── All 10 GARRINCHA centers ──────────────────────────────────────────────────
 const CENTERS_DATA = [
-  { short: "ANT", name: "Antwerp",    city: "Antwerp",  color: "#5FE090" },
-  { short: "BRU", name: "Brussels",   city: "Brussels", color: "#F5C242" },
-  { short: "GNT", name: "Ghent",      city: "Ghent",    color: "#6FB3FF" },
-  { short: "LIE", name: "Liège",      city: "Liège",    color: "#FF8C66" },
-  { short: "LEU", name: "Leuven",     city: "Leuven",   color: "#C792EA" },
-  { short: "BRG", name: "Bruges",     city: "Bruges",   color: "#4ED9C0" },
+  { short: "AN",  name: "Antwerpen Noord",      city: "Antwerpen",  color: "#5FE090" },
+  { short: "AZ",  name: "Antwerpen Zuid",       city: "Antwerpen",  color: "#F5C242" },
+  { short: "CD",  name: "Charleroi Dampremy",   city: "Charleroi",  color: "#FF8C66" },
+  { short: "CM",  name: "Charleroi Montignies", city: "Charleroi",  color: "#FF5A4D" },
+  { short: "DG",  name: "Diegem",               city: "Diegem",     color: "#6FB3FF" },
+  { short: "GA",  name: "Gent Arsenaal",        city: "Gent",       color: "#C792EA" },
+  { short: "GT",  name: "Gent The Loop",        city: "Gent",       color: "#4ED9C0" },
+  { short: "KT",  name: "Kortrijk",             city: "Kortrijk",   color: "#FFD060" },
+  { short: "LK",  name: "Luik",                 city: "Luik",       color: "#FF9F1C" },
+  { short: "WD",  name: "Westgate Dilbeek",     city: "Dilbeek",    color: "#78D97C" },
 ];
 
 // ── Sub-components ────────────────────────────────────────────────────────────

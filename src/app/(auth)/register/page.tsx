@@ -2,7 +2,6 @@ import Link from "next/link";
 import { GarrinchaLogo } from "@/components/GarrinchaLogo";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { RegisterForm } from "@/components/AuthForms";
-import { PublicFooter } from "@/components/PublicFooter";
 import { getLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { t } from "@/lib/translations";

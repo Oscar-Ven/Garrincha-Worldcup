@@ -59,7 +59,7 @@ export function LandingClient({ locale }: { locale: Locale }) {
       <div className="lp-nav-in">
         {/* Logo */}
         <a href="#top" aria-label="GARRINCHA home" className="lp-nav-logo">
-          <Image src="/garrincha-white.png" alt="GARRINCHA" height={22} width={132} style={{ height: 22, width: "auto" }} />
+          <Image src="/garrincha-white.png" alt="GARRINCHA" height={28} width={168} style={{ height: 28, width: "auto" }} />
         </a>
 
         {/* Desktop nav links */}
