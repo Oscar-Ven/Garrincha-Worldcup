@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Minus, Plus, CheckCircle } from "lucide-react";
 import { type Locale, t } from "@/lib/translations";
 
-// ─── Score stepper ────────────────────────────────────────────────────────────
+// ─── Score stepper using DaisyUI join ────────────────────────────────────────
 
 function ScoreStep({
   value,
@@ -19,29 +19,34 @@ function ScoreStep({
   disabled: boolean;
 }) {
   return (
-    <div className="score-step">
+    <div className="flex flex-col items-center gap-1.5 flex-1">
       <span className="score-step-label">{label}</span>
-      <div className="score-step-controls">
+      {/* DaisyUI join: connected group of controls */}
+      <div className="join w-full">
         <button
           type="button"
-          className="score-step-btn"
+          className="btn btn-square join-item score-step-minus"
           onClick={() => onChange(Math.max(0, value - 1))}
           disabled={disabled || value <= 0}
           aria-label={`Decrease ${label}`}
         >
-          <Minus size={22} strokeWidth={2.5} />
+          <Minus size={20} strokeWidth={2.5} />
         </button>
-        <span className="score-step-value" aria-live="polite" aria-atomic>
+        <span
+          className="join-item score-step-value"
+          aria-live="polite"
+          aria-atomic
+        >
           {value}
         </span>
         <button
           type="button"
-          className="score-step-btn"
+          className="btn btn-square join-item score-step-plus"
           onClick={() => onChange(Math.min(30, value + 1))}
           disabled={disabled || value >= 30}
           aria-label={`Increase ${label}`}
         >
-          <Plus size={22} strokeWidth={2.5} />
+          <Plus size={20} strokeWidth={2.5} />
         </button>
       </div>
     </div>
@@ -89,13 +94,11 @@ export function PredictionForm({
       setMessage(body.error ?? "Prediction could not be saved.");
       return;
     }
-
     setSaved(true);
     setMessage(t(locale, "prediction.saved"));
     router.refresh();
   }
 
-  // ── Locked state ──────────────────────────────────────────────────────────
   if (locked) {
     return (
       <div className="prediction-locked">
@@ -109,9 +112,9 @@ export function PredictionForm({
     );
   }
 
-  // ── Active state ──────────────────────────────────────────────────────────
   return (
     <div className="prediction-stepper">
+      {/* Score steppers */}
       <div className="prediction-stepper-scores">
         <ScoreStep
           value={home}
@@ -128,6 +131,7 @@ export function PredictionForm({
         />
       </div>
 
+      {/* Save button */}
       <button
         type="button"
         className={`prediction-stepper-save${saved ? " saved" : ""}${pending ? " saving" : ""}`}
