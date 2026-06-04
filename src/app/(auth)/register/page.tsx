@@ -18,13 +18,13 @@ export default async function RegisterPage({
       <DataModeNotice locale={locale} />
       <div className="auth-shell">
         <section className="auth-panel">
-          <span className="eyebrow">Free registration</span>
-          <h1>Register for free</h1>
-          <p>Scan the QR code at a GARRINCHA Center, register for free, and receive your personal access link by email.</p>
+          <span className="eyebrow">{t(locale, "register.eyebrow")}</span>
+          <h1>{t(locale, "auth.registerFree")}</h1>
+          <p>{t(locale, "auth.registerFreeCopy")}</p>
           <div className="mini-steps">
-            <span>1. Scan QR</span>
-            <span>2. Register free</span>
-            <span>3. Play remotely</span>
+            <span>{t(locale, "register.step1")}</span>
+            <span>{t(locale, "register.step2")}</span>
+            <span>{t(locale, "register.step3")}</span>
           </div>
           <p>
             <Link href="/login">{t(locale, "auth.already")}</Link>

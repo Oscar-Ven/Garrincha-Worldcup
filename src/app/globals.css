@@ -1566,3 +1566,40 @@ input:disabled {
   font-style: italic;
 }
 
+/* ── Mini steps (register auth panel) ────────────────────────────────── */
+
+.mini-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.mini-steps span {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.72);
+  display: flex;
+  font-size: 0.85rem;
+  gap: 8px;
+}
+
+.mini-steps span::before {
+  background: var(--green);
+  border-radius: 50%;
+  content: "";
+  flex-shrink: 0;
+  height: 6px;
+  width: 6px;
+}
+
+/* ── Auth shell card padding ──────────────────────────────────────────── */
+
+.auth-shell > .card {
+  padding: 32px 28px;
+}
+
+.auth-shell > .card h2 {
+  font-size: 1.3rem;
+  margin: 0 0 4px;
+}
+

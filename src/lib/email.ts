@@ -1,5 +1,6 @@
 import "server-only";
 import { isPlaceholderValue } from "@/lib/app-mode";
+import { defaultLocale, t, type Locale } from "@/lib/translations";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -23,17 +24,13 @@ export interface AccessLinkEmailPayload {
   displayName: string;
   centerName: string;
   accessUrl: string;
+  locale?: Locale;
 }
 
 // ---------------------------------------------------------------------------
 // Provider status
 // ---------------------------------------------------------------------------
 
-/**
- * Returns true when both RESEND_API_KEY and EMAIL_FROM are set to non-empty
- * values. Use this to surface configuration status in admin dashboards or
- * health checks without exposing the key values themselves.
- */
 export function isEmailConfigured(): boolean {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from = process.env.EMAIL_FROM?.trim();
@@ -44,25 +41,27 @@ export function isEmailConfigured(): boolean {
 // Email template
 // ---------------------------------------------------------------------------
 
-/**
- * Builds the subject line, HTML body, and plain-text body for the permanent
- * access-link email. Exported for unit testing; never called outside email.ts
- * and the test suite.
- */
 export function buildEmailContent(payload: AccessLinkEmailPayload): {
   subject: string;
   html: string;
   text: string;
 } {
-  const { displayName, centerName, accessUrl } = payload;
+  const { displayName, centerName, accessUrl, locale = defaultLocale } = payload;
   const safeName = escapeHtml(displayName);
   const safeCenter = escapeHtml(centerName);
   const safeUrl = escapeHtml(accessUrl);
 
-  const subject = `Your GARRINCHA World Cup access link — ${safeCenter}`;
+  const subject = t(locale, "email.subject", { center: safeCenter });
+  const greeting = t(locale, "email.greeting", { name: safeName });
+  const welcome = t(locale, "email.welcome");
+  const neverExpires = t(locale, "email.neverExpires");
+  const buttonText = t(locale, "email.button");
+  const copyPaste = t(locale, "email.copyPaste");
+  const keepPrivate = t(locale, "email.keepPrivate");
+  const ignore = t(locale, "email.ignore");
 
   const html = `<!DOCTYPE html>
-<html lang="en">
+<html lang="${locale}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -86,13 +85,12 @@ export function buildEmailContent(payload: AccessLinkEmailPayload): {
           <!-- Body -->
           <tr>
             <td style="padding:32px;">
-              <p style="margin:0 0 16px;font-size:16px;color:#111827;">Hello ${safeName},</p>
+              <p style="margin:0 0 16px;font-size:16px;color:#111827;">${greeting}</p>
               <p style="margin:0 0 8px;font-size:15px;color:#374151;line-height:1.6;">
-                Welcome to the GARRINCHA World Cup Pronostiek! Below is your personal access link.
+                ${welcome}
               </p>
               <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.6;">
-                <strong>This link never expires.</strong> Use it anytime with an internet connection
-                to access your account and continue predicting match results.
+                <strong>${neverExpires}</strong>
               </p>
               <table cellpadding="0" cellspacing="0">
                 <tr>
@@ -104,23 +102,21 @@ export function buildEmailContent(payload: AccessLinkEmailPayload): {
                       style="display:inline-block;padding:14px 32px;color:#252320;font-size:15px;
                              font-weight:700;text-decoration:none;border-radius:6px;"
                     >
-                      Access my account →
+                      ${buttonText}
                     </a>
                   </td>
                 </tr>
               </table>
               <p style="margin:24px 0 0;font-size:13px;color:#6b7280;">
-                Or copy and paste this link into your browser:<br />
+                ${copyPaste}<br />
                 <span style="color:#1d4ed8;word-break:break-all;">${safeUrl}</span>
               </p>
               <hr style="margin:32px 0;border:none;border-top:1px solid #e5e7eb;" />
               <p style="margin:0 0 8px;font-size:12px;color:#9ca3af;">
-                <strong style="color:#374151;">Keep this link private.</strong>
-                It gives full access to your account — do not share it publicly or forward this email
-                to others.
+                <strong style="color:#374151;">${keepPrivate}</strong>
               </p>
               <p style="margin:0;font-size:12px;color:#9ca3af;">
-                If you did not register for this campaign, you can safely ignore this email.
+                ${ignore}
               </p>
             </td>
           </tr>
@@ -132,19 +128,15 @@ export function buildEmailContent(payload: AccessLinkEmailPayload): {
 </html>`;
 
   const text = [
-    `Hello ${displayName},`,
+    t(locale, "email.greeting", { name: displayName }),
     "",
-    `Welcome to the GARRINCHA World Cup Pronostiek at ${centerName}!`,
-    "",
-    "Below is your personal access link.",
-    "This link never expires — use it anytime with an internet connection to access your account.",
+    `${t(locale, "email.welcome")} ${t(locale, "email.neverExpires")}`,
     "",
     accessUrl,
     "",
-    "Keep this link private. It gives full access to your account.",
-    "Do not share it publicly or forward this email to others.",
+    t(locale, "email.keepPrivate"),
     "",
-    "If you did not register for this campaign, you can safely ignore this email.",
+    t(locale, "email.ignore"),
   ].join("\n");
 
   return { subject, html, text };
@@ -160,12 +152,14 @@ export function buildAccessLinkEmail(opts: {
   displayName?: string;
   fullName?: string;
   centerName?: string;
+  locale?: Locale;
 }): AccessLinkEmailPayload {
   return {
     to: opts.email,
     displayName: opts.displayName ?? opts.fullName ?? "Player",
     centerName: opts.centerName ?? "GARRINCHA World Cup",
     accessUrl: opts.accessUrl,
+    locale: opts.locale,
   };
 }
 
@@ -178,18 +172,6 @@ export async function sendEmail(payload: AccessLinkEmailPayload): Promise<void> 
 // Send (Resend provider)
 // ---------------------------------------------------------------------------
 
-/**
- * Sends a permanent access-link email via Resend when the provider is
- * configured. Falls back to a safe no-provider mode when RESEND_API_KEY or
- * EMAIL_FROM are absent:
- *
- *  - Development / no config: logs `{ to, subject }` to stdout and returns.
- *  - Production / no config:  logs an error-level warning so operators know
- *    emails are not going out, then returns. Does NOT throw — registration
- *    succeeds even without email delivery.
- *
- * The raw access token is never logged, only the `to` address and subject.
- */
 export async function sendAccessLinkEmail(
   payload: AccessLinkEmailPayload,
 ): Promise<void> {
@@ -199,7 +181,6 @@ export async function sendAccessLinkEmail(
   const from = process.env.EMAIL_FROM?.trim();
   const apiKey = process.env.RESEND_API_KEY?.trim();
 
-  // No-provider mode: both env vars must be present to send.
   if (!isEmailConfigured() || !from || !apiKey) {
     if (process.env.NODE_ENV === "production") {
       console.error(
@@ -207,7 +188,6 @@ export async function sendAccessLinkEmail(
         { to, subject },
       );
     } else {
-      // Development: compact summary only — never log the access URL or token.
       console.log("[email:dev]", JSON.stringify({ to, subject }));
     }
     return;
