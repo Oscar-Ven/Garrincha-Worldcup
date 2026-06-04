@@ -12,13 +12,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ─── Quality: typecheck · lint · unit tests ──────────────────────────────────
+  # Quality: typecheck, lint, unit tests
   quality:
-    name: Typecheck · Lint · Test
+    name: Typecheck, Lint, Test
     runs-on: ubuntu-latest
 
     # Fake-but-valid values so Prisma config and app-mode checks pass without a real DB.
-    # Tests are pure unit tests — no database connection is made.
+    # Tests are pure unit tests; no database connection is made.
     env:
       DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
       DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
@@ -65,13 +65,13 @@ jobs:
               print('| Metric | Coverage |')
               print('|--------|----------|')
               for name, pct in rows:
-                  bar = '🟢' if pct >= 60 else ('🟡' if pct >= 40 else '🔴')
-                  print(f'| {name} | {bar} {pct}% |')
+                  status = 'PASS' if pct >= 60 else ('WARN' if pct >= 40 else 'LOW')
+                  print(f'| {name} | {status} {pct}% |')
           except Exception as e:
               print('Coverage summary not available:', e)
           " >> $GITHUB_STEP_SUMMARY
 
-  # ─── Security: npm audit ─────────────────────────────────────────────────────
+  # Security: npm audit
   security:
     name: Security Audit
     runs-on: ubuntu-latest

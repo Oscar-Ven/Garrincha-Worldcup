@@ -12,6 +12,8 @@
  * checkRateLimit is async to support the Redis path.  All call sites must await it.
  */
 
+import { isPlaceholderValue } from "@/lib/app-mode";
+
 // ─── In-memory fallback ───────────────────────────────────────────────────────
 
 type Entry = { count: number; resetAt: number };
@@ -104,7 +106,12 @@ export async function checkRateLimit(
   const upstashUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
   const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
 
-  if (upstashUrl && upstashToken) {
+  if (
+    upstashUrl &&
+    upstashToken &&
+    !isPlaceholderValue(upstashUrl) &&
+    !isPlaceholderValue(upstashToken)
+  ) {
     return checkRateLimitRedis(key, maxAttempts, windowMs);
   }
   return checkRateLimitMemory(key, maxAttempts, windowMs);

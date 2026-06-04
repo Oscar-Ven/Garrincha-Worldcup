@@ -15,9 +15,8 @@ jobs:
     name: Production Build
     runs-on: ubuntu-latest
 
-    # APP_PREVIEW_MODE=true so Next.js uses demo data during build —
-    # no real Supabase connection is attempted for static rendering.
-    # All routes are dynamic (ƒ) so no DB calls happen at build time anyway.
+    # Placeholder CI database values are enough because routes are dynamic
+    # and no real Supabase connection is attempted during the build.
     env:
       DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
       DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
@@ -46,5 +45,5 @@ jobs:
         run: |
           echo "### Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Build succeeded. All 30 routes compiled." >> $GITHUB_STEP_SUMMARY
+          echo "Build succeeded. All routes compiled." >> $GITHUB_STEP_SUMMARY
           du -sh .next/standalone 2>/dev/null || echo "Standalone output not enabled"

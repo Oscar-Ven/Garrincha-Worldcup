@@ -63,6 +63,13 @@ function checkAppUrl(): HealthCheck {
       detail: "NEXT_PUBLIC_APP_URL not set",
     };
   }
+  if (isPlaceholderValue(value)) {
+    return {
+      label: "App URL",
+      status: "error",
+      detail: "Placeholder value detected",
+    };
+  }
   if (value.includes("localhost") || value.includes("127.0.0.1")) {
     return {
       label: "App URL",
@@ -232,6 +239,13 @@ function checkResendApiKey(): HealthCheck {
       detail: "Not configured",
     };
   }
+  if (isPlaceholderValue(value)) {
+    return {
+      label: "RESEND_API_KEY",
+      status: "warning",
+      detail: "Placeholder value detected",
+    };
+  }
   return {
     label: "RESEND_API_KEY",
     status: "healthy",
@@ -246,6 +260,13 @@ function checkEmailFrom(): HealthCheck {
       label: "EMAIL_FROM",
       status: "unconfigured",
       detail: "Not configured",
+    };
+  }
+  if (isPlaceholderValue(value)) {
+    return {
+      label: "EMAIL_FROM",
+      status: "warning",
+      detail: "Placeholder value detected",
     };
   }
 
@@ -279,7 +300,7 @@ function checkEmailDomain(): HealthCheck {
   }
 
   // Detect placeholder domain patterns
-  if (value.includes("[your-domain") || value.includes("[YOUR-DOMAIN")) {
+  if (isPlaceholderValue(value)) {
     return {
       label: "Email domain",
       status: "warning",
@@ -309,6 +330,13 @@ function checkEmailDomain(): HealthCheck {
 
 function checkUpstashRedisUrl(): HealthCheck {
   const value = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  if (value && isPlaceholderValue(value)) {
+    return {
+      label: "UPSTASH_REDIS_REST_URL",
+      status: "warning",
+      detail: "Placeholder value detected",
+    };
+  }
   return {
     label: "UPSTASH_REDIS_REST_URL",
     status: value ? "healthy" : "unconfigured",
@@ -318,6 +346,13 @@ function checkUpstashRedisUrl(): HealthCheck {
 
 function checkUpstashRedisToken(): HealthCheck {
   const value = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+  if (value && isPlaceholderValue(value)) {
+    return {
+      label: "UPSTASH_REDIS_REST_TOKEN",
+      status: "warning",
+      detail: "Placeholder value detected",
+    };
+  }
   return {
     label: "UPSTASH_REDIS_REST_TOKEN",
     status: value ? "healthy" : "unconfigured",
@@ -326,8 +361,10 @@ function checkUpstashRedisToken(): HealthCheck {
 }
 
 function checkRateLimiterMode(): HealthCheck {
-  const hasUrl = Boolean(process.env.UPSTASH_REDIS_REST_URL?.trim());
-  const hasToken = Boolean(process.env.UPSTASH_REDIS_REST_TOKEN?.trim());
+  const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+  const hasUrl = Boolean(url && !isPlaceholderValue(url));
+  const hasToken = Boolean(token && !isPlaceholderValue(token));
   const upstashConfigured = hasUrl && hasToken;
 
   if (upstashConfigured) {
@@ -403,6 +440,13 @@ function checkSentryDsn(): HealthCheck {
   const value =
     process.env.SENTRY_DSN?.trim() ||
     process.env.NEXT_PUBLIC_SENTRY_DSN?.trim();
+  if (value && isPlaceholderValue(value)) {
+    return {
+      label: "Sentry DSN",
+      status: "warning",
+      detail: "Placeholder value detected",
+    };
+  }
   return {
     label: "Sentry DSN",
     status: value ? "healthy" : "unconfigured",
@@ -416,6 +460,13 @@ function checkSentryDsn(): HealthCheck {
 
 function checkFootballApiKey(): HealthCheck {
   const value = process.env.FOOTBALL_DATA_API_KEY?.trim();
+  if (value && isPlaceholderValue(value)) {
+    return {
+      label: "Football API Key",
+      status: "warning",
+      detail: "Placeholder value detected",
+    };
+  }
   return {
     label: "Football API Key",
     status: value ? "healthy" : "unconfigured",
@@ -475,10 +526,54 @@ function checkJwtSecret(): HealthCheck {
 
 function checkOwnerPassword(): HealthCheck {
   const value = process.env.OWNER_PASSWORD?.trim();
+  if (value && isPlaceholderValue(value)) {
+    return {
+      label: "Owner password",
+      status: "error",
+      detail: "Placeholder value detected",
+    };
+  }
+  if (value && value.length < 8) {
+    return {
+      label: "Owner password",
+      status: "error",
+      detail: "Too short (minimum 8 characters required)",
+    };
+  }
   return {
     label: "Owner password",
     status: value ? "healthy" : "unconfigured",
     detail: value ? "Configured" : "Not configured",
+  };
+}
+
+function checkAdminPassword(): HealthCheck {
+  const value = process.env.ADMIN_PASSWORD?.trim();
+  if (!value) {
+    return {
+      label: "Admin password",
+      status: "unconfigured",
+      detail: "Not configured",
+    };
+  }
+  if (isPlaceholderValue(value)) {
+    return {
+      label: "Admin password",
+      status: "error",
+      detail: "Placeholder value detected",
+    };
+  }
+  if (value.length < 8) {
+    return {
+      label: "Admin password",
+      status: "error",
+      detail: "Too short (minimum 8 characters required)",
+    };
+  }
+  return {
+    label: "Admin password",
+    status: "healthy",
+    detail: "Configured",
   };
 }
 
@@ -489,6 +584,20 @@ function checkCenterAdminPassword(): HealthCheck {
       label: "Center admin password",
       status: "unconfigured",
       detail: "Not configured",
+    };
+  }
+  if (isPlaceholderValue(value)) {
+    return {
+      label: "Center admin password",
+      status: "error",
+      detail: "Placeholder value detected",
+    };
+  }
+  if (value.length < 8) {
+    return {
+      label: "Center admin password",
+      status: "error",
+      detail: "Too short (minimum 8 characters required)",
     };
   }
   return {
@@ -577,6 +686,7 @@ export async function getHealthReport(): Promise<HealthReport> {
     // Security
     checkJwtSecret(),
     checkOwnerPassword(),
+    checkAdminPassword(),
     checkCenterAdminPassword(),
     checkSecurityHeaders(),
     checkCsrfProtection(),

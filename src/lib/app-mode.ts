@@ -1,11 +1,14 @@
 const PLACEHOLDER_PATTERNS = [
+  "replace-with",
   "replace-with-your",
   "replace-with-a-long-random-secret",
   "replace-with-owner-password",
   "replace-with-admin-password",
+  "[YOUR-APP-DOMAIN]",
   "[PROJECT-REF]",
   "[PASSWORD]",
   "your-password",
+  "your-domain",
   "your-project",
 ];
 

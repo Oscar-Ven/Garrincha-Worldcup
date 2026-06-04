@@ -1,6 +1,7 @@
-name: Preview
+# DISABLED — Vercel PR preview deployment replaced by Render.
+# Kept for reference. All jobs are disabled with if: false.
+name: Preview (Vercel — disabled)
 
-# Deploy a Vercel preview URL for every non-draft pull request.
 on:
   pull_request:
     branches: [main, develop]
@@ -8,89 +9,15 @@ on:
 
 concurrency:
   group: preview-pr-${{ github.event.pull_request.number }}
-  cancel-in-progress: true  # new commits replace the previous preview
+  cancel-in-progress: true
 
 jobs:
   preview:
-    name: Deploy PR preview
+    name: Deploy PR preview — DISABLED
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.draft == false }}
-
+    if: false   # Disabled: project moved to Render
     permissions:
-      contents: read        # needed for actions/checkout
-      pull-requests: write  # needed to post the preview URL comment
-
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
+      contents: read
+      pull-requests: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-
-      - name: Pull Vercel environment info
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build (Vercel preview)
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy preview
-        id: deploy
-        run: |
-          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
-
-      - name: Comment preview URL on PR
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const url = "${{ steps.deploy.outputs.url }}";
-            const sha = context.payload.pull_request.head.sha.slice(0, 8);
-            const body = [
-              `### Preview deployment`,
-              ``,
-              `| | |`,
-              `|--|--|`,
-              `| **URL** | ${url} |`,
-              `| **Commit** | \`${sha}\` |`,
-              `| **Branch** | \`${{ github.head_ref }}\` |`,
-              ``,
-              `_Updates automatically on new commits._`,
-            ].join("\n");
-
-            // Find and update existing preview comment, or create a new one
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-
-            const existing = comments.find(c =>
-              c.user.login === "github-actions[bot]" &&
-              c.body.includes("Preview deployment")
-            );
-
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            }
+      - run: echo "Vercel preview disabled — using Render"
