@@ -1,15 +1,18 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { localeNames, type Locale } from "@/lib/translations";
 
 export function LanguageSwitcher({ locale, dark = true }: { locale: Locale; dark?: boolean }) {
+  const router = useRouter();
+
   async function switchLocale(nextLocale: Locale) {
     await fetch("/api/locale", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ locale: nextLocale }),
     });
-    window.location.reload();
+    router.refresh();
   }
 
   return (

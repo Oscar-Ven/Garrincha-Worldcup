@@ -1,40 +1,58 @@
 /* ============================================================
    GARRINCHA · Mobile-specific overrides
-   Score stepper DaisyUI join — kept for PredictionForm
    ============================================================ */
 
-/* Prevent iOS input zoom */
-input, select, textarea {
-  font-size: 16px !important;
+/* Prevent iOS zoom on input focus — 16px minimum required */
+@media (max-width: 640px) {
+  .field,
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
-/* Touch feedback */
-a, button, [role="button"] {
+/* Touch feedback — no highlight flash */
+a, button, [role="button"], .btm-nav-item {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-/* Score stepper DaisyUI join overrides */
-.score-step-minus,
-.score-step-plus {
-  background: var(--surface) !important;
-  border: 1px solid var(--line-2) !important;
-  border-radius: 0 !important;
-  color: var(--ink) !important;
-  height: 38px !important;
-  min-height: 38px !important;
-  min-width: 48px !important;
+/* ============================================================
+   SCORE BOX — DaisyUI join overrides (PredictionForm)
+   ============================================================ */
+
+.score-box-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: 11px;
+  color: var(--ink);
+  width: 48px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.1s;
+  flex-shrink: 0;
 }
 
-.score-step-minus:active:not(:disabled),
-.score-step-plus:active:not(:disabled) {
-  background: var(--surface-2) !important;
-}
+.score-box-btn:disabled { color: var(--ink-faint); cursor: default; opacity: 0.5; }
+.score-box-btn:active:not(:disabled) { background: var(--surface); }
 
-.join .score-step-minus { border-radius: 11px 0 0 11px !important; }
-.join .score-step-plus  { border-radius: 0 11px 11px 0 !important; }
+/* ============================================================
+   RESPONSIVE UTILITIES
+   ============================================================ */
 
-/* Leaderboard — hide columns on small screens */
 @media (max-width: 480px) {
+  /* Hide leaderboard secondary columns on very small screens */
   .lb-hide-mobile { display: none; }
+
+  /* Admin table: trim columns */
+  .tbl th:nth-child(3),
+  .tbl td:nth-child(3) { display: none; }
 }
