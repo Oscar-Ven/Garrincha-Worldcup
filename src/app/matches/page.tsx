@@ -114,6 +114,7 @@ export default async function MatchesPage() {
                 height={220}
                 className="mc-trophy-img"
                 priority
+                unoptimized
               />
             </div>
           </div>

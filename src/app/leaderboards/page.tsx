@@ -93,6 +93,7 @@ export default async function LeaderboardsPage() {
                 height={220}
                 className="mc-trophy-img"
                 priority
+                unoptimized
               />
             </div>
           </div>
