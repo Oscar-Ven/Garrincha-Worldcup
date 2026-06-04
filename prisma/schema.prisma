@@ -68,6 +68,11 @@ model User {
   checkIn                     CenterCheckIn?
   createdAt                   DateTime        @default(now())
   updatedAt                   DateTime        @updatedAt
+
+  @@index([accessTokenHash])
+  @@index([centerId])
+  @@index([competitionCenterId])
+  @@index([nationality])
 }
 
 model Team {
@@ -107,6 +112,7 @@ model Match {
 
   @@index([kickoffAt])
   @@index([stage])
+  @@index([status])
 }
 
 model Prediction {
@@ -123,6 +129,7 @@ model Prediction {
   updatedAt     DateTime  @updatedAt
 
   @@unique([userId, matchId])
+  @@index([userId])
   @@index([matchId])
 }
 

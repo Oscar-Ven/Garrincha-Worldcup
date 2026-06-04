@@ -5,6 +5,9 @@ import { hasDatabaseConfig } from "@/lib/app-mode";
 import { demoAllMatches } from "@/lib/ui-demo-data";
 import { MatchesClient, type PublicMatch } from "@/components/MatchesClient";
 
+// Revalidate every 5 minutes — match data changes only on admin score updates.
+export const revalidate = 300;
+
 export const metadata = {
   title: "World Cup 2026 Matches — GARRINCHA",
   description: "Full FIFA World Cup 2026 match schedule. Group stage, Round of 32, knockout rounds. Predict scores and climb the leaderboard.",
