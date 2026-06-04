@@ -1,0 +1,36 @@
+name: Check Vercel Production Env
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: List Vercel production env var keys (no values)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch env var keys from Vercel production
+        run: |
+          echo "=== Vercel production env var KEYS (no values) ==="
+          curl -s \
+            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            "https://api.vercel.com/v9/projects/${{ secrets.VERCEL_PROJECT_ID }}/env?teamId=${{ secrets.VERCEL_ORG_ID }}" \
+            | jq -r '
+              .envs[]
+              | select(.target != null and (.target | map(. == "production") | any))
+              | .key
+            ' | sort
+
+          echo ""
+          echo "=== Check required vars ==="
+          REQUIRED="DATABASE_URL DIRECT_URL JWT_SECRET OWNER_PASSWORD ADMIN_PASSWORD CENTER_ADMIN_PASSWORD RESEND_API_KEY EMAIL_FROM UPSTASH_REDIS_REST_URL UPSTASH_REDIS_REST_TOKEN NEXT_PUBLIC_APP_URL"
+          KEYS=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            "https://api.vercel.com/v9/projects/${{ secrets.VERCEL_PROJECT_ID }}/env?teamId=${{ secrets.VERCEL_ORG_ID }}" \
+            | jq -r '.envs[] | select(.target != null and (.target | map(. == "production") | any)) | .key')
+          for VAR in $REQUIRED; do
+            if echo "$KEYS" | grep -q "^${VAR}$"; then
+              echo "PRESENT: $VAR"
+            else
+              echo "MISSING: $VAR"
+            fi
+          done
