@@ -1,10 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getLocale } from "@/lib/i18n";
-import { getLeaderboardWithMeta } from "@/lib/leaderboards";
-import { prisma } from "@/lib/prisma";
 import { t } from "@/lib/translations";
-import { demoCenters, demoLeaderboard, demoMatches, hasDatabaseConfig } from "@/lib/ui-demo-data";
 import { LandingClient } from "@/components/LandingClient";
 
 // ── Centers data ─────────────────────────────────────────────────────────────
@@ -39,15 +36,7 @@ function CenterCard({ short, name, city, color }: { short: string; name: string;
 
 export default async function HomePage() {
   const locale = await getLocale();
-  const hasDb = hasDatabaseConfig();
-
-  const [, centerCount, leaders] = hasDb
-    ? await Promise.all([
-        prisma.match.count(),
-        prisma.garrinchaCenter.count(),
-        getLeaderboardWithMeta().then((m) => m.rows),
-      ]).catch(() => [demoMatches.length, demoCenters.length, demoLeaderboard] as const)
-    : [demoMatches.length, demoCenters.length, demoLeaderboard] as const;
+  const centerCount = CENTERS_DATA.length;
 
   return (
     <div className="landing-root">

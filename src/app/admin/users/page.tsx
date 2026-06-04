@@ -1,7 +1,6 @@
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
+import { AdminSidebar } from "@/components/AdminSidebar";
 import { UserRoleForm } from "@/components/AdminForms";
 import { DataModeNotice } from "@/components/DataModeNotice";
 import { requireSuperAdmin } from "@/lib/auth";
@@ -13,9 +12,10 @@ import { demoLeaderboard, hasDatabaseConfig } from "@/lib/ui-demo-data";
 export default async function AdminUsersPage() {
   const locale = await getLocale();
   let ownerId: string | null = null;
+  let ownerName: string | null = null;
 
   if (hasDatabaseConfig()) {
-    try { const owner = await requireSuperAdmin(); ownerId = owner.id; }
+    try { const owner = await requireSuperAdmin(); ownerId = owner.id; ownerName = owner.fullName ?? owner.displayName; }
     catch { redirect("/admin/login?next=/admin/users"); }
   }
 
@@ -25,12 +25,8 @@ export default async function AdminUsersPage() {
         select: { id: true, email: true, displayName: true, nationality: true, role: true, center: { select: { name: true } } },
       })
     : demoLeaderboard.map((row, index) => ({
-        id: row.id,
-        email: `${row.name.toLowerCase().replaceAll(" ", ".")}@example.com`,
-        displayName: row.name,
-        nationality: row.nationality,
-        role: index === 0 ? Role.SUPER_ADMIN : index === 1 ? Role.ADMIN : Role.USER,
-        center: { name: row.center },
+        id: row.id, email: `${row.name.toLowerCase().replaceAll(" ", ".")}@example.com`, displayName: row.name,
+        nationality: row.nationality, role: index === 0 ? Role.SUPER_ADMIN : index === 1 ? Role.ADMIN : Role.USER, center: { name: row.center },
       }));
 
   const ROLE_COLOR: Record<string, string> = {
@@ -39,20 +35,7 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="admin-root" style={{ minHeight: "100vh" }}>
-      <aside className="admin-side">
-        <div className="admin-side-top">
-          <Image src="/garrincha-white.png" alt="GARRINCHA" height={20} width={120} style={{ height: 20, width: "auto" }} />
-          <span className="admin-side-tag">ADMIN</span>
-        </div>
-        <nav className="admin-side-nav">
-          <Link href="/admin" className="admin-nav-link" style={{ textDecoration: "none" }}><span className="admin-nav-ic">▦</span>Overview</Link>
-          <Link href="/admin/users" className="admin-nav-link active" style={{ textDecoration: "none" }}><span className="admin-nav-ic">👥</span>{t(locale, "admin.usersTitle")}</Link>
-          <Link href="/admin/health" className="admin-nav-link" style={{ textDecoration: "none" }}><span className="admin-nav-ic">🩺</span>{t(locale, "admin.healthTitle")}</Link>
-        </nav>
-        <div className="admin-side-foot">
-          <Link href="/admin" style={{ fontSize: 13, color: "var(--ink-dim)", textDecoration: "none" }}>← Back</Link>
-        </div>
-      </aside>
+      <AdminSidebar active="/admin/users" isSuperAdmin adminName={ownerName ?? undefined} />
       <main className="admin-main">
         <header className="admin-topbar">
           <div>
@@ -62,12 +45,10 @@ export default async function AdminUsersPage() {
         </header>
         <div className="admin-content">
           <DataModeNotice locale={locale} />
-          {/* Warning */}
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 16px", borderRadius: 12, background: "rgba(245,194,66,0.07)", border: "1px solid rgba(245,194,66,0.25)", fontSize: 13, color: "var(--ink-dim)", lineHeight: 1.5 }}>
             <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
             {t(locale, "admin.ownerWarning")}
           </div>
-
           <div className="acard" style={{ padding: 0, overflow: "hidden" }}>
             {users.length === 0 ? (
               <div style={{ padding: "32px", textAlign: "center", color: "var(--ink-faint)" }}>{t(locale, "admin.noUsers")}</div>
@@ -96,7 +77,9 @@ export default async function AdminUsersPage() {
                             <span className="apill" style={{ background: `${ROLE_COLOR[user.role]}1f`, color: ROLE_COLOR[user.role], fontSize: 10 }}>
                               {user.role.replace("_", " ")}
                             </span>
-                            <UserRoleForm userId={user.id} role={user.role} disabled={user.id === ownerId} locale={locale} />
+                            {user.id !== ownerId && (
+                              <UserRoleForm userId={user.id} role={user.role as "USER" | "ADMIN" | "CENTER_ADMIN" | "SUPER_ADMIN"} locale={locale} />
+                            )}
                           </div>
                         </td>
                       </tr>

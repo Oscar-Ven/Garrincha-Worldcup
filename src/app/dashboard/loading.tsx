@@ -1,30 +1,40 @@
 export default function DashboardLoading() {
   return (
-    <main className="page">
-      <div className="page-header">
-        <span className="eyebrow" style={{ background: "rgba(255,255,255,0.1)", borderRadius: 4, color: "transparent", display: "inline-block", width: 120 }}>...</span>
-        <div style={{ background: "rgba(8,235,154,0.18)", borderRadius: 8, height: "4rem", width: "60%" }} />
-      </div>
-      <div className="grid four" style={{ marginBottom: 24 }}>
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="stat-card" style={{ opacity: 0.5 }}>
-            <div style={{ background: "var(--line)", borderRadius: 4, height: 14, width: "55%" }} />
-            <div style={{ background: "var(--line)", borderRadius: 4, height: 36, width: "40%" }} />
+    <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
+      {/* Greeting skeleton */}
+      <div style={{ padding: "58px 18px 16px", background: "radial-gradient(120% 80% at 80% -20%, #16331F, var(--bg) 60%)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 13, marginTop: 18 }}>
+          <div className="skeleton" style={{ width: 50, height: 50, borderRadius: "50%" }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div className="skeleton" style={{ height: 13, width: 80, borderRadius: 4 }} />
+            <div className="skeleton" style={{ height: 22, width: 140, borderRadius: 4 }} />
           </div>
-        ))}
+        </div>
       </div>
-      <div className="match-list">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="campaign-match-card" style={{ opacity: 0.45 - i * 0.07 }}>
-            <div style={{ background: "var(--line)", borderRadius: 4, height: 16, width: "30%", margin: "0 auto" }} />
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 1fr", gap: 18, alignItems: "center" }}>
-              <div style={{ justifySelf: "center", background: "var(--line)", borderRadius: 8, height: 48, width: 64 }} />
-              <div style={{ background: "var(--line)", borderRadius: 8, height: 52 }} />
-              <div style={{ justifySelf: "center", background: "var(--line)", borderRadius: 8, height: 48, width: 64 }} />
+      <div className="dash-content">
+        {/* Stats */}
+        <div className="stats-grid">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="card stat-tile">
+              <div className="skeleton" style={{ height: 36, borderRadius: 6, marginBottom: 8 }} />
+              <div className="skeleton" style={{ height: 11, width: "60%", borderRadius: 4 }} />
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        {/* Match cards */}
+        <div className="match-list">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="campaign-match-card" style={{ opacity: 1 - i * 0.2 }}>
+              <div className="skeleton" style={{ height: 16, width: "30%", borderRadius: 4 }} />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 12, alignItems: "center" }}>
+                <div className="skeleton" style={{ height: 48, borderRadius: 8 }} />
+                <div className="skeleton" style={{ height: 52, width: 120, borderRadius: 8 }} />
+                <div className="skeleton" style={{ height: 48, borderRadius: 8 }} />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

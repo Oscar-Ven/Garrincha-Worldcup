@@ -1,7 +1,6 @@
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
+import { AdminSidebar } from "@/components/AdminSidebar";
 import { BonusForm } from "@/components/AdminForms";
 import { DataModeNotice } from "@/components/DataModeNotice";
 import { requireAdmin } from "@/lib/auth";
@@ -12,8 +11,9 @@ import { demoBonusEvents, demoBonusUsers, hasDatabaseConfig } from "@/lib/ui-dem
 
 export default async function BonusPage() {
   const locale = await getLocale();
+  let admin: Awaited<ReturnType<typeof requireAdmin>> | null = null;
   if (hasDatabaseConfig()) {
-    try { await requireAdmin(); }
+    try { admin = await requireAdmin(); }
     catch { redirect("/admin/login?next=/admin/bonus"); }
   }
 
@@ -24,34 +24,26 @@ export default async function BonusPage() {
       ])
     : [demoBonusUsers, demoBonusEvents];
 
+  const isSuperAdmin = !admin || admin.role === "SUPER_ADMIN" || !hasDatabaseConfig();
+
   return (
     <div className="admin-root" style={{ minHeight: "100vh" }}>
-      <aside className="admin-side">
-        <div className="admin-side-top">
-          <Image src="/garrincha-white.png" alt="GARRINCHA" height={20} width={120} style={{ height: 20, width: "auto" }} />
-          <span className="admin-side-tag">ADMIN</span>
-        </div>
-        <nav className="admin-side-nav">
-          <Link href="/admin" className="admin-nav-link" style={{ textDecoration: "none" }}><span className="admin-nav-ic">▦</span>Overview</Link>
-          <Link href="/admin/matches" className="admin-nav-link" style={{ textDecoration: "none" }}><span className="admin-nav-ic">✏️</span>{t(locale, "admin.scoreTitle")}</Link>
-          <Link href="/admin/bonus" className="admin-nav-link active" style={{ textDecoration: "none" }}><span className="admin-nav-ic">🎁</span>{t(locale, "admin.bonusTitle")}</Link>
-          <Link href="/admin/checkin" className="admin-nav-link" style={{ textDecoration: "none" }}><span className="admin-nav-ic">📱</span>{t(locale, "admin.checkinTitle")}</Link>
-        </nav>
-        <div className="admin-side-foot">
-          <Link href="/admin" style={{ fontSize: 13, color: "var(--ink-dim)", textDecoration: "none" }}>← Back</Link>
-        </div>
-      </aside>
+      <AdminSidebar
+        active="/admin/bonus"
+        isSuperAdmin={isSuperAdmin}
+        centerName={admin?.center?.name}
+        adminName={admin?.fullName ?? admin?.displayName ?? undefined}
+      />
       <main className="admin-main">
         <header className="admin-topbar">
           <div>
-            <div className="admin-topbar-crumb">{t(locale, "auth.adminEyebrow")}</div>
+            <div className="admin-topbar-crumb">{isSuperAdmin ? "Super Admin" : `Center Admin · ${admin?.center?.name}`}</div>
             <h1 className="admin-topbar-title">{t(locale, "admin.bonusTitle")}</h1>
           </div>
         </header>
         <div className="admin-content">
           <DataModeNotice locale={locale} />
           <div className="two-col">
-            {/* Award form */}
             <div className="acard">
               <div className="panel-header">
                 <h3 className="panel-title">{t(locale, "admin.awardBonus")}</h3>
@@ -59,8 +51,6 @@ export default async function BonusPage() {
               <p style={{ fontSize: 13, color: "var(--ink-dim)", margin: "0 0 20px", lineHeight: 1.5 }}>{t(locale, "admin.awardCopy")}</p>
               <BonusForm users={users} locale={locale} />
             </div>
-
-            {/* Recent awards */}
             <div className="acard" style={{ padding: 0, overflow: "hidden" }}>
               <div style={{ padding: "20px 20px 0" }}>
                 <div className="panel-header">
@@ -72,13 +62,7 @@ export default async function BonusPage() {
               ) : (
                 <div className="tbl-scroll">
                   <table className="tbl">
-                    <thead>
-                      <tr>
-                        <th>{t(locale, "form.user")}</th>
-                        <th>{t(locale, "form.reason")}</th>
-                        <th style={{ textAlign: "right" }}>{t(locale, "form.points")}</th>
-                      </tr>
-                    </thead>
+                    <thead><tr><th>{t(locale, "form.user")}</th><th>{t(locale, "form.reason")}</th><th style={{ textAlign: "right" }}>{t(locale, "form.points")}</th></tr></thead>
                     <tbody>
                       {(events as { id: string; points: number; reason: string; user: { email: string; displayName: string | null } }[]).map((ev) => (
                         <tr key={ev.id}>
