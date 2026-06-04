@@ -1,12 +1,24 @@
 import { prisma } from "@/lib/prisma";
 
+const TEAM_SELECT = {
+  id: true, name: true, fifaCode: true, flagUrl: true, groupName: true,
+} as const;
+
 /** Fetch all matches for a specific user (includes their predictions). */
 export async function getMatchesForUser(userId?: string) {
   return prisma.match.findMany({
     orderBy: [{ kickoffAt: "asc" }, { fifaMatchNo: "asc" }],
-    include: {
-      homeTeam: true,
-      awayTeam: true,
+    select: {
+      id: true,
+      stage: true,
+      fifaMatchNo: true,
+      venue: true,
+      kickoffAt: true,
+      status: true,
+      homeScore: true,
+      awayScore: true,
+      homeTeam: { select: TEAM_SELECT },
+      awayTeam: { select: TEAM_SELECT },
       predictions: userId
         ? {
             where: { userId },
@@ -21,13 +33,17 @@ export async function getMatchesForUser(userId?: string) {
 export async function getAllMatches() {
   return prisma.match.findMany({
     orderBy: [{ kickoffAt: "asc" }, { fifaMatchNo: "asc" }],
-    include: {
-      homeTeam: {
-        select: { id: true, name: true, fifaCode: true, flagUrl: true, groupName: true },
-      },
-      awayTeam: {
-        select: { id: true, name: true, fifaCode: true, flagUrl: true, groupName: true },
-      },
+    select: {
+      id: true,
+      stage: true,
+      fifaMatchNo: true,
+      venue: true,
+      kickoffAt: true,
+      status: true,
+      homeScore: true,
+      awayScore: true,
+      homeTeam: { select: TEAM_SELECT },
+      awayTeam: { select: TEAM_SELECT },
     },
   });
 }

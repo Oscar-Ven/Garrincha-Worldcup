@@ -7,7 +7,7 @@ import { MatchFilter } from "@/components/MatchFilter";
 import type { FilterableMatch } from "@/components/MatchFilter";
 import { getCurrentUser } from "@/lib/auth";
 import { getLocale } from "@/lib/i18n";
-import { getLeaderboard } from "@/lib/leaderboards";
+import { getUserRankAndPoints } from "@/lib/leaderboards";
 import { getMatchesForUser } from "@/lib/matches";
 import { isPredictionLocked } from "@/lib/scoring";
 import { t } from "@/lib/translations";
@@ -52,11 +52,12 @@ export default async function DashboardPage() {
 
   const isDemo = !hasDatabaseConfig();
 
-  const [matches, leaderboard, centers] = isDemo
-    ? [demoMatches, demoLeaderboard, demoCenters]
+  const demoRankAndPoints = { rank: 0, points: 0 };
+  const [matches, rankAndPoints, centers] = isDemo
+    ? [demoMatches, demoRankAndPoints, demoCenters]
     : await Promise.all([
         getMatchesForUser(user.id),
-        getLeaderboard(),
+        getUserRankAndPoints(user.id),
         prisma.garrinchaCenter.findMany({
           orderBy: [{ country: "asc" }, { city: "asc" }],
           select: { id: true, name: true, city: true, country: true },
@@ -83,8 +84,12 @@ export default async function DashboardPage() {
   const total = matches.length;
   const pct = total > 0 ? Math.round((made / total) * 100) : 0;
   const lockedMatches = matches.filter((m) => isPredictionLocked(m.kickoffAt, now));
-  const userRank = (leaderboard as { id: string; points: number }[]).findIndex((r) => r.id === user.id) + 1;
-  const userPoints = (leaderboard as { id: string; points: number }[]).find((r) => r.id === user.id)?.points ?? 0;
+  const userRank = isDemo
+    ? (demoLeaderboard as { id: string; points: number }[]).findIndex((r) => r.id === user.id) + 1
+    : rankAndPoints.rank;
+  const userPoints = isDemo
+    ? (demoLeaderboard as { id: string; points: number }[]).find((r) => r.id === user.id)?.points ?? 0
+    : rankAndPoints.points;
 
   const hasCompetitionCenter = isDemo || !!user.competitionCenterId;
   const competitionCenterName = isDemo ? user.center.name : user.competitionCenter?.name ?? null;

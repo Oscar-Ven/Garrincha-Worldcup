@@ -193,6 +193,7 @@ export async function sendAccessLinkEmail(
     return;
   }
 
+  // 10s hard timeout prevents email send from hanging a serverless function.
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -200,6 +201,7 @@ export async function sendAccessLinkEmail(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ from, to, subject, html, text }),
+    signal: AbortSignal.timeout(10_000),
   });
 
   if (!response.ok) {

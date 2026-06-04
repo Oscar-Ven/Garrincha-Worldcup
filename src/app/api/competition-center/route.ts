@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { isPreviewMode } from "@/lib/app-mode";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { rejectCrossOriginRequest } from "@/lib/request-security";
 import { Role } from "@prisma/client";
 
@@ -10,9 +11,14 @@ const bodySchema = z.object({
   centerId: z.string().min(1),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const originError = rejectCrossOriginRequest(request);
   if (originError) return originError;
+
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  if (!(await checkRateLimit(`competition-center:${ip}`, 10, 15 * 60 * 1000))) {
+    return NextResponse.json({ error: "Too many requests. Please wait a moment." }, { status: 429 });
+  }
 
   const user = await getCurrentUser();
   if (!user) {

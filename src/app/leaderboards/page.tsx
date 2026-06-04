@@ -4,6 +4,9 @@ import { hasDatabaseConfig } from "@/lib/app-mode";
 import { demoLeaderboard } from "@/lib/ui-demo-data";
 import { LeaderboardClient, type LbRow } from "@/components/LeaderboardClient";
 
+// Revalidate every 60s — avoids recalculating all prediction sums on every request.
+export const revalidate = 60;
+
 export const metadata = {
   title: "World Cup 2026 Leaderboard — GARRINCHA",
   description: "Track the top players, points, predictions, and rankings. FIFA World Cup 2026 prediction campaign.",
