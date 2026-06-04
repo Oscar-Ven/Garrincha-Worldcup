@@ -123,7 +123,7 @@ export default async function RootLayout({
           {/* ── Shared footer — same on every public page.
               Hidden on landing page (which renders its own PublicFooter inside landing-root) ── */}
           <div className="layout-footer-slot">
-            <PublicFooter locale={locale} />
+            <PublicFooter />
           </div>
 
           {/* Mobile bottom nav */}

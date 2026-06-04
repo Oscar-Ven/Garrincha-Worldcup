@@ -205,58 +205,122 @@ button:disabled { cursor: not-allowed; opacity: 0.5; }
 }
 
 /* ============================================================
-   SITE FOOTER
+   SITE FOOTER — slim single-row bar (PublicFooter.tsx)
    ============================================================ */
 
-.site-footer-wrap {
-  background: var(--bg-2);
-  border-top: 1px solid var(--line);
-  margin-top: 40px;
-  /* Hidden inside admin-root — admin has its own layout */
+/* The .sf system is the ONLY footer. All old site-footer-*/
+/* pub-footer-* and lp-footer styles are removed.          */
+
+.sf {
+  background: var(--bg);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
 /* Hide footer inside admin pages */
-.admin-root ~ .site-footer-wrap,
-.admin-root + * .site-footer-wrap {
-  display: none;
-}
+.admin-root ~ .layout-footer-slot,
+body:has(.admin-root) .layout-footer-slot { display: none; }
 
-.site-footer-inner {
-  max-width: 960px;
+.sf-inner {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 24px 40px;
+  padding: 0 28px;
+  height: 48px;
   display: flex;
-  flex-direction: column;
-  gap: 14px;
+  align-items: center;
+  gap: 0;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.site-footer-copy {
-  font-size: 12.5px;
-  color: var(--ink-faint);
-  line-height: 1.5;
-  margin: 0;
-  max-width: 540px;
-}
-
-.site-footer-links {
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-}
-
-.site-footer-links a {
+/* Company identity — far left */
+.sf-company {
   font-size: 12px;
-  color: var(--ink-faint);
-  transition: color 0.15s;
+  color: rgba(241,245,238,0.38);
+  flex-shrink: 0;
+  margin-right: 20px;
 }
 
-.site-footer-links a:hover { color: var(--green); }
+/* Legal links — after company text */
+.sf-links {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
 
-.site-footer-legal {
+.sf-links a {
+  font-size: 12px;
+  color: rgba(241,245,238,0.50);
+  padding: 0 10px;
+  transition: color 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sf-links a:hover { color: var(--green); }
+
+.sf-dot {
   font-size: 11px;
-  color: var(--ink-faint);
-  opacity: 0.45;
-  margin: 0;
+  color: rgba(255,255,255,0.18);
+  user-select: none;
+}
+
+/* Icons — pushed to far right */
+.sf-icons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.sf-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: rgba(241,245,238,0.40);
+  transition: color 0.15s, background 0.15s;
+  text-decoration: none;
+}
+
+.sf-icon:hover {
+  color: var(--green);
+  background: rgba(95,224,144,0.08);
+}
+
+/* Mobile — allow wrapping */
+@media (max-width: 860px) {
+  .sf-inner {
+    height: auto;
+    padding: 14px 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+    white-space: normal;
+    overflow: visible;
+  }
+  .sf-company {
+    width: 100%;
+    margin-right: 0;
+    font-size: 11px;
+  }
+  .sf-links {
+    flex-wrap: wrap;
+    gap: 0;
+    flex: 1;
+  }
+  .sf-icons {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .sf-inner { padding: 12px 16px; gap: 8px; }
+  .sf-links a { padding: 0 7px; font-size: 11px; }
+  .sf-company { font-size: 10.5px; }
 }
 
 /* ============================================================
@@ -2548,10 +2612,10 @@ button:disabled { cursor: not-allowed; opacity: 0.5; }
    layout.tsx's site-topbar and site-footer-wrap.
    ============================================================ */
 
-/* Hide the shared layout chrome on the landing page */
+/* Hide layout chrome on landing page (has its own nav + bottom nav) */
 body:has(.landing-root) .site-topbar      { display: none !important; }
-body:has(.landing-root) .site-footer-wrap { display: none !important; }
 body:has(.landing-root) .btm-nav-garrincha{ display: none !important; }
+/* Note: layout-footer-slot (.sf) IS shown on landing page — no hide rule needed */
 
 .landing-root {
   background: var(--bg);
@@ -3177,57 +3241,7 @@ body:has(.landing-root) .btm-nav-garrincha{ display: none !important; }
   gap: 8px;
 }
 
-/* ── FOOTER ── */
-.lp-footer {
-  border-top: 1px solid var(--line);
-  padding: 48px 0 40px;
-}
-
-.lp-foot-in {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 30px;
-  flex-wrap: wrap;
-}
-
-.lp-foot-links {
-  display: flex;
-  gap: 40px;
-  flex-wrap: wrap;
-}
-
-.lp-foot-col h4 {
-  font-family: var(--f-body);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  font-size: 10.5px;
-  color: var(--ink-faint);
-  margin: 0 0 12px;
-}
-
-.lp-foot-col a {
-  display: block;
-  font-size: 14px;
-  color: var(--ink-dim);
-  margin-bottom: 9px;
-  transition: color .15s;
-}
-.lp-foot-col a:hover { color: var(--green); }
-
-.lp-foot-bottom {
-  margin-top: 40px;
-  padding-top: 22px;
-  border-top: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  font-size: 12.5px;
-  color: var(--ink-faint);
-}
+/* lp-footer removed — replaced by .sf slim bar */
 
 /* ── REVEAL ANIMATION ── */
 .rv {
@@ -4211,214 +4225,11 @@ body:has(.landing-root) .btm-nav-garrincha{ display: none !important; }
   }
 }
 
-/* ── OLD site-footer-* classes removed — PublicFooter.tsx uses pub-footer-* ── */
+/* pub-footer-* and lp-footer styles removed — .sf is the only footer now */
 
-/* Landing page has its own PublicFooter inside .landing-root.
-   Hide the layout-level footer slot to prevent double footer. */
-body:has(.landing-root) .layout-footer-slot { display: none !important; }
-body:has(.landing-root) .site-footer-wrap { display: none !important; }
-body:has(.landing-root) .site-footer-bottom-outer { display: none !important; }
+/* Landing page: layout-level footer shows via layout.tsx — no duplicate needed */
 
-/* ============================================================
-   PUBLIC FOOTER — shared across all public pages
-   Matches the landing page footer exactly: same layout, spacing,
-   colors, typography. Used in PublicFooter.tsx component.
-   ============================================================ */
-
-/* ── Base ── */
-.pub-footer {
-  background: var(--bg-2);
-  border-top: 1px solid var(--line);
-}
-
-/* ── Main body ── */
-.pub-footer-body {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 52px 28px 44px;
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 56px;
-  align-items: start;
-}
-
-/* ── Brand column ── */
-.pub-footer-brand {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.pub-footer-desc {
-  font-size: 13px;
-  color: var(--ink-dim);
-  line-height: 1.6;
-  margin: 0;
-}
-
-.pub-footer-disclaimer {
-  font-size: 11px;
-  color: var(--ink-faint);
-  line-height: 1.6;
-  margin: 0;
-  font-style: italic;
-  opacity: 0.75;
-}
-
-/* ── Social icons ── */
-.pub-footer-social {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.pub-footer-social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.06);
-  color: var(--ink-dim);
-  border: 1px solid var(--line);
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-  text-decoration: none;
-}
-
-.pub-footer-social-link:hover {
-  background: rgba(95,224,144,0.12);
-  color: var(--green);
-  border-color: rgba(95,224,144,0.30);
-}
-
-/* ── Nav columns ── */
-.pub-footer-cols {
-  display: grid;
-  grid-template-columns: 1fr 1.8fr 1fr;
-  gap: 32px;
-  align-items: start;
-}
-
-.pub-footer-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.pub-footer-col h4 {
-  font-family: var(--f-body);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.10em;
-  font-size: 9.5px;
-  color: var(--ink-faint);
-  margin: 0 0 14px;
-}
-
-.pub-footer-col a {
-  display: block;
-  font-size: 13px;
-  color: var(--ink-dim);
-  margin-bottom: 8px;
-  transition: color 0.15s;
-  line-height: 1.4;
-}
-
-.pub-footer-col a:hover { color: var(--green); }
-
-/* ── Centers grid ── */
-.pub-footer-centers-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 16px;
-}
-
-.pub-footer-center-item {
-  font-size: 12px;
-  color: var(--ink-dim);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  line-height: 1.5;
-}
-
-.pub-footer-center-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  opacity: 0.85;
-}
-
-/* ── Legal strip ── */
-.pub-footer-legal-strip {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 14px 28px 20px;
-  border-top: 1px solid var(--line);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  font-size: 11.5px;
-  color: var(--ink-faint);
-  line-height: 1.6;
-}
-
-.pub-footer-legal-strip a {
-  color: var(--ink-faint);
-  transition: color 0.15s;
-}
-
-.pub-footer-legal-strip a:hover { color: var(--green); }
-
-.pub-footer-sep {
-  color: var(--line-2);
-  margin: 0 6px;
-  opacity: 0.7;
-}
-
-.pub-footer-lang-hint {
-  font-size: 11px;
-  color: var(--ink-faint);
-  opacity: 0.45;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* ── Responsive ── */
-@media (max-width: 1060px) {
-  .pub-footer-body {
-    grid-template-columns: 260px 1fr;
-    gap: 40px;
-  }
-}
-
-@media (max-width: 860px) {
-  .pub-footer-body {
-    grid-template-columns: 1fr;
-    padding: 40px 24px 36px;
-    gap: 36px;
-  }
-  .pub-footer-cols {
-    grid-template-columns: 1fr 1fr;
-    gap: 28px 32px;
-  }
-  .pub-footer-col-centers {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 540px) {
-  .pub-footer-body { padding: 32px 20px 28px; }
-  .pub-footer-cols { grid-template-columns: 1fr 1fr; gap: 24px 20px; }
-  .pub-footer-legal-strip { padding: 12px 20px 18px; font-size: 11px; flex-direction: column; gap: 6px; }
-  .pub-footer-lang-hint { display: none; }
-  .pub-footer-sep { margin: 0 4px; }
-  .pub-footer-centers-grid { grid-template-columns: 1fr 1fr; }
-}
+/* pub-footer-* CSS removed — .sf is the single footer */
 
 /* ============================================================
    LEADERBOARD PAGE — clean desktop layout

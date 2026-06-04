@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getLocale } from "@/lib/i18n";
 import { t } from "@/lib/translations";
 import { LandingClient } from "@/components/LandingClient";
-import { PublicFooter } from "@/components/PublicFooter";
 
 // ── All 10 GARRINCHA centers ──────────────────────────────────────────────────
 const CENTERS_DATA = [
@@ -241,8 +240,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── FOOTER — shared PublicFooter component ─────────────── */}
-      <PublicFooter locale={locale} />
     </div>
   );
 }
