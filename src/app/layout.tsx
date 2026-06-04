@@ -111,10 +111,8 @@ export default async function RootLayout({
                     </button>
                   </form>
                 ) : (
-                  <>
-                    <Link href="/login" className="site-nav-btn site-nav-btn-ghost">{t(locale, "nav.login")}</Link>
-                    <Link href="/register" className="site-nav-btn site-nav-btn-primary">{t(locale, "nav.register")}</Link>
-                  </>
+                  /* No "Log in" — app uses email-link access after registration */
+                  <Link href="/register" className="site-nav-btn site-nav-btn-primary">{t(locale, "nav.register")}</Link>
                 )}
                 <LanguageSwitcher locale={locale} />
               </div>
