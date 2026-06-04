@@ -11,43 +11,57 @@ type Props = {
 export function MobileNav({ isLoggedIn }: Props) {
   const pathname = usePathname();
 
-  // Hide on all admin / owner pages — desktop-only
+  // Desktop-only pages — hide bottom nav
   if (pathname.startsWith("/admin") || pathname.startsWith("/owner")) return null;
 
-  const active = (href: string) =>
-    pathname === href || (href !== "/" && pathname.startsWith(href))
-      ? " active"
-      : "";
+  const isActive = (href: string) =>
+    pathname === href || (href !== "/" && pathname.startsWith(href));
 
   return (
-    <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
-      <Link href="/" className={`mobile-nav-item${active("/")}`}>
+    // DaisyUI btm-nav — mobile-only via CSS
+    <nav className="btm-nav btm-nav-garrincha" aria-label="Mobile navigation">
+      <Link
+        href="/"
+        className={isActive("/") ? "active" : ""}
+        aria-label="Home"
+      >
         <Home size={22} strokeWidth={2} />
-        <span>Home</span>
+        <span className="btm-nav-label">Home</span>
       </Link>
 
-      <Link href="/dashboard" className={`mobile-nav-item${active("/dashboard")}`}>
-        {/* Football icon via emoji — Lucide doesn't have one */}
-        <span className="mobile-nav-icon-emoji" aria-hidden>⚽</span>
-        <span>Predict</span>
+      <Link
+        href="/dashboard"
+        className={isActive("/dashboard") ? "active" : ""}
+        aria-label="Predict"
+      >
+        <span className="btm-nav-emoji" aria-hidden>⚽</span>
+        <span className="btm-nav-label">Predict</span>
       </Link>
 
-      <Link href="/leaderboards" className={`mobile-nav-item${active("/leaderboards")}`}>
+      <Link
+        href="/leaderboards"
+        className={isActive("/leaderboards") ? "active" : ""}
+        aria-label="Rankings"
+      >
         <Trophy size={22} strokeWidth={2} />
-        <span>Rankings</span>
+        <span className="btm-nav-label">Rankings</span>
       </Link>
 
       {isLoggedIn ? (
-        <form action="/api/auth/logout" method="post" className="mobile-nav-item-form">
-          <button type="submit" className="mobile-nav-item">
+        <form action="/api/auth/logout" method="post" className="btm-nav-form">
+          <button type="submit" aria-label="Log out">
             <LogOut size={22} strokeWidth={2} />
-            <span>Logout</span>
+            <span className="btm-nav-label">Logout</span>
           </button>
         </form>
       ) : (
-        <Link href="/login" className={`mobile-nav-item${active("/login")}`}>
+        <Link
+          href="/login"
+          className={isActive("/login") ? "active" : ""}
+          aria-label="Log in"
+        >
           <LogIn size={22} strokeWidth={2} />
-          <span>Login</span>
+          <span className="btm-nav-label">Login</span>
         </Link>
       )}
     </nav>

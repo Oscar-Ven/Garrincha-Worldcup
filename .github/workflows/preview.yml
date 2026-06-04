@@ -17,7 +17,8 @@ jobs:
     if: ${{ github.event.pull_request.draft == false }}
 
     permissions:
-      pull-requests: write  # needed to post the comment
+      contents: read        # needed for actions/checkout
+      pull-requests: write  # needed to post the preview URL comment
 
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

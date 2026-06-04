@@ -4,6 +4,56 @@
    Admin / owner dashboards are excluded.
    ============================================================ */
 
+/* ---- DaisyUI join overrides for score stepper ------------------- */
+
+/* Tie the DaisyUI join/btn into the GARRINCHA brand */
+.score-step-minus,
+.score-step-plus {
+  background: var(--paper) !important;
+  border: 2px solid var(--black) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+  height: 56px !important;
+  min-height: 56px !important;
+  min-width: 52px !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.score-step-minus:active:not(:disabled),
+.score-step-plus:active:not(:disabled) {
+  background: var(--black) !important;
+  color: var(--green) !important;
+  transform: scale(0.93);
+}
+
+.score-step-minus:disabled,
+.score-step-plus:disabled {
+  opacity: 0.32 !important;
+}
+
+/* The left and right radius for the join items */
+.join .score-step-minus { border-radius: 10px 0 0 10px !important; }
+.join .score-step-plus  { border-radius: 0 10px 10px 0 !important; }
+
+.score-step-value {
+  align-items: center;
+  background: #fff;
+  border: 2px solid var(--black);
+  border-left: none;
+  border-right: none;
+  color: var(--ink);
+  display: flex;
+  flex-grow: 1;
+  font-family: var(--font-heading, sans-serif);
+  font-size: 1.8rem;
+  font-weight: 900;
+  height: 56px;
+  justify-content: center;
+  min-width: 52px;
+  user-select: none;
+}
+
 /* ---- Score stepper (PredictionForm) ------------------------------ */
 
 .prediction-stepper {
@@ -176,15 +226,38 @@
   font-weight: 800;
 }
 
-/* ---- Mobile bottom navigation ------------------------------------ */
+/* ---- DaisyUI btm-nav — GARRINCHA theme ----------------------------- */
 
-.mobile-bottom-nav {
-  display: none;
+/* Hidden on desktop, shown on mobile via btm-nav override */
+.btm-nav-garrincha {
+  display: none;          /* hidden by default (desktop) */
 }
 
-.mobile-nav-item-form {
+/* The logout form needs to stretch like a tab item */
+.btm-nav-form {
+  display: contents;
+}
+
+.btm-nav-form button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
   display: flex;
-  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 2px;
+  padding: 8px 4px;
+  color: inherit;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btm-nav-emoji {
+  font-size: 1.25rem;
+  line-height: 1;
 }
 
 /* ---- Global touch improvements ----------------------------------- */
@@ -201,62 +274,36 @@ a, button, [role="button"] {
 
 @media (max-width: 720px) {
 
-  /* Bottom nav */
-  .mobile-bottom-nav {
-    align-items: stretch;
-    background: var(--black);
-    border-top: 2px solid rgba(255,255,255,0.08);
-    bottom: 0;
+  /* DaisyUI btm-nav — show on mobile with GARRINCHA brand */
+  .btm-nav-garrincha {
     display: flex;
-    gap: 0;
-    justify-content: stretch;
-    left: 0;
+    background: var(--black);
+    border-top: 2px solid rgba(255,255,255,0.09);
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    position: fixed;
-    right: 0;
     z-index: 100;
   }
 
-  .mobile-nav-item,
-  .mobile-nav-item-form .mobile-nav-item {
-    align-items: center;
-    background: transparent;
-    border: none;
+  .btm-nav-garrincha > * {
     color: rgba(255,255,255,0.45);
-    cursor: pointer;
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    font-size: 0.63rem;
+    font-size: 0.6rem;
     font-weight: 700;
-    gap: 3px;
-    justify-content: center;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     min-height: 58px;
-    padding: 8px 4px;
-    text-decoration: none;
     text-transform: uppercase;
+    gap: 3px;
     touch-action: manipulation;
-    transition: color 100ms;
     -webkit-tap-highlight-color: transparent;
-    width: 100%;
+    transition: color 100ms;
   }
 
-  .mobile-nav-item:active,
-  .mobile-nav-item-form .mobile-nav-item:active {
-    color: var(--green);
+  .btm-nav-garrincha > .active,
+  .btm-nav-garrincha > *:active {
+    color: var(--green) !important;
+    background: transparent !important;
+    border-top-color: var(--green) !important;
   }
 
-  .mobile-nav-item.active {
-    color: var(--green);
-  }
-
-  .mobile-nav-icon-emoji {
-    font-size: 1.2rem;
-    line-height: 1;
-  }
-
-  /* Ensure page content clears the fixed bottom nav */
+  /* Page content clears the fixed bottom nav */
   .page {
     padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
   }
