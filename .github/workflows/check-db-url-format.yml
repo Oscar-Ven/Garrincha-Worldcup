@@ -1,0 +1,56 @@
+name: Check production DATABASE_URL format (no value exposed)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Diagnose DATABASE_URL format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Vercel env and check DATABASE_URL format
+        run: |
+          npm install -g vercel@latest -q
+          vercel pull --yes --environment=production \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }} 2>/dev/null
+
+          DB_URL=$(grep "^DATABASE_URL=" .vercel/.env.production.local 2>/dev/null | cut -d= -f2-)
+          if [ -z "$DB_URL" ]; then
+            echo "DATABASE_URL not found in pulled env"
+            exit 1
+          fi
+
+          echo "=== DATABASE_URL diagnostics (no value exposed) ==="
+          echo "Length: ${#DB_URL}"
+
+          if echo "$DB_URL" | grep -q "^postgresql://\|^postgres://"; then
+            echo "Protocol: OK (postgresql/postgres)"
+          else
+            echo "Protocol: WRONG (not postgresql:// or postgres://)"
+          fi
+
+          if echo "$DB_URL" | grep -q ":6543"; then
+            echo "Port: 6543 (Transaction Pooler) ✓"
+          elif echo "$DB_URL" | grep -q ":5432"; then
+            echo "Port: 5432 (DIRECT connection — WRONG for serverless)"
+          else
+            echo "Port: unknown"
+          fi
+
+          if echo "$DB_URL" | grep -q "pooler.supabase.com"; then
+            echo "Host: Supabase Transaction Pooler ✓"
+          elif echo "$DB_URL" | grep -q "supabase.co"; then
+            echo "Host: Supabase DIRECT (db.PROJECT.supabase.co — WRONG for serverless)"
+          else
+            echo "Host: unknown/other"
+          fi
+
+          if echo "$DB_URL" | grep -q "pgbouncer=true"; then
+            echo "pgbouncer=true: present ✓"
+          else
+            echo "pgbouncer=true: MISSING (add ?pgbouncer=true for Transaction Pooler)"
+          fi
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
