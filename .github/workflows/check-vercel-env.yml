@@ -2,6 +2,9 @@ name: Check Vercel Production Env
 
 on:
   workflow_dispatch:
+  push:
+    branches: [fix/auth-production]
+    paths: ['.github/workflows/check-vercel-env.yml']
 
 jobs:
   check:

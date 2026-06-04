@@ -29,11 +29,17 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
     if (!user || user.role !== Role.USER) return successResponse;
 
-    await rotateAndSendAccessLink(user.id, user.email, getLocaleFromRequest(request));
+    // Non-blocking: always return success regardless of email outcome (security + resilience).
+    try {
+      await rotateAndSendAccessLink(user.id, user.email, getLocaleFromRequest(request));
+    } catch (emailErr) {
+      console.error("[auth/request-link] Email send failed:", (emailErr as Error).message);
+    }
 
     return successResponse;
   } catch (err) {
-    console.error("[auth/request-link]", err);
+    const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+    console.error("[auth/request-link] Fatal:", msg);
     return NextResponse.json({ error: "Service unavailable. Please try again later." }, { status: 503 });
   }
 }
