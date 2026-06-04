@@ -1,39 +1,14 @@
-name: Deploy (Render)
+name: Deploy (Render Worker Disabled)
 
-# Render has autoDeploy=yes — it detects pushes to main and builds automatically.
-# This workflow also triggers a deploy via the API as a secondary mechanism,
-# ensuring the exact CI-verified commit is deployed immediately without waiting
-# for Render's GitHub polling interval.
+# Render is reserved for a future background worker / football API sync.
+# The main Next.js app deploys to Vercel.
 on:
-  workflow_run:
-    workflows: ["CI"]
-    branches: [main]
-    types: [completed]
-
-concurrency:
-  group: deploy-render-production
-  cancel-in-progress: false
+  workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Trigger Render production deploy
+  disabled:
+    name: Render worker deploy not configured
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
+    if: false
     steps:
-      - name: Trigger Render deploy via API
-        # RENDER_SERVICE_ID and RENDER_TOKEN secrets must be set in GitHub repo settings.
-        # Service ID: srv-d8gko7f7f7vs73es9ohg
-        # Get token from: Render dashboard → Account Settings → API Keys
-        run: |
-          if [ -z "${{ secrets.RENDER_TOKEN }}" ]; then
-            echo "RENDER_TOKEN not set — Render will auto-deploy on next git push."
-            exit 0
-          fi
-          curl -f -X POST \
-            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
-            -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"clearCache":"do_not_clear"}' \
-            --fail-with-body
-          echo "Render deploy triggered for commit ${{ github.event.workflow_run.head_sha }}"
+      - run: echo "Render worker deployment is not configured yet."

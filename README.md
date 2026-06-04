@@ -10,7 +10,9 @@ World Cup 2026 prediction game for GARRINCHA Centers. Players scan a QR code at 
 | **Supabase PostgreSQL** | Only real database |
 | **Resend** | Transactional email (permanent access links) |
 | **Upstash Redis** | Production rate limiting |
-| **Domain** | `https://[YOUR-APP-DOMAIN]` |
+| **Sentry** | Error monitoring |
+| **Render** | Optional future worker only |
+| **Domain** | `https://worldcup-garrincha.com` |
 
 ## Framework Stack
 
@@ -67,9 +69,10 @@ Required variables:
 | `JWT_SECRET` | Random secret, min 32 chars |
 | `OWNER_PASSWORD` | Seed owner account password |
 | `ADMIN_PASSWORD` | Seed admin account password |
-| `NEXT_PUBLIC_APP_URL` | `https://[YOUR-APP-DOMAIN]` (production) |
+| `CENTER_ADMIN_PASSWORD` | Seed center admin password |
+| `NEXT_PUBLIC_APP_URL` | `https://worldcup-garrincha.com` (production) |
 | `RESEND_API_KEY` | Resend API key |
-| `EMAIL_FROM` | `Garrincha World Cup Predictions <noreply@[your-domain.com]>` |
+| `EMAIL_FROM` | `Garrincha World Cup Predictions <noreply@worldcup-garrincha.com>` |
 | `UPSTASH_REDIS_REST_URL` | Upstash REST URL |
 | `UPSTASH_REDIS_REST_TOKEN` | Upstash REST token |
 
@@ -134,10 +137,10 @@ npm run dev
 
 Access-link emails are sent via [Resend](https://resend.com).
 
-1. Create a Resend account and add domain `[your-domain.com]`.
+1. Create a Resend account and add domain `worldcup-garrincha.com`.
 2. Add SPF, DKIM, and DMARC DNS records as instructed by Resend.
 3. Wait for domain verification.
-4. Set `RESEND_API_KEY` and `EMAIL_FROM="Garrincha World Cup Predictions <noreply@[your-domain.com]>"`.
+4. Set `RESEND_API_KEY` and `EMAIL_FROM="Garrincha World Cup Predictions <noreply@worldcup-garrincha.com>"`.
 
 Without these vars, emails are skipped with a warning log. Registration still succeeds (player is auto-logged in). They can request a new access link from `/login`.
 

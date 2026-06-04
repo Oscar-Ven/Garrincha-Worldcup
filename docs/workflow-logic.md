@@ -92,10 +92,11 @@ Center admin emails (all share `CENTER_ADMIN_PASSWORD` initially):
 
 ## 10. Infrastructure
 
-- **Email provider**: Resend — `RESEND_API_KEY` configured. Domain `[your-domain.com]` must be verified in Resend before production email sending.
+- **Email provider**: Resend — `RESEND_API_KEY` configured. Domain `worldcup-garrincha.com` must be verified in Resend before production email sending.
 - **Database**: Supabase PostgreSQL — connected, migrations and seed applied.
 - **Rate limiting**: Upstash Redis — `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` configured. `checkRateLimit` uses Redis when vars are present, falls back to in-memory otherwise.
-- **App hosting**: Vercel at `https://[YOUR-APP-DOMAIN]`.
+- **App hosting**: Vercel at `https://worldcup-garrincha.com`.
+- **Optional worker**: Render may be used later for background football API sync only; it is not the main app host.
 
 ## 11. Open Client Decisions
 

@@ -30,9 +30,6 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // Standalone output bundles the app + Node.js server into .next/standalone/
-  // Required for Render Web Service deployment.
-  output: "standalone",
   experimental: {},
   async headers() {
     return [
@@ -54,7 +51,6 @@ export default withSentryConfig(nextConfig, {
 
   // Only upload source maps when SENTRY_AUTH_TOKEN is present.
   // Without a token the upload would fail and potentially break the build.
-  // On Render, set SENTRY_AUTH_TOKEN in the service environment to enable uploads.
   sourcemaps: {
     disable: !process.env.SENTRY_AUTH_TOKEN,
   },

@@ -15,10 +15,9 @@ jobs:
     name: Production Build
     runs-on: ubuntu-latest
 
-    # Match Render's environment as closely as possible.
-    # NODE_ENV=production is set to match Render exactly.
+    # Placeholder CI database values are enough because routes are dynamic
+    # and no real Supabase connection is attempted during the build.
     env:
-      NODE_ENV: "production"
       DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
       DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
       JWT_SECRET: "ci-only-placeholder-secret-at-least-32-chars-long"
@@ -26,7 +25,6 @@ jobs:
       APP_PREVIEW_MODE: "false"
       NEXT_PUBLIC_DEMO_MODE: "false"
       NEXT_TELEMETRY_DISABLED: "1"
-      # No SENTRY_AUTH_TOKEN — sourcemaps.disable = true when token is absent.
 
     steps:
       - name: Checkout
@@ -38,14 +36,14 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Run Render build script (exact Render parity)
-        # Use the same script that runs on Render so CI shows any build failures
-        # with full verbose output (set -euxo pipefail).
-        run: bash scripts/render-build.sh
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
 
       - name: Report
         run: |
           echo "### Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Build succeeded via \`scripts/render-build.sh\`." >> $GITHUB_STEP_SUMMARY
-          du -sh .next/standalone 2>/dev/null || true
+          echo "Build succeeded. All routes compiled." >> $GITHUB_STEP_SUMMARY

@@ -382,19 +382,19 @@ function checkRateLimiterMode(): HealthCheck {
 }
 
 // ---------------------------------------------------------------------------
-// Vercel checks
+// Hosting checks
 // ---------------------------------------------------------------------------
 
 function checkDeploymentPlatform(): HealthCheck {
   if (process.env.VERCEL === "1") {
     return {
-      label: "Deployment platform",
+      label: "Main app host",
       status: "healthy",
       detail: "Vercel",
     };
   }
   return {
-    label: "Deployment platform",
+    label: "Main app host",
     status: "warning",
     detail: "Not running on Vercel",
   };
@@ -429,6 +429,14 @@ function checkVercelDeployUrl(): HealthCheck {
     label: "Deploy URL",
     status: "healthy",
     detail: value,
+  };
+}
+
+function checkRenderWorker(): HealthCheck {
+  return {
+    label: "Render worker",
+    status: "unconfigured",
+    detail: "Optional future background worker only; main app host is Vercel",
   };
 }
 
@@ -671,10 +679,11 @@ export async function getHealthReport(): Promise<HealthReport> {
     checkUpstashRedisToken(),
     checkRateLimiterMode(),
 
-    // Vercel
+    // Hosting
     checkDeploymentPlatform(),
     checkVercelEnvironment(),
     checkVercelDeployUrl(),
+    checkRenderWorker(),
 
     // Sentry
     checkSentryDsn(),
