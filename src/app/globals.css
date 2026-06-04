@@ -4393,18 +4393,26 @@ body:has(.landing-root) .btm-nav-garrincha{ display: none !important; }
 
 .mc-hero-date { font-size: 14px; color: var(--mc-muted); margin: 0; display: flex; align-items: center; gap: 6px; }
 
-.mc-hero-visual { position: relative; display: flex; align-items: center; justify-content: center; height: 180px; }
+.mc-hero-visual { position: relative; display: flex; align-items: center; justify-content: center; height: 240px; }
 
 .mc-trophy-glow {
   position: absolute;
-  width: 180px; height: 180px;
+  width: 220px; height: 220px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(245,194,66,0.35) 0%, rgba(245,194,66,0.1) 50%, transparent 70%);
-  filter: blur(24px);
+  filter: blur(28px);
   z-index: 0;
 }
 
-.mc-trophy-icon { position: relative; z-index: 1; filter: drop-shadow(0 0 20px rgba(245,194,66,0.4)); }
+.mc-trophy-img {
+  position: relative;
+  z-index: 1;
+  height: 220px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 32px rgba(245,194,66,0.45));
+}
 
 /* ── Stats ── */
 .mc-stats-grid {
