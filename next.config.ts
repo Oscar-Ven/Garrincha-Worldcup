@@ -49,10 +49,17 @@ export default withSentryConfig(nextConfig, {
   org: "garrincha-worldcup",
   project: "garrincha-worldcup",
 
-  // Upload source maps to Sentry during production builds.
-  // SENTRY_AUTH_TOKEN must be set in the build environment.
-  silent: !process.env.CI, // only verbose in CI
+  // Suppress Sentry build output unless CI is explicitly set.
+  silent: !process.env.CI,
 
+  // Only upload source maps when SENTRY_AUTH_TOKEN is present.
+  // Without a token the upload would fail and potentially break the build.
+  // On Render, set SENTRY_AUTH_TOKEN in the service environment to enable uploads.
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+
+  // Remove Sentry debug logging from production bundles to reduce bundle size.
   webpack: {
     treeshake: {
       removeDebugLogging: true,
