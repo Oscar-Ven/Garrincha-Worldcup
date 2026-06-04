@@ -4,46 +4,67 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { type Locale, t } from "@/lib/translations";
 
-interface Center {
-  id: string;
-  name: string;
-  city: string;
-  country: string;
+interface Center { id: string; name: string; city: string; country: string; }
+
+const CENTER_COLORS: Record<string, string> = {
+  antwerp: "#5FE090", brussels: "#F5C242", ghent: "#6FB3FF", liege: "#FF8C66",
+  leuven: "#C792EA", bruges: "#4ED9C0",
+  "antwerpen-noord": "#5FE090", "antwerpen-zuid": "#F5C242", "gent-arsenaal": "#6FB3FF",
+  "gent-theloop": "#46C878", charleroi: "#FF8C66", kortrijk: "#C792EA",
+  luik: "#4ED9C0", diegem: "#FFB347", "westgate-dilbeek": "#E879F9",
+};
+
+function getColor(name: string): string {
+  const key = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z-]/g, "");
+  return CENTER_COLORS[key] ?? "#5FE090";
 }
 
-interface CompetitionCenterSelectProps {
-  centers: Center[];
-  activationCenterName: string;
-  locale: Locale;
+function getShort(name: string): string {
+  return name.replace("GARRINCHA ", "").slice(0, 3).toUpperCase();
+}
+
+function CenterShield({ name, size = 32 }: { name: string; size?: number }) {
+  const color = getColor(name);
+  const short = getShort(name);
+  return (
+    <div style={{ width: size, height: size * 1.1, position: "relative", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+      <svg viewBox="0 0 40 44" width={size} height={size * 1.1} style={{ position: "absolute", inset: 0 }}>
+        <path d="M20 1 L38 7 V22 C38 33 30 40 20 43 C10 40 2 33 2 22 V7 Z" fill={color} fillOpacity="0.16" stroke={color} strokeWidth="1.6" />
+      </svg>
+      <span style={{ position: "relative", fontFamily: "var(--f-disp)", fontWeight: 900, fontStyle: "italic", fontSize: size * 0.34, color, letterSpacing: "-0.02em" }}>{short}</span>
+    </div>
+  );
 }
 
 export default function CompetitionCenterSelect({
   centers,
   activationCenterName,
   locale,
-}: CompetitionCenterSelectProps) {
+}: {
+  centers: Center[];
+  activationCenterName: string;
+  locale: Locale;
+}) {
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSelect(centerId: string) {
+    if (pending) return;
     setSelectedId(centerId);
     setPending(true);
     setError(null);
-
     try {
       const response = await fetch("/api/competition-center", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ centerId }),
       });
-
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(data?.error ?? t(locale, "dashboard.noCenter"));
       }
-
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t(locale, "dashboard.noCenter"));
@@ -53,58 +74,50 @@ export default function CompetitionCenterSelect({
   }
 
   return (
-    <div className="competition-center-select">
-      <div className="competition-center-select__header">
-        <h2 className="competition-center-select__title">{t(locale, "competition.title")}</h2>
-        <p className="competition-center-select__subtitle">{t(locale, "competition.copy")}</p>
-        {activationCenterName && (
-          <p className="competition-center-select__activation-note">
-            {t(locale, "competition.activationNote", { center: activationCenterName })}
-          </p>
-        )}
-        <p className="competition-center-select__lock-note">{t(locale, "competition.lock")}</p>
+    <div className="card" style={{ padding: "18px 16px" }}>
+      {/* section title */}
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, margin: "2px 0 12px" }}>
+        <h3 className="disp" style={{ margin: 0, fontSize: 23, color: "var(--ink)" }}>{t(locale, "competition.title")}</h3>
       </div>
+      <p style={{ fontSize: 13, color: "var(--ink-dim)", margin: "2px 0 6px", lineHeight: 1.4 }}>{t(locale, "competition.copy")}</p>
+      {activationCenterName && (
+        <p style={{ fontSize: 12, color: "var(--ink-faint)", margin: "0 0 14px" }}>
+          {t(locale, "competition.activationNote", { center: activationCenterName })}
+        </p>
+      )}
 
       {error && (
-        <div className="competition-center-select__error" role="alert">
-          {error}
+        <div style={{ padding: "10px 12px", borderRadius: 10, background: "rgba(255,90,77,0.10)", border: "1px solid rgba(255,90,77,0.3)", color: "var(--live)", fontSize: 13, fontWeight: 600, marginBottom: 12 }}>
+          ⚠ {error}
         </div>
       )}
 
-      <ul className="competition-center-select__list" role="list">
+      <div className="center-choose-grid">
         {centers.map((center) => {
-          const isSelected = selectedId === center.id;
-          const isDisabled = pending;
-
+          const on = selectedId === center.id;
           return (
-            <li key={center.id} className="competition-center-select__item">
-              <button
-                type="button"
-                className={[
-                  "competition-center-select__card",
-                  isSelected ? "competition-center-select__card--selected" : "",
-                  isDisabled ? "competition-center-select__card--disabled" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                onClick={() => handleSelect(center.id)}
-                disabled={isDisabled}
-                aria-pressed={isSelected}
-              >
-                <span className="competition-center-select__card-name">{center.name}</span>
-                <span className="competition-center-select__card-location">
-                  {center.city}, {center.country}
-                </span>
-                {isSelected && pending && (
-                  <span className="competition-center-select__card-saving" aria-live="polite">
-                    {t(locale, "competition.choosing")}
-                  </span>
-                )}
-              </button>
-            </li>
+            <button
+              key={center.id}
+              type="button"
+              className={`center-choose-btn${on ? " selected" : ""}`}
+              onClick={() => handleSelect(center.id)}
+              disabled={pending}
+              aria-pressed={on}
+            >
+              <CenterShield name={center.name} size={28} />
+              <div style={{ minWidth: 0 }}>
+                <div className="disp" style={{ fontSize: 14, color: "var(--ink)", lineHeight: 1.1 }}>{center.name.replace("GARRINCHA ", "")}</div>
+                <div style={{ fontSize: 10, color: "var(--ink-faint)", marginTop: 2 }}>{center.city}</div>
+                {on && pending && <div style={{ fontSize: 10, color: "var(--green)", marginTop: 2 }}>{t(locale, "competition.choosing")}</div>}
+              </div>
+            </button>
           );
         })}
-      </ul>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 12, fontSize: 11, color: "var(--ink-faint)" }}>
+        🔒 {t(locale, "competition.lock")}
+      </div>
     </div>
   );
 }

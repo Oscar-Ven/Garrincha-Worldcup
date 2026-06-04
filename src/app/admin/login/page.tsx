@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { LoginForm } from "@/components/AuthForms";
 import { getLocale } from "@/lib/i18n";
 import { t } from "@/lib/translations";
@@ -10,39 +11,37 @@ export default async function AdminLoginPage() {
   const isPreview = !hasDatabaseConfig();
 
   return (
-    <main className="page">
-      {isPreview && (
-        <div className="notice" style={{ marginBottom: 20 }}>
-          <strong>Preview mode —</strong> no database connected. Admin login is disabled.
-          Go directly to <Link href="/admin" style={{ fontWeight: 700, textDecoration: "underline" }}>Admin dashboard</Link> or <Link href="/owner" style={{ fontWeight: 700, textDecoration: "underline" }}>Owner dashboard</Link> — no login needed in preview.
+    <div className="auth-page" style={{ background: "var(--bg-2)", minHeight: "100vh", justifyContent: "center", alignItems: "center" }}>
+      <div style={{ width: "100%", maxWidth: 400 }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <Image src="/garrincha-white.png" alt="GARRINCHA" height={22} width={132} style={{ height: 22, width: "auto", display: "inline-block", opacity: 0.9 }} />
+          <div className="admin-side-tag" style={{ display: "inline-block", marginLeft: 10 }}>ADMIN</div>
         </div>
-      )}
-      <div className="auth-shell">
-        <section className="auth-panel">
-          <span className="eyebrow">{t(locale, "auth.adminEyebrow")}</span>
-          <h1>{t(locale, "auth.adminTitle")}</h1>
-          <p>{t(locale, "auth.adminCopy")}</p>
-        </section>
-        <section className="card">
-          <h2>{t(locale, "auth.adminCredentials")}</h2>
-          <p className="muted">
-            {isPreview
-              ? "Login requires a live Supabase database. Use the links above to access admin pages in preview mode."
-              : t(locale, "auth.adminCredentialsCopy")}
+
+        <div className="acard" style={{ padding: "28px 24px" }}>
+          <div className="kick" style={{ fontSize: 12, color: "var(--green)", marginBottom: 8 }}>{t(locale, "auth.adminEyebrow")}</div>
+          <h1 className="disp" style={{ fontSize: 28, color: "var(--ink)", margin: "0 0 6px" }}>{t(locale, "auth.adminTitle")}</h1>
+          <p style={{ fontSize: 13, color: "var(--ink-dim)", margin: "0 0 24px", lineHeight: 1.5 }}>
+            {isPreview ? "Login requires a live Supabase database." : t(locale, "auth.adminCopy")}
           </p>
-          {!isPreview && (
+
+          {isPreview ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <Link href="/admin" className="btn btn-green btn-md" style={{ textDecoration: "none" }}>Admin dashboard (preview)</Link>
+              <Link href="/dashboard" className="btn btn-ghost btn-md" style={{ textDecoration: "none" }}>Back to app</Link>
+            </div>
+          ) : (
             <Suspense>
               <LoginForm admin locale={locale} />
             </Suspense>
           )}
-          {isPreview && (
-            <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
-              <Link className="button primary" href="/owner">👑 Owner dashboard</Link>
-              <Link className="button dark" href="/admin">Admin dashboard</Link>
-            </div>
-          )}
-        </section>
+        </div>
+
+        <p style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "var(--ink-faint)" }}>
+          {t(locale, "auth.adminCredentialsCopy")}
+        </p>
       </div>
-    </main>
+    </div>
   );
 }
