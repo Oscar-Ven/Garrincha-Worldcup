@@ -93,8 +93,11 @@ export default async function RootLayout({
               </Link>
 
               <nav className="site-topbar-nav" aria-label="Primary navigation">
-                <Link href="/dashboard" className="site-nav-link">{t(locale, "nav.matches")}</Link>
+                <Link href="/matches" className="site-nav-link">{t(locale, "nav.matches")}</Link>
                 <Link href="/leaderboards" className="site-nav-link">{t(locale, "nav.leaderboards")}</Link>
+                {user && (
+                  <Link href="/dashboard" className="site-nav-link">{t(locale, "nav.predict")}</Link>
+                )}
                 {isAdmin && (
                   <Link href="/admin" className="site-nav-link">{t(locale, "nav.admin")}</Link>
                 )}
