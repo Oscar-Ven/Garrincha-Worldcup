@@ -15,16 +15,18 @@ jobs:
     name: Production Build
     runs-on: ubuntu-latest
 
-    # Placeholder CI database values — routes are dynamic so no real DB needed.
+    # Match Render's environment as closely as possible.
+    # NODE_ENV=production is set to match Render exactly.
     env:
+      NODE_ENV: "production"
       DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
       DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
       JWT_SECRET: "ci-only-placeholder-secret-at-least-32-chars-long"
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
       APP_PREVIEW_MODE: "false"
       NEXT_PUBLIC_DEMO_MODE: "false"
-      # No SENTRY_AUTH_TOKEN — source map upload is disabled when token is absent.
-      # This mirrors the current Render environment for debugging parity.
+      NEXT_TELEMETRY_DISABLED: "1"
+      # No SENTRY_AUTH_TOKEN — sourcemaps.disable = true when token is absent.
 
     steps:
       - name: Checkout
