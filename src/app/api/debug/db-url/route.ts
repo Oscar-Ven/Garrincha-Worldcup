@@ -79,7 +79,12 @@ export async function GET() {
       await prisma.$queryRaw`SELECT 1`;
       prismaConnectResult = "success";
     } catch (e) {
-      prismaConnectResult = `failed: ${(e as Error).constructor.name}`;
+      const err = e as { constructor: { name: string }; code?: string; message?: string };
+      prismaConnectResult = [
+        `type=${err.constructor.name}`,
+        err.code ? `code=${err.code}` : null,
+        err.message ? `msg=${err.message.slice(0, 150).replace(/password=[^&\s]*/gi, "***")}` : null,
+      ].filter(Boolean).join(" | ");
     }
   }
 
