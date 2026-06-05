@@ -145,7 +145,6 @@ function buildDemoMatches(): DemoMatch[] {
   for (const [groupName, names] of Object.entries(GROUPS)) {
     for (const [hi, ai] of PAIR_INDEXES) {
       const kickoffAt = demoKickoff(matchNo);
-      const locked = now >= new Date(kickoffAt.getTime() + 5 * 60 * 1000);
       matches.push({
         id: `demo-match-${matchNo}`,
         fifaMatchNo: matchNo,

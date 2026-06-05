@@ -2,9 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { CountryFlag } from "@/components/Flag";
 import { isoCodeForTeam } from "@/lib/flags";
-import { isPredictionLocked } from "@/lib/scoring";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

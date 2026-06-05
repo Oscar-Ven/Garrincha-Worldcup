@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { getLocale } from "@/lib/i18n";
 import { t } from "@/lib/translations";
 import { LandingClient } from "@/components/LandingClient";
+import { demoAllMatches } from "@/lib/ui-demo-data";
 
 // ── All 10 GARRINCHA centers ──────────────────────────────────────────────────
 const CENTERS_DATA = [
@@ -36,11 +36,79 @@ function CenterCard({ short, name, city, color }: { short: string; name: string;
   );
 }
 
+function HeroBoard({ centerCount, matchCount }: { centerCount: number; matchCount: number }) {
+  return (
+    <div className="lp-hero-board rv">
+      <div className="lp-hero-board-top">
+        <div>
+          <span className="lp-hero-board-kicker">Campaign board</span>
+          <div className="lp-hero-board-title">Live prediction flow</div>
+        </div>
+        <span className="lp-mini-chip lp-mini-chip-strong">Open now</span>
+      </div>
+
+      <div className="lp-hero-board-grid">
+        <div className="lp-hero-board-card lp-hero-match-card">
+          <div className="lp-hero-board-head">
+            <span>Next kickoff</span>
+            <span>Locks 5 min after kickoff</span>
+          </div>
+          <div className="lp-hero-matchline">
+            <div className="lp-hero-team">
+              <div className="lp-flag" style={{ background: "linear-gradient(90deg,#2B2B2B 0 33.3%,#FFD90F 33.3% 66.6%,#F31830 66.6%)" }} />
+              <span>BEL</span>
+            </div>
+            <span className="lp-hero-vs">vs</span>
+            <div className="lp-hero-team">
+              <div className="lp-flag" style={{ background: "linear-gradient(90deg,#0055A4 0 33.3%,#fff 33.3% 66.6%,#EF4135 66.6%)" }} />
+              <span>FRA</span>
+            </div>
+          </div>
+          <div className="lp-hero-scoreline">
+            <div className="lp-hero-scorebox">2</div>
+            <span>:</span>
+            <div className="lp-hero-scorebox">1</div>
+          </div>
+          <div className="lp-hero-matchmeta">18:00 · Tue 09 Jun · Group A</div>
+        </div>
+
+        <div className="lp-hero-board-card lp-hero-rules-card">
+          <div className="lp-hero-board-head">
+            <span>Scoring</span>
+            <span>Every point counts</span>
+          </div>
+          <div className="lp-hero-rules-list">
+            <div className="lp-hero-rule">
+              <strong>5</strong>
+              <span>Exact score</span>
+            </div>
+            <div className="lp-hero-rule">
+              <strong>3</strong>
+              <span>Result + difference</span>
+            </div>
+            <div className="lp-hero-rule">
+              <strong>2</strong>
+              <span>Right result</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="lp-hero-board-footer">
+        <span>{centerCount} centers</span>
+        <span>{matchCount} matches</span>
+        <span>€0 to play</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
   const locale = await getLocale();
   const centerCount = CENTERS_DATA.length;
+  const matchCount = demoAllMatches.length;
 
   return (
     <div className="landing-root">
@@ -51,11 +119,15 @@ export default async function HomePage() {
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="lp-hero" id="top">
-        <div className="lp-wrap lp-hero-grid">
-
-          {/* Left: copy */}
-          <div>
+        <div className="lp-wrap lp-hero-shell">
+          <div className="lp-hero-copy rv">
             <span className="lp-hero-eyebrow">{t(locale, "tagline")}</span>
+
+            <div className="lp-hero-ribbon">
+              <span>{centerCount} centers</span>
+              <span>{matchCount} matches</span>
+              <span>€0 to play</span>
+            </div>
 
             <h1 className="lp-h1">
               <span>{t(locale, "hero_l1")}</span><br />
@@ -81,8 +153,8 @@ export default async function HomePage() {
                 <div className="lp-stat-l">{t(locale, "stat_centers")}</div>
               </div>
               <div className="lp-stat">
-                <div className="lp-stat-n">€0</div>
-                <div className="lp-stat-l">{t(locale, "stat_free")}</div>
+                <div className="lp-stat-n">{matchCount}</div>
+                <div className="lp-stat-l">Matches</div>
               </div>
               <div className="lp-stat">
                 <div className="lp-stat-n" style={{ color: "var(--green)" }}>∞</div>
@@ -91,49 +163,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Right: phone mockup */}
-          <div className="lp-phone-wrap">
-            <div className="lp-phone-glow" />
-            <div className="lp-phone">
-              <div className="lp-island" />
-              <div className="lp-phone-screen">
-                <div className="lp-ps-pad">
-                  <div className="lp-ps-top">
-                    <Image src="/garrincha-white.png" alt="GARRINCHA" height={15} width={90} style={{ height: 15, width: "auto" }} />
-                    <span className="lp-mini-chip">2 open</span>
-                  </div>
-                  {/* Prediction card preview */}
-                  <div className="lp-pcard">
-                    <div className="lp-pcard-top">
-                      <span className="lp-pcard-stage">Group A · MD1</span>
-                      <span className="lp-mini-chip">Open</span>
-                    </div>
-                    {/* Teams */}
-                    <div className="lp-row" style={{ marginBottom: 14 }}>
-                      <div className="lp-team">
-                        <div className="lp-flag" style={{ background: "linear-gradient(90deg,#2B2B2B 0 33.3%,#FFD90F 33.3% 66.6%,#F31830 66.6%)" }} />
-                        <span className="lp-team-ab">BEL</span>
-                      </div>
-                      <span className="lp-colon">vs</span>
-                      <div className="lp-team">
-                        <div className="lp-flag" style={{ background: "linear-gradient(90deg,#0055A4 0 33.3%,#fff 33.3% 66.6%,#EF4135 66.6%)" }} />
-                        <span className="lp-team-ab">FRA</span>
-                      </div>
-                    </div>
-                    {/* Score boxes */}
-                    <div className="lp-row" style={{ justifyContent: "center", gap: 16, borderTop: "1px solid var(--line)", paddingTop: 14 }}>
-                      <div className="lp-sbox">2</div>
-                      <span className="lp-colon">:</span>
-                      <div className="lp-sbox">1</div>
-                    </div>
-                    <div className="lp-pcard-meta">18:00 · Tue 09 Jun</div>
-                    <div className="lp-pcard-save">Save prediction</div>
-                  </div>
-                  <div className="lp-lock-note">⏱ Locks 5 min after kickoff</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <HeroBoard centerCount={centerCount} matchCount={matchCount} />
         </div>
       </section>
 

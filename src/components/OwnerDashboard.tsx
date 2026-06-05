@@ -412,6 +412,7 @@ function PlayersTab({ users, ownerId }: { users: OwnerUser[]; ownerId: string })
   const [roleFilter, setRoleFilter] = useState<"all" | "USER" | "ADMIN" | "SUPER_ADMIN">("all");
   const [centerFilter, setCenterFilter] = useState("all");
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [roleStatus, setRoleStatus] = useState<Record<string, string>>({});
 
   const centers = Array.from(new Set(users.map((u) => u.center.name))).sort();
@@ -438,11 +439,12 @@ function PlayersTab({ users, ownerId }: { users: OwnerUser[]; ownerId: string })
   async function deleteUser(userId: string, name: string) {
     if (!confirm(`Delete "${name}"? This removes all their predictions and points. This cannot be undone.`)) return;
     setDeleting(userId);
+    setDeleteError(null);
     try {
       await apiDelete(`/api/admin/users/${userId}`);
       router.refresh();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Could not delete user.");
+      setDeleteError(err instanceof Error ? err.message : "Could not delete user.");
     } finally { setDeleting(null); }
   }
 
@@ -534,6 +536,12 @@ function PlayersTab({ users, ownerId }: { users: OwnerUser[]; ownerId: string })
           </tbody>
         </table>
       </div>
+      {deleteError && (
+        <div role="alert" style={{ marginTop: 12, padding: "10px 14px", borderRadius: 8, background: "#FEE2E2", border: "1px solid #FECACA", color: "#B91C1C", fontSize: 13, fontWeight: 500 }}>
+          ⚠ {deleteError}
+          <button onClick={() => setDeleteError(null)} style={{ marginLeft: 10, background: "transparent", border: "none", cursor: "pointer", color: "#B91C1C", fontWeight: 700 }}>✕</button>
+        </div>
+      )}
     </div>
   );
 }

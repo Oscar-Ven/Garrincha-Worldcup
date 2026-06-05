@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Image from "next/image";
 import { getAllMatches } from "@/lib/matches";
 import { hasDatabaseConfig } from "@/lib/app-mode";

@@ -9,7 +9,7 @@ import CompetitionCenterSelect from "@/components/CompetitionCenterSelect";
 import { DataModeNotice } from "@/components/DataModeNotice";
 import { getCurrentUser } from "@/lib/auth";
 import { getLocale } from "@/lib/i18n";
-import { getLeaderboard, getUserRankAndPoints } from "@/lib/leaderboards";
+import { getUserRankAndPoints } from "@/lib/leaderboards";
 import { getMatchesForUser } from "@/lib/matches";
 import { isPredictionLocked } from "@/lib/scoring";
 import { t } from "@/lib/translations";
@@ -92,8 +92,8 @@ export default async function DashboardPage() {
   const isDemo = !hasDatabaseConfig();
   const demoRankPoints = { rank: 0, points: 0 };
 
-  const [matches, rankPoints, centers, topPlayers] = isDemo
-    ? [demoMatches, demoRankPoints, demoCenters, demoLeaderboard.map((r, i) => ({ ...r, rank: i + 1 }))]
+  const [matches, rankPoints, centers] = isDemo
+    ? [demoMatches, demoRankPoints, demoCenters]
     : await Promise.all([
         getMatchesForUser(user.id),
         getUserRankAndPoints(user.id),
@@ -101,7 +101,6 @@ export default async function DashboardPage() {
           orderBy: [{ country: "asc" }, { city: "asc" }],
           select: { id: true, name: true, city: true, country: true },
         }),
-        getLeaderboard({}, 5).then((rows) => rows.map((r, i) => ({ ...r, rank: i + 1 }))),
       ]);
 
   const now = new Date();
