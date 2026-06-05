@@ -15,20 +15,19 @@ export function DashboardAppBar({
 }) {
   return (
     <header className="app-bar">
-      {/* Left: GARRINCHA logo + subtitle */}
       <Link href="/" className="app-bar-brand" aria-label="GARRINCHA home">
         <Image
-          src="/garrincha-white.png"
-          alt="GARRINCHA"
-          height={20}
-          width={120}
-          style={{ height: 20, width: "auto" }}
-          priority
+          src="/branding/garrincha-white.png"
+          alt=""
+          width={270}
+          height={66}
+          className="app-bar-brand-logo"
+          style={{ width: "auto", height: 22 }}
         />
+        <span>GARRINCHA</span>
         <span className="app-bar-wc">{subtitle}</span>
       </Link>
 
-      {/* Right: avatar + logout */}
       <div className="app-bar-right">
         <Link href="/dashboard" className="app-bar-avatar" aria-label={`Dashboard — ${displayName}`}>
           {getInitials(displayName)}

@@ -276,7 +276,7 @@ export const demoUser = {
   competitionCenterId: "demo-gent-arsenaal",
   competitionCenterLockedAt: null,
   competitionCenter: { id: "demo-gent-arsenaal", name: "GARRINCHA Gent Arsenaal", country: "Belgium", city: "Gent" },
-  center: { id: "demo-gent-arsenaal", name: "GARRINCHA Gent Arsenaal", country: "Belgium", city: "Gent", bannerUrl: "/branding/garrincha-banner.svg" },
+  center: { id: "demo-gent-arsenaal", name: "GARRINCHA Gent Arsenaal", country: "Belgium", city: "Gent", bannerUrl: null },
 };
 
 export const demoBonusUsers = [

@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420" role="img" aria-label="GARRINCHA World Cup banner">
-  <rect width="1400" height="420" fill="#083f31"/>
-  <path d="M0 320C230 240 380 402 604 306c237-102 412-76 796 16v98H0z" fill="#0c6b4f"/>
-  <circle cx="1090" cy="96" r="74" fill="#d8a229"/>
-  <text x="92" y="178" fill="#fffaf0" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="800">GARRINCHA</text>
-  <text x="96" y="250" fill="#d8a229" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700">WORLD CUP PREDICTION GAME</text>
-</svg>

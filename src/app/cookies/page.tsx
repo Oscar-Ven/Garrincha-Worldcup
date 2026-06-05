@@ -26,7 +26,7 @@ export default function CookiesPage() {
         use advertising cookies, tracking pixels, or third-party analytics cookies.
       </p>
 
-      <h3 style={{ fontFamily: "var(--f-disp)", fontStyle: "italic", fontSize: 17, marginBottom: 8, color: "var(--ink)" }}>
+      <h3 style={{ fontFamily: "Arial, Helvetica, sans-serif", fontStyle: "normal", fontSize: 17, marginBottom: 8, color: "var(--ink)" }}>
         Session Cookie
       </h3>
       <p>
@@ -37,7 +37,7 @@ export default function CookiesPage() {
         This cookie is essential for authentication and expires when you log out or after 30 days.
       </p>
 
-      <h3 style={{ fontFamily: "var(--f-disp)", fontStyle: "italic", fontSize: 17, marginBottom: 8, marginTop: 20, color: "var(--ink)" }}>
+      <h3 style={{ fontFamily: "Arial, Helvetica, sans-serif", fontStyle: "normal", fontSize: 17, marginBottom: 8, marginTop: 20, color: "var(--ink)" }}>
         Language Preference Cookie
       </h3>
       <p>

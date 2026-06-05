@@ -6,23 +6,21 @@ export function PublicFooter() {
     <footer className="site-footer" aria-label="Site footer">
       <div className="container">
         <div className="site-footer-main">
-          {/* Brand */}
           <Link href="/" className="site-footer-brand" aria-label="GARRINCHA home">
-            <div className="site-footer-logo">
-              <Image
-                src="/images/player-medal.png"
-                alt="GARRINCHA logo"
-                width={44}
-                height={44}
-              />
-            </div>
+            <Image
+              src="/branding/garrincha-white.png"
+              alt=""
+              width={270}
+              height={66}
+              className="site-footer-brand-logo"
+              style={{ width: "auto", height: 24 }}
+            />
             <div>
               <span className="site-footer-brand-name">GARRINCHA</span>
               <span className="site-footer-brand-sub">World Cup 2026</span>
             </div>
           </Link>
 
-          {/* Social icons */}
           <div className="site-footer-social">
             <a
               href="https://www.instagram.com/garrincha_belgium/"
@@ -60,7 +58,6 @@ export function PublicFooter() {
           </div>
         </div>
 
-        {/* Legal row */}
         <div className="site-footer-legal">
           <span>©2026 Kempes BV</span>
           <span className="site-footer-sep">·</span>

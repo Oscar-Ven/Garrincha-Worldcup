@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 interface AdminSidebarProps {
   active: string;
@@ -122,15 +121,13 @@ export function AdminSidebar({ active, isSuperAdmin = false, centerName, adminNa
 
   return (
     <aside className="manager-sidebar">
-      {/* Logo + badge */}
       <div className="manager-sidebar-top">
-        <Image src="/garrincha-white.png" alt="GARRINCHA" height={18} width={108} style={{ height: 18, width: "auto" }} />
+        <span>GARRINCHA</span>
         <span className={`manager-badge${isSuperAdmin ? " manager-badge--owner" : ""}`}>
           {isSuperAdmin ? "OWNER" : "MANAGER"}
         </span>
       </div>
 
-      {/* Role row */}
       <div className="manager-role-row">
         <div className={`manager-role-label${isSuperAdmin ? " manager-role-label--owner" : ""}`}>
           {isSuperAdmin ? "Platform Owner" : "Center Manager"}
@@ -140,7 +137,6 @@ export function AdminSidebar({ active, isSuperAdmin = false, centerName, adminNa
         )}
       </div>
 
-      {/* Nav links */}
       <nav className="manager-nav">
         {links.map((link) => (
           <Link
@@ -154,7 +150,6 @@ export function AdminSidebar({ active, isSuperAdmin = false, centerName, adminNa
         ))}
       </nav>
 
-      {/* Footer */}
       <div className="manager-sidebar-foot">
         <div className="manager-avatar">{(adminName?.[0] ?? "M").toUpperCase()}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
