@@ -31,6 +31,17 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
+          <div className="lp-mobile-preview" aria-hidden="true">
+            <Image
+              src="/images/landing-mobile-predictor.png"
+              alt=""
+              width={1024}
+              height={1536}
+              sizes="(max-width: 900px) 86vw, 420px"
+              className="lp-mobile-preview-image"
+              priority
+            />
+          </div>
         </div>
       </section>
 
