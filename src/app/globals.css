@@ -681,9 +681,9 @@ label,
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 430px);
   align-items: center;
-  gap: 56px;
+  gap: clamp(34px, 5vw, 72px);
 }
 
 .lp-hero-inner > div:first-child {
@@ -748,21 +748,61 @@ label,
   color: #06210f;
 }
 
-.lp-hero-inner::after {
-  width: min(100%, 330px);
-  aspect-ratio: 0.72;
+.lp-campaign-section {
+  padding: clamp(42px, 7vw, 90px) 0;
+}
+
+.lp-campaign-graphic {
+  position: relative;
+  overflow: hidden;
+  border-radius: clamp(16px, 2vw, 28px);
+  background: #050906;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
+}
+
+.lp-campaign-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lp-campaign-register-link {
+  position: absolute;
+  right: 6.2%;
+  bottom: 21.5%;
+  width: 20%;
+  height: 12%;
+  border-radius: 18px;
+}
+
+.lp-campaign-graphic--secondary {
+  margin-top: clamp(18px, 3vw, 34px);
+}
+
+.lp-campaign-leaderboard-link {
+  position: absolute;
+  right: 6.2%;
+  bottom: 21.5%;
+  width: 39%;
+  height: 12%;
+  border-radius: 18px;
+}
+
+.lp-campaign-register-link:focus-visible,
+.lp-campaign-leaderboard-link:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 5px;
+}
+
+.lp-mobile-preview {
   justify-self: center;
-  border: 11px solid #000;
-  border-radius: 42px;
-  content: "";
-  background:
-    radial-gradient(90px 90px at 50% 24%, rgba(95, 224, 144, 0.16), transparent 70%),
-    linear-gradient(90deg, transparent 18%, rgba(95, 224, 144, 0.18) 18% 38%, transparent 38% 44%, rgba(95, 224, 144, 0.18) 44% 64%, transparent 64%) 50% 76% / 70% 12% no-repeat,
-    linear-gradient(90deg, rgba(241, 245, 238, 0.18), rgba(241, 245, 238, 0.04)) 50% 64% / 72% 1px no-repeat,
-    linear-gradient(90deg, rgba(241, 245, 238, 0.18), rgba(241, 245, 238, 0.04)) 50% 70% / 72% 1px no-repeat,
-    linear-gradient(180deg, var(--surface), var(--bg-2)) padding-box,
-    linear-gradient(160deg, rgba(95, 224, 144, 0.18), rgba(245, 194, 66, 0.12)) border-box;
-  box-shadow: 0 50px 90px -20px rgba(0, 0, 0, 0.75), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  width: min(100%, 430px);
+}
+
+.lp-mobile-preview-image {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .lp-steps-section,
@@ -2132,8 +2172,8 @@ tr:last-child td {
     grid-template-columns: 1fr;
   }
 
-  .lp-hero-inner::after {
-    display: none;
+  .lp-mobile-preview {
+    width: min(86vw, 360px);
   }
 
   .dash-stats,

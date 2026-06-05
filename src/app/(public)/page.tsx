@@ -1,19 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const CENTERS = [
-  { short: "AN", name: "Antwerpen Noord", city: "Antwerpen" },
-  { short: "AZ", name: "Antwerpen Zuid", city: "Antwerpen" },
-  { short: "CD", name: "Charleroi Dampremy", city: "Charleroi" },
-  { short: "CM", name: "Charleroi Montignies", city: "Charleroi" },
-  { short: "DG", name: "Diegem", city: "Diegem" },
-  { short: "GA", name: "Gent Arsenaal", city: "Gent" },
-  { short: "GT", name: "Gent The Loop", city: "Gent" },
-  { short: "KT", name: "Kortrijk", city: "Kortrijk" },
-  { short: "LK", name: "Luik", city: "Luik" },
-  { short: "WD", name: "Westgate Dilbeek", city: "Dilbeek" },
-];
-
 export default function HomePage() {
   return (
     <main className="lp">
@@ -44,129 +31,50 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="lp-steps-section">
-        <div className="container">
-          <div className="lp-steps">
-            <article className="step-card">
-              <h2>Register</h2>
-              <p>Create your free player profile.</p>
-            </article>
-            <article className="step-card">
-              <h2>Predict</h2>
-              <p>Choose the score before each match starts.</p>
-            </article>
-            <article className="step-card">
-              <h2>Climb</h2>
-              <p>Earn points and rise in the global and center leaderboards.</p>
-            </article>
+          <div className="lp-mobile-preview" aria-hidden="true">
+            <Image
+              src="/images/landing-mobile-predictor.png"
+              alt=""
+              width={1024}
+              height={1536}
+              sizes="(max-width: 900px) 86vw, 420px"
+              className="lp-mobile-preview-image"
+              priority
+            />
           </div>
         </div>
       </section>
 
-      <section className="score-section">
+      <section className="lp-campaign-section" aria-labelledby="lp-campaign-title">
         <div className="container">
-          <div className="score-grid">
-
-            {/* ── Simple Scoring ── */}
-            <article className="sc-card">
-              <div className="sc-card-head">
-                <div className="sc-hex">
-                  <svg className="sc-hex-shape" viewBox="0 0 56 56" fill="none">
-                    <polygon points="28,2 54,15 54,41 28,54 2,41 2,15" fill="#0c1a10" stroke="#5fe090" strokeWidth="1.5"/>
-                  </svg>
-                  <svg className="sc-hex-ico" viewBox="0 0 24 24" fill="none" stroke="#5fe090" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M8 21h8M12 17v4M12 17a5 5 0 0 0 5-5V5H7v7a5 5 0 0 0 5 5Z"/>
-                    <path d="M7 5H4a2 2 0 0 0-2 2v1a4 4 0 0 0 4 4h1M17 5h3a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-1"/>
-                  </svg>
-                </div>
-                <h2 className="sc-card-title">Simple<br/>Scoring</h2>
-              </div>
-              <div className="sc-divider"/>
-              <div className="sc-rows">
-                <div className="sc-row">
-                  <span className="sc-row-ico">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg>
-                  </span>
-                  <span className="sc-row-txt">Exact score</span>
-                  <span className="sc-row-sep"/>
-                  <span className="sc-row-pts"><strong className="sc-pts-num">5</strong><small className="sc-pts-lbl">points</small></span>
-                </div>
-                <div className="sc-row">
-                  <span className="sc-row-ico">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="6" width="20" height="13" rx="1"/><path d="M2 10h20M2 14h20M9 6v13M15 6v13"/></svg>
-                  </span>
-                  <span className="sc-row-txt">Correct result + goal difference</span>
-                  <span className="sc-row-sep"/>
-                  <span className="sc-row-pts"><strong className="sc-pts-num">3</strong><small className="sc-pts-lbl">points</small></span>
-                </div>
-                <div className="sc-row">
-                  <span className="sc-row-ico">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                  </span>
-                  <span className="sc-row-txt">Correct result</span>
-                  <span className="sc-row-sep"/>
-                  <span className="sc-row-pts"><strong className="sc-pts-num">2</strong><small className="sc-pts-lbl">points</small></span>
-                </div>
-                <div className="sc-row sc-row--wrong">
-                  <span className="sc-row-ico sc-row-ico--wrong">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
-                  </span>
-                  <span className="sc-row-txt">Wrong prediction</span>
-                  <span className="sc-row-sep"/>
-                  <span className="sc-row-pts sc-row-pts--zero"><strong className="sc-pts-num sc-pts-num--zero">0</strong><small className="sc-pts-lbl">points</small></span>
-                </div>
-              </div>
-            </article>
-
-            {/* ── Play for your Center ── */}
-            <article className="sc-card">
-              <div className="sc-card-head">
-                <div className="sc-hex">
-                  <svg className="sc-hex-shape" viewBox="0 0 56 56" fill="none">
-                    <polygon points="28,2 54,15 54,41 28,54 2,41 2,15" fill="#0c1a10" stroke="#5fe090" strokeWidth="1.5"/>
-                  </svg>
-                  <svg className="sc-hex-ico" viewBox="0 0 24 24" fill="none" stroke="#5fe090" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87"/>
-                  </svg>
-                </div>
-                <h2 className="sc-card-title">Play for your<br/>Garrincha Center</h2>
-              </div>
-              <div className="sc-divider"/>
-              <p className="sc-desc">Choose your center during registration and help it climb the center leaderboard.</p>
-              <div className="sc-centers">
-                <ul>
-                  <li>Antwerpen Noord, Antwerpen</li>
-                  <li>Antwerpen Zuid, Antwerpen</li>
-                  <li>Charleroi Dampremy, Charleroi</li>
-                  <li>Charleroi Montignies, Charleroi</li>
-                  <li>Diegem, Diegem</li>
-                </ul>
-                <ul>
-                  <li>Gent Arsenal, Gent</li>
-                  <li>Gent The Loop, Gent</li>
-                  <li>Kortrijk, Kortrijk</li>
-                  <li>Luik, Luik</li>
-                  <li>Westgate Dilbeek, Dilbeek</li>
-                </ul>
-              </div>
-              <Link href="/leaderboards" className="sc-cta-btn">
-                <span>SEE LEADERBOARD</span>
-                <span className="sc-cta-right">
-                  <span className="sc-cta-arrow">›</span>
-                  <svg className="sc-cta-ball" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                    <path d="M2 12h20"/>
-                  </svg>
-                </span>
-              </Link>
-            </article>
-
+          <h2 id="lp-campaign-title" className="sr-only">
+            Register, predict, climb, and win the prize challenge
+          </h2>
+          <div className="lp-campaign-graphic">
+            <Image
+              src="/images/landing-prize-challenge.png"
+              alt="Register, predict, and climb. Top players per center win the prize challenge. Register for free."
+              width={1672}
+              height={941}
+              sizes="(max-width: 1200px) 100vw, 1180px"
+              className="lp-campaign-image"
+            />
+            <Link href="/register" className="lp-campaign-register-link">
+              <span className="sr-only">Register for free</span>
+            </Link>
+          </div>
+          <div className="lp-campaign-graphic lp-campaign-graphic--secondary">
+            <Image
+              src="/images/landing-scoring-centers.png"
+              alt="Simple scoring rules and GARRINCHA center leaderboard information. See leaderboard."
+              width={1672}
+              height={941}
+              sizes="(max-width: 1200px) 100vw, 1180px"
+              className="lp-campaign-image"
+            />
+            <Link href="/leaderboards" className="lp-campaign-leaderboard-link">
+              <span className="sr-only">See leaderboard</span>
+            </Link>
           </div>
         </div>
       </section>
