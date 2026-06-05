@@ -24,7 +24,7 @@ function RankRow({ row, rank, highlight }: { row: Row; rank: number; highlight?:
   );
 }
 
-function PodiumBoard({ rows, locale: _locale }: { rows: Row[]; locale: Locale }) {
+function PodiumBoard({ rows }: { rows: Row[]; locale?: Locale }) {
   const top = rows.slice(0, 3);
   const rest = rows.slice(3);
   const order = [top[1], top[0], top[2]].filter(Boolean) as Row[];
@@ -61,16 +61,6 @@ function PodiumBoard({ rows, locale: _locale }: { rows: Row[]; locale: Locale })
           <RankRow key={p.id} row={p} rank={i + 4} />
         ))}
       </div>
-    </div>
-  );
-}
-
-function CleanBoard({ rows }: { rows: Row[] }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {rows.map((p, i) => (
-        <RankRow key={p.id} row={p} rank={i + 1} highlight />
-      ))}
     </div>
   );
 }
