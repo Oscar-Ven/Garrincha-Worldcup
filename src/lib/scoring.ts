@@ -27,9 +27,9 @@ export function calculatePredictionPoints(prediction: Score, finalScore: Score):
 }
 
 export function getPredictionLockAt(kickoffAt: Date): Date {
-  return new Date(kickoffAt.getTime() + 5 * 60 * 1000);
+  return new Date(kickoffAt.getTime() - 5 * 60 * 1000);
 }
 
 export function isPredictionLocked(kickoffAt: Date, now = new Date()) {
-  return now >= new Date(kickoffAt.getTime() + 5 * 60 * 1000);
+  return now >= new Date(kickoffAt.getTime() - 5 * 60 * 1000);
 }

@@ -50,23 +50,28 @@ function makeUser(
 // ---------------------------------------------------------------------------
 
 describe("prediction lock timing", () => {
-  it("allows prediction exactly at kickoff", () => {
-    const { kickoff, now } = kickoffPlusMs(0);
+  it("allows prediction 6 minutes before kickoff", () => {
+    const { kickoff, now } = kickoffPlusMs(-6 * MIN);
     expect(isPredictionLocked(kickoff, now)).toBe(false);
   });
 
-  it("allows prediction 4 minutes 59 seconds after kickoff", () => {
-    const { kickoff, now } = kickoffPlusMs(4 * MIN + 59 * SEC);
+  it("allows prediction 5 minutes and 1 second before kickoff", () => {
+    const { kickoff, now } = kickoffPlusMs(-(5 * MIN + 1 * SEC));
     expect(isPredictionLocked(kickoff, now)).toBe(false);
   });
 
-  it("locks at exactly 5 minutes after kickoff", () => {
-    const { kickoff, now } = kickoffPlusMs(5 * MIN);
+  it("locks at exactly 5 minutes before kickoff", () => {
+    const { kickoff, now } = kickoffPlusMs(-5 * MIN);
     expect(isPredictionLocked(kickoff, now)).toBe(true);
   });
 
-  it("locks after 5 minutes", () => {
-    const { kickoff, now } = kickoffPlusMs(5 * MIN + 1 * SEC);
+  it("locks at kickoff", () => {
+    const { kickoff, now } = kickoffPlusMs(0);
+    expect(isPredictionLocked(kickoff, now)).toBe(true);
+  });
+
+  it("locks after kickoff", () => {
+    const { kickoff, now } = kickoffPlusMs(5 * MIN);
     expect(isPredictionLocked(kickoff, now)).toBe(true);
   });
 });

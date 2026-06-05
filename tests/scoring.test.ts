@@ -53,38 +53,42 @@ describe("calculatePredictionPoints", () => {
 describe("isPredictionLocked", () => {
   const kickoff = new Date("2026-06-11T17:00:00.000Z");
 
-  it("is NOT locked at kickoff time exactly (now === kickoffAt)", () => {
-    expect(isPredictionLocked(kickoff, new Date("2026-06-11T17:00:00.000Z"))).toBe(false);
+  it("is NOT locked 6 minutes before kickoff", () => {
+    expect(isPredictionLocked(kickoff, new Date("2026-06-11T16:54:00.000Z"))).toBe(false);
   });
 
-  it("is NOT locked 4 minutes 59 seconds after kickoff", () => {
-    expect(isPredictionLocked(kickoff, new Date("2026-06-11T17:04:59.000Z"))).toBe(false);
+  it("is NOT locked 5 minutes and 1 second before kickoff", () => {
+    expect(isPredictionLocked(kickoff, new Date("2026-06-11T16:54:59.000Z"))).toBe(false);
   });
 
-  it("is locked exactly 5 minutes after kickoff (now === kickoffAt + 5min)", () => {
-    expect(isPredictionLocked(kickoff, new Date("2026-06-11T17:05:00.000Z"))).toBe(true);
+  it("is locked exactly 5 minutes before kickoff (now === kickoffAt - 5min)", () => {
+    expect(isPredictionLocked(kickoff, new Date("2026-06-11T16:55:00.000Z"))).toBe(true);
   });
 
-  it("is locked 6 minutes after kickoff", () => {
+  it("is locked 4 minutes before kickoff", () => {
+    expect(isPredictionLocked(kickoff, new Date("2026-06-11T16:56:00.000Z"))).toBe(true);
+  });
+
+  it("is locked at kickoff", () => {
+    expect(isPredictionLocked(kickoff, new Date("2026-06-11T17:00:00.000Z"))).toBe(true);
+  });
+
+  it("is locked after kickoff", () => {
     expect(isPredictionLocked(kickoff, new Date("2026-06-11T17:06:00.000Z"))).toBe(true);
-  });
-
-  it("is NOT locked before kickoff", () => {
-    expect(isPredictionLocked(kickoff, new Date("2026-06-11T16:59:59.000Z"))).toBe(false);
   });
 });
 
 describe("getPredictionLockAt", () => {
-  it("returns a Date that is kickoffAt + 5 minutes", () => {
+  it("returns a Date that is kickoffAt - 5 minutes", () => {
     const kickoff = new Date("2026-06-11T17:00:00.000Z");
     const lockAt = getPredictionLockAt(kickoff);
     expect(lockAt).toBeInstanceOf(Date);
-    expect(lockAt.getTime()).toBe(new Date("2026-06-11T17:05:00.000Z").getTime());
+    expect(lockAt.getTime()).toBe(new Date("2026-06-11T16:55:00.000Z").getTime());
   });
 
   it("works for any kickoff time", () => {
     const kickoff = new Date("2026-07-04T20:00:00.000Z");
     const lockAt = getPredictionLockAt(kickoff);
-    expect(lockAt.getTime()).toBe(new Date("2026-07-04T20:05:00.000Z").getTime());
+    expect(lockAt.getTime()).toBe(new Date("2026-07-04T19:55:00.000Z").getTime());
   });
 });
