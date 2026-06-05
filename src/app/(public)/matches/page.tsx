@@ -62,9 +62,7 @@ export default async function MatchesPage() {
 
       {/* ── Match list ── */}
       <div className="matches-body">
-        <div className="container">
-          <MatchesClient matches={matches} />
-        </div>
+        <MatchesClient matches={matches} />
       </div>
     </div>
   );
