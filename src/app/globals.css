@@ -748,6 +748,38 @@ label,
   color: #06210f;
 }
 
+.lp-campaign-section {
+  padding: clamp(42px, 7vw, 90px) 0;
+}
+
+.lp-campaign-graphic {
+  position: relative;
+  overflow: hidden;
+  border-radius: clamp(16px, 2vw, 28px);
+  background: #050906;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
+}
+
+.lp-campaign-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lp-campaign-register-link {
+  position: absolute;
+  right: 6.2%;
+  bottom: 21.5%;
+  width: 20%;
+  height: 12%;
+  border-radius: 18px;
+}
+
+.lp-campaign-register-link:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 5px;
+}
+
 .lp-hero-inner::after {
   width: min(100%, 330px);
   aspect-ratio: 0.72;
