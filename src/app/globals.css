@@ -5688,3 +5688,119 @@ h1.mc-hero-title, .lp-h1, .lp-h2, .lp-score-pts,
   height: 0;
   pointer-events: none;
 }
+
+/* ============================================================
+   PAGE ISOLATION — dashboard, admin, owner are fully
+   separated from the public website shell.
+   Uses CSS :has() (Chrome 105+, FF 121+, Safari 15.4+).
+   ============================================================ */
+
+/* ── Player dashboard: hide public topbar + footer ── */
+body:has(.d2-root) .site-topbar,
+body:has(.d2-root) .layout-footer-slot { display: none !important; }
+
+/* Adjust top padding: public topbar gone, app bar inside page */
+body:has(.d2-root) .d2-root {
+  padding-top: 0 !important;
+}
+
+/* ── Admin (branch manager): hide public topbar (footer already hidden) ── */
+body:has(.admin-root) .site-topbar { display: none !important; }
+
+/* ── Owner: hide both public topbar and footer ── */
+body:has(.owner-shell) .site-topbar,
+body:has(.owner-shell) .layout-footer-slot { display: none !important; }
+
+/* ── Dedicated dashboard app bar ── */
+.dash-app-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 56px;
+  background: #111111;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  gap: 12px;
+  flex-shrink: 0;
+}
+@media (min-width: 640px) {
+  .dash-app-bar { padding: 0 24px; height: 60px; }
+}
+@media (min-width: 1025px) {
+  .dash-app-bar { padding: 0 40px; }
+}
+
+.dash-app-bar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.dash-app-bar-subtitle {
+  font-family: var(--font-roboto), Roboto, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: none;
+}
+@media (min-width: 480px) {
+  .dash-app-bar-subtitle { display: block; }
+}
+
+.dash-app-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.dash-app-bar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  font-family: var(--font-roboto), Roboto, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,0.15);
+}
+
+.dash-app-bar-logout {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6);
+  font-family: var(--font-roboto), Roboto, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  display: none;
+}
+@media (min-width: 640px) {
+  .dash-app-bar-logout { display: inline-flex; align-items: center; gap: 5px; }
+}
+.dash-app-bar-logout:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+
+/* Dashboard content area (below the app bar) */
+.dash-app-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Remove role-label since topbar is gone */
+.d2-root .dash-remote-note { display: none; }

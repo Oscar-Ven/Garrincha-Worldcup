@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { MatchFilter } from "@/components/MatchFilter";
 import type { FilterableMatch } from "@/components/MatchFilter";
 import { AvatarUpload } from "@/components/AvatarUpload";
+import { DashboardAppBar } from "@/components/DashboardAppBar";
 import CompetitionCenterSelect from "@/components/CompetitionCenterSelect";
 import { DataModeNotice } from "@/components/DataModeNotice";
 import { getCurrentUser } from "@/lib/auth";
@@ -138,8 +139,12 @@ export default async function DashboardPage() {
   }));
 
   return (
-    <div className="d2-root">
-      <DataModeNotice locale={locale} />
+    <>
+      {/* ── Dedicated app bar — isolated from public site nav ── */}
+      <DashboardAppBar displayName={displayName} />
+
+      <div className="d2-root">
+        <DataModeNotice locale={locale} />
 
       {/* ── HERO ──────────────────────────────────────────────────────── */}
       <div className="d2-hero">
@@ -354,5 +359,6 @@ export default async function DashboardPage() {
         <MatchFilter matches={serializedMatches} locale={locale} nowISO={nowISO} />
       </div>
     </div>
+    </>
   );
 }
