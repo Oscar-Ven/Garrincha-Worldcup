@@ -16,7 +16,9 @@
     "db:generate": "prisma generate",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "node --env-file=.env --import tsx/esm prisma/seed.ts",
-    "load:local": "node scripts/load-test.mjs"
+    "load:local": "node scripts/load-test.mjs",
+    "qa:players:mobile": "node scripts/qa-players-mobile.mjs",
+    "qa:owner:desktop": "node scripts/qa-owner-desktop.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.8.0",

@@ -987,7 +987,7 @@ body:has(.admin-root) .layout-footer-slot { display: none; }
    ============================================================ */
 
 .auth-page {
-  min-height: 100vh;
+  min-height: min(100dvh, 100vh);
   background: var(--bg);
   padding: 66px 22px 30px;
   display: flex;
@@ -2614,6 +2614,24 @@ body:has(.admin-root) .layout-footer-slot { display: none; }
   .kpi-row { grid-template-columns: 1fr 1fr; }
   .health-grid { grid-template-columns: 1fr; }
   .center-hero { flex-wrap: wrap; }
+}
+
+/* Admin/owner desktop-optimized notice — visible only on very small screens */
+.admin-desktop-notice { display: none; }
+@media (max-width: 480px) {
+  .admin-desktop-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    background: rgba(245,194,66,0.08);
+    border: 1px solid rgba(245,194,66,0.25);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+  }
 }
 
 /* Player pages need bottom padding on mobile so content isn't hidden

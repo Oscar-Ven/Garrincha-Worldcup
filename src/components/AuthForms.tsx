@@ -90,7 +90,7 @@ export function RegisterForm({
           onClick={() => { router.push("/dashboard"); router.refresh(); }}
           style={{ width: "100%", maxWidth: 320 }}
         >
-          {t(locale, "auth.accessLinkSent").includes("dashboard") ? "Open my dashboard" : "Continue"}
+          {t(locale, "auth.goToDashboard")}
         </button>
       </div>
     );
