@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { MobileNav } from "@/components/MobileNav";
 import { NavLink } from "@/components/NavLink";
@@ -12,7 +13,7 @@ import "./globals.css";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#ffffff",
+  themeColor: "#0a0d0a",
 };
 
 export const metadata: Metadata = {
@@ -77,6 +78,15 @@ export default async function RootLayout({
         <header className="site-nav">
           <div className="container site-nav-inner">
             <Link href="/" className="site-nav-brand" aria-label="GARRINCHA home">
+              <Image
+                src="/branding/garrincha-white.png"
+                alt=""
+                width={270}
+                height={66}
+                className="site-nav-brand-logo"
+                style={{ width: "auto", height: 26 }}
+                priority
+              />
               <div className="site-nav-brand-text">
                 <span className="site-nav-brand-name">GARRINCHA</span>
                 <span className="site-nav-brand-sub">World Cup 2026</span>

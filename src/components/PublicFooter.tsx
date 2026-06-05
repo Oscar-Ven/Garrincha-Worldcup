@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function PublicFooter() {
@@ -6,6 +7,14 @@ export function PublicFooter() {
       <div className="container">
         <div className="site-footer-main">
           <Link href="/" className="site-footer-brand" aria-label="GARRINCHA home">
+            <Image
+              src="/branding/garrincha-white.png"
+              alt=""
+              width={270}
+              height={66}
+              className="site-footer-brand-logo"
+              style={{ width: "auto", height: 24 }}
+            />
             <div>
               <span className="site-footer-brand-name">GARRINCHA</span>
               <span className="site-footer-brand-sub">World Cup 2026</span>

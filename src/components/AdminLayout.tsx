@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface NavItem { k: string; label: string; ic: string; }
@@ -45,7 +46,14 @@ export function AdminLayout({ role, page, onNavigate, children, pageTitle, bread
     <div className="admin-root">
       <aside className={`admin-side${navOpen ? " open" : ""}`}>
         <div className="admin-side-top">
-          <span>GARRINCHA</span>
+          <Image
+            src="/branding/garrincha-white.png"
+            alt="GARRINCHA"
+            width={270}
+            height={66}
+            className="admin-brand-logo"
+            style={{ width: "auto", height: 20 }}
+          />
           <span className="admin-side-tag">ADMIN</span>
         </div>
 

@@ -32,8 +32,8 @@ export default async function LoginPage() {
           <div style={{
             display: "flex", alignItems: "center", gap: 8,
             padding: "10px 14px", borderRadius: 10,
-            background: "#ffffff", border: "1px solid #dddddd",
-            marginBottom: 16, fontSize: 13, color: "#111111",
+            background: "rgba(245,194,66,0.12)", border: "1px solid rgba(245,194,66,0.28)",
+            marginBottom: 16, fontSize: 13, color: "var(--gold)",
           }}>
             <span>👁</span>
             <span>{t(locale, "auth.previewModeNotice")}</span>

@@ -32,8 +32,8 @@ function initials(name: string): string {
 
 function getInitialColor(id: string): string {
   const colors = [
-    "#111111","#111111","#111111","#111111","#111111",
-    "#111111","#111111","#111111","#111111","#111111",
+    "#5FE090","#F5C242","#46C878","#6FB3FF","#E0A92E",
+    "#5FE090","#F5C242","#46C878","#6FB3FF","#E0A92E",
   ];
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
@@ -95,9 +95,9 @@ function ChevronDown() {
 // ─── Podium positions ─────────────────────────────────────────────────────────
 
 const PODIUM_CONFIG = [
-  { rank: 1, label: "1st", shieldColor: "#111111", rankColor: "#111111", rankBg: "#ffffff", rankBorder: "#dddddd", height: "podium-card--first" },
-  { rank: 2, label: "2nd", shieldColor: "#666666", rankColor: "#333333", rankBg: "#ffffff", rankBorder: "#dddddd", height: "podium-card--second" },
-  { rank: 3, label: "3rd", shieldColor: "#111111", rankColor: "#111111", rankBg: "#ffffff", rankBorder: "#dddddd", height: "podium-card--third" },
+  { rank: 1, label: "1st", shieldColor: "#F5C242", rankColor: "#F5C242", rankBg: "rgba(245,194,66,0.14)", rankBorder: "rgba(245,194,66,0.28)", height: "podium-card--first" },
+  { rank: 2, label: "2nd", shieldColor: "#B8C1B1", rankColor: "#F1F5EE", rankBg: "rgba(255,255,255,0.06)", rankBorder: "rgba(255,255,255,0.16)", height: "podium-card--second" },
+  { rank: 3, label: "3rd", shieldColor: "#E0A92E", rankColor: "#F5C242", rankBg: "rgba(245,194,66,0.10)", rankBorder: "rgba(245,194,66,0.22)", height: "podium-card--third" },
 ] as const;
 
 // ─── Player avatar ────────────────────────────────────────────────────────────
@@ -188,10 +188,10 @@ function ScoringSection() {
           </p>
           <div className="lb-scoring-grid">
             {[
-              { pts: 5, label: "Exact score",         desc: "You predicted the exact final score",    accent: "#111111" },
-              { pts: 3, label: "Correct result + goal difference", desc: "Correct outcome and goal difference", accent: "#111111" },
-              { pts: 2, label: "Correct result",       desc: "Correct outcome (win / draw / loss)",    accent: "#111111" },
-              { pts: 0, label: "Wrong prediction",     desc: "Incorrect match outcome",                accent: "#666666" },
+              { pts: 5, label: "Exact score",         desc: "You predicted the exact final score",    accent: "#F5C242" },
+              { pts: 3, label: "Correct result + goal difference", desc: "Correct outcome and goal difference", accent: "#5FE090" },
+              { pts: 2, label: "Correct result",       desc: "Correct outcome (win / draw / loss)",    accent: "#46C878" },
+              { pts: 0, label: "Wrong prediction",     desc: "Incorrect match outcome",                accent: "rgba(241,245,238,0.42)" },
             ].map((s) => (
               <div key={s.pts} className="lb-scoring-row">
                 <span className="lb-scoring-pts" style={{ color: s.accent }}>+{s.pts}</span>
@@ -236,9 +236,9 @@ function RankRow({ row, rank }: { row: LbRow; rank: number }) {
   const isTop3 = rank <= 3;
 
   const medalColors: Record<number, string> = {
-    1: "#111111",
-    2: "#666666",
-    3: "#111111",
+    1: "#F5C242",
+    2: "#B8C1B1",
+    3: "#E0A92E",
   };
   const rankColor = medalColors[rank];
 
@@ -293,9 +293,9 @@ function MobileRankCard({ row, rank }: { row: LbRow; rank: number }) {
   const isTop3 = rank <= 3;
 
   const medalColors: Record<number, string> = {
-    1: "#111111",
-    2: "#666666",
-    3: "#111111",
+    1: "#F5C242",
+    2: "#B8C1B1",
+    3: "#E0A92E",
   };
   const rankColor = medalColors[rank];
 

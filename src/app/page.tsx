@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const CENTERS = [
@@ -19,6 +20,15 @@ export default function HomePage() {
       <section className="lp-hero">
         <div className="container lp-hero-inner">
           <div>
+            <Image
+              src="/branding/garrincha-white.png"
+              alt="GARRINCHA"
+              width={270}
+              height={66}
+              className="lp-hero-logo"
+              style={{ width: "min(270px, 72vw)", height: "auto" }}
+              priority
+            />
             <p>World Cup 2026 Prediction Game</p>
             <h1>Predict the World Cup. Represent your GARRINCHA Center.</h1>
             <p>

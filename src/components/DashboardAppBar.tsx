@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 function getInitials(name: string) {
@@ -15,6 +16,14 @@ export function DashboardAppBar({
   return (
     <header className="app-bar">
       <Link href="/" className="app-bar-brand" aria-label="GARRINCHA home">
+        <Image
+          src="/branding/garrincha-white.png"
+          alt=""
+          width={270}
+          height={66}
+          className="app-bar-brand-logo"
+          style={{ width: "auto", height: 22 }}
+        />
         <span>GARRINCHA</span>
         <span className="app-bar-wc">{subtitle}</span>
       </Link>
