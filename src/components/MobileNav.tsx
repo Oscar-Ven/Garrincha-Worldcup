@@ -73,11 +73,12 @@ export function MobileNav({ isLoggedIn, locale }: Props) {
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(href));
 
+  // Reference design: Home · Matches · Leaderboard · Account (always 4 items)
   const items = [
-    { k: "home",    href: "/",            icon: "home",  label: t(locale, "nav.home") },
-    { k: "matches", href: "/matches",     icon: "ball",  label: t(locale, "nav.matches") },
-    { k: "ranks",   href: "/leaderboards",icon: "chart", label: t(locale, "nav.rankings") },
-    ...(isLoggedIn ? [{ k: "predict", href: "/dashboard", icon: "user", label: t(locale, "nav.predict") }] : []),
+    { k: "home",    href: "/",             icon: "home",   label: t(locale, "nav.home") },
+    { k: "matches", href: "/matches",      icon: "ball",   label: t(locale, "nav.matches") },
+    { k: "ranks",   href: "/leaderboards", icon: "chart",  label: "Leaderboard" },
+    { k: "account", href: isLoggedIn ? "/dashboard" : "/register", icon: "user", label: "Account" },
   ];
 
   return (
@@ -94,22 +95,7 @@ export function MobileNav({ isLoggedIn, locale }: Props) {
           );
         })}
 
-        {isLoggedIn ? (
-          <div className="btm-nav-form">
-            <form action="/api/auth/logout" method="post">
-              <button type="submit" aria-label={t(locale, "nav.logout")}>
-                <NavIcon name="logout" on={false} />
-                <span className="btm-nav-label">{t(locale, "nav.logout")}</span>
-              </button>
-            </form>
-          </div>
-        ) : (
-          <Link href="/register" className={`btm-nav-item${isActive("/register") ? " active" : ""}`}>
-            {isActive("/register") && <span className="btm-nav-dot" />}
-            <NavIcon name="user" on={isActive("/register")} />
-            <span className="btm-nav-label">{t(locale, "nav.register")}</span>
-          </Link>
-        )}
+        {/* Account item already in items array above — no extra slot needed */}
       </nav>
     </div>
   );

@@ -1,13 +1,11 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MatchFilter } from "@/components/MatchFilter";
 import type { FilterableMatch } from "@/components/MatchFilter";
 import CompetitionCenterSelect from "@/components/CompetitionCenterSelect";
-import { CountryFlag } from "@/components/Flag";
 import { DataModeNotice } from "@/components/DataModeNotice";
 import { getCurrentUser } from "@/lib/auth";
-import { isoCodeForNationality } from "@/lib/flags";
 import { getLocale } from "@/lib/i18n";
 import { getLeaderboard, getUserRankAndPoints } from "@/lib/leaderboards";
 import { getMatchesForUser } from "@/lib/matches";
@@ -16,59 +14,73 @@ import { t } from "@/lib/translations";
 import { demoCenters, demoLeaderboard, demoMatches, demoUser, hasDatabaseConfig } from "@/lib/ui-demo-data";
 import { prisma } from "@/lib/prisma";
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
+// ─── Small helpers ────────────────────────────────────────────────────────────
 
 function initials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  return name.slice(0, 2).toUpperCase();
+  const p = name.trim().split(/\s+/);
+  return p.length >= 2 ? (p[0][0] + p[p.length - 1][0]).toUpperCase() : name.slice(0, 2).toUpperCase();
 }
 
-function RankBadge({ rank }: { rank: number }) {
-  const colors: Record<number, { bg: string; color: string }> = {
-    1: { bg: "#F5C24222", color: "#F5C242" },
-    2: { bg: "#C8CDD422", color: "#C8CDD4" },
-    3: { bg: "#CD8B5B22", color: "#CD8B5B" },
-  };
-  const s = colors[rank] ?? { bg: "rgba(255,255,255,0.07)", color: "var(--ink-dim)" };
-  return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", justifyContent: "center",
-      minWidth: 28, height: 28, borderRadius: 7, fontSize: 13, fontWeight: 700,
-      background: s.bg, color: s.color, flexShrink: 0,
-    }}>
-      {rank}
-    </span>
-  );
-}
-
-function TeamFlag({ fifaCode, name }: { fifaCode: string | null; name: string }) {
-  const iso = fifaCode ? isoCodeForNationality(name) ?? null : null;
-  if (iso) {
-    return <CountryFlag isoCode={iso} label={name} size="sm" />;
-  }
-  return (
-    <span style={{
-      display: "inline-block", width: 24, height: 16, background: "var(--surface-2)",
-      borderRadius: 3, fontSize: 9, color: "var(--ink-faint)", textAlign: "center", lineHeight: "16px",
-    }}>
-      {fifaCode ?? "?"}
-    </span>
-  );
-}
-
-function formatKickoff(iso: string, locale: string) {
+function fmtKickoff(raw: string | Date) {
   try {
-    const d = new Date(iso);
-    return d.toLocaleDateString(locale === "nl" ? "nl-BE" : locale === "fr" ? "fr-FR" : "en-GB", {
-      day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
-    });
-  } catch {
-    return iso.slice(0, 10);
-  }
+    const d = new Date(typeof raw === "string" ? raw : raw.toISOString());
+    const today = new Date();
+    const isToday = d.toDateString() === today.toDateString();
+    const datePart = isToday ? "Today" : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    const timePart = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    return `${datePart}, ${timePart}`;
+  } catch { return ""; }
 }
 
-// ─── page ─────────────────────────────────────────────────────────────────────
+// ─── Icon components (Lucide-style) ──────────────────────────────────────────
+
+const IconTarget = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+  </svg>
+);
+const IconBar = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+    <path d="M5 21V10M12 21V4M19 21v-7"/>
+  </svg>
+);
+const IconZap = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+  </svg>
+);
+const IconGift = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+    <rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 13h18"/><path d="M8 8a3 3 0 01-3-3 3 3 0 016 0c0 1.5-3 5-3 5z"/><path d="M16 8a3 3 0 003-3 3 3 0 00-6 0c0 1.5 3 5 3 5z"/>
+  </svg>
+);
+const IconCalendar = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+);
+const IconMatchNav = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+);
+const IconTrophy = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+    <path d="M7 4h10v3a5 5 0 01-10 0z"/><path d="M5 5H3v1a3 3 0 003 3M19 5h2v1a3 3 0 01-3 3M9 14h6l-1 4h-4z"/>
+  </svg>
+);
+const IconPerson = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+    <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>
+  </svg>
+);
+const IconArrow = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+    <path d="M9 18l6-6-6-6"/>
+  </svg>
+);
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function DashboardPage() {
   const locale = await getLocale();
@@ -76,12 +88,10 @@ export default async function DashboardPage() {
   if (!user) redirect("/login?next=/dashboard");
 
   const isDemo = !hasDatabaseConfig();
+  const demoRankPoints = { rank: 0, points: 0 };
 
-  const demoTopPlayers = demoLeaderboard.map((r, i) => ({ ...r, rank: i + 1 }));
-  const demoRankAndPoints = { rank: 0, points: 0 };
-
-  const [matches, rankAndPoints, centers, topPlayers] = isDemo
-    ? [demoMatches, demoRankAndPoints, demoCenters, demoTopPlayers]
+  const [matches, rankPoints, centers, topPlayers] = isDemo
+    ? [demoMatches, demoRankPoints, demoCenters, demoLeaderboard.map((r, i) => ({ ...r, rank: i + 1 }))]
     : await Promise.all([
         getMatchesForUser(user.id),
         getUserRankAndPoints(user.id),
@@ -95,300 +105,240 @@ export default async function DashboardPage() {
   const now = new Date();
   const nowISO = now.toISOString();
 
-  // ── derived stats ──────────────────────────────────────────────────────────
   const made = matches.filter((m) => (m.predictions?.length ?? 0) > 0).length;
   const total = matches.length;
   const missing = total - made;
   const pct = total > 0 ? Math.round((made / total) * 100) : 0;
 
-  const correctScores = matches.filter((m) =>
-    (m.predictions ?? []).some((p) => p.pointsAwarded === 5),
-  ).length;
-  const correctOutcomes = matches.filter((m) =>
-    (m.predictions ?? []).some((p) => p.pointsAwarded >= 2),
-  ).length;
+  const exactScores = matches.filter((m) => (m.predictions ?? []).some((p) => p.pointsAwarded === 5)).length;
+  const correctWinners = matches.filter((m) => (m.predictions ?? []).some((p) => p.pointsAwarded >= 2)).length;
 
-  const userRank = isDemo
-    ? (demoLeaderboard.findIndex((r) => r.id === user.id) + 1) || 0
-    : rankAndPoints.rank;
-  const userPoints = isDemo
-    ? (demoLeaderboard.find((r) => r.id === user.id)?.points ?? 0)
-    : rankAndPoints.points;
+  const userRank = isDemo ? (demoLeaderboard.findIndex((r) => r.id === user.id) + 1) || 0 : rankPoints.rank;
+  const userPoints = isDemo ? (demoLeaderboard.find((r) => r.id === user.id)?.points ?? 0) : rankPoints.points;
 
-  // upcoming = next 3 matches not yet locked
-  const upcomingMatches = matches
-    .filter((m) => !isPredictionLocked(m.kickoffAt, now))
-    .slice(0, 3);
-
-  // next unpredicted match
-  const nextToPredict = matches.find(
+  const nextMatch = matches.find(
     (m) => !isPredictionLocked(m.kickoffAt, now) && !(m.predictions ?? []).length,
-  ) ?? upcomingMatches[0];
+  ) ?? matches.find((m) => !isPredictionLocked(m.kickoffAt, now));
 
-  const hasCompetitionCenter = isDemo || !!user.competitionCenterId;
-  const competitionCenterName = isDemo
-    ? user.center?.name
-    : user.competitionCenter?.name ?? null;
-  const activationCenterName = user.center?.name ?? "";
+  const hasCenter = isDemo || !!user.competitionCenterId;
+  const centerName = isDemo ? user.center?.name : user.competitionCenter?.name ?? null;
+  const activationCenter = user.center?.name ?? "";
   const displayName = (user as { nickname?: string | null }).nickname ?? user.fullName ?? "Player";
-  const userEmail = user.email ?? "";
 
-  // ── leaderboard highlight ──────────────────────────────────────────────────
-  const userInTopPlayers = topPlayers.some((r) => r.id === user.id);
-  const displayBoard = userInTopPlayers
-    ? topPlayers
-    : [...topPlayers.slice(0, 4), { id: user.id, name: displayName, center: competitionCenterName ?? "", nationality: "", points: userPoints, predictionCount: made, rank: userRank }];
-
-  // ── serialize for MatchFilter ──────────────────────────────────────────────
+  // Serialize for MatchFilter
   const serializedMatches: FilterableMatch[] = matches.map((m) => ({
-    id: m.id,
-    stage: m.stage,
-    fifaMatchNo: m.fifaMatchNo ?? null,
-    venue: m.venue,
+    id: m.id, stage: m.stage, fifaMatchNo: m.fifaMatchNo ?? null, venue: m.venue,
     kickoffAt: m.kickoffAt instanceof Date ? m.kickoffAt.toISOString() : String(m.kickoffAt),
-    homeScore: m.homeScore ?? null,
-    awayScore: m.awayScore ?? null,
+    homeScore: m.homeScore ?? null, awayScore: m.awayScore ?? null,
     homeTeam: { id: m.homeTeam.id, name: m.homeTeam.name, fifaCode: m.homeTeam.fifaCode ?? null, flagUrl: m.homeTeam.flagUrl ?? null, groupName: m.homeTeam.groupName ?? null },
     awayTeam: { id: m.awayTeam.id, name: m.awayTeam.name, fifaCode: m.awayTeam.fifaCode ?? null, flagUrl: m.awayTeam.flagUrl ?? null, groupName: m.awayTeam.groupName ?? null },
     predictions: (m.predictions ?? []).map((p) => ({ id: p.id, homeScore: p.homeScore, awayScore: p.awayScore, pointsAwarded: p.pointsAwarded })),
   }));
 
-  // ──────────────────────────────────────────────────────────────────────────
   return (
-    <div className="db-page">
+    <div className="d2-root">
       <DataModeNotice locale={locale} />
 
-      {/* ── HERO CARD ─────────────────────────────────────────────────────── */}
-      <div className="db-hero">
-        <div className="db-hero-left">
+      {/* ── HERO ──────────────────────────────────────────────────────── */}
+      <div className="d2-hero">
+        <div className="d2-hero-trophy">
           <Image
-            src="/garrincha-white.png"
-            alt="GARRINCHA"
-            height={18}
-            width={110}
-            style={{ height: 18, width: "auto", opacity: 0.9 }}
+            src="/images/world-cup-trophy.png"
+            alt="World Cup trophy"
+            width={120}
+            height={150}
+            className="d2-trophy-img"
+            priority
+            unoptimized
           />
-          <div className="db-hero-eyebrow">Welcome back,</div>
-          <div className="db-hero-name">{displayName.toUpperCase()}!</div>
-          <div className="db-hero-sub">World Cup Pronostiek 2026</div>
-          <div className="db-status-badge">
-            <span className="db-status-dot" />
-            Account Status · <strong>Active</strong>
+        </div>
+        <div className="d2-hero-content">
+          <div className="d2-hero-welcome">Welcome back, {displayName}! 👋</div>
+          <div className="d2-hero-sub">World Cup Pronostiek 2026</div>
+          <div className="d2-hero-badges">
+            <span className="d2-badge-active">
+              <span className="d2-badge-dot" />
+              Active Player
+            </span>
+            <span className="d2-badge-date">
+              <IconCalendar />
+              Access valid until 19 Jul 2026
+            </span>
           </div>
         </div>
-        <div className="db-hero-right" aria-hidden>
-          <div className="db-hero-ball">⚽</div>
-          <div className="db-hero-glow" />
-        </div>
+        <div className="d2-hero-glow" aria-hidden />
       </div>
 
-      {/* ── 2-COL GRID: Prediction Status + Stats ─────────────────────────── */}
-      <div className="db-grid-2">
+      {/* ── Center picker (if not chosen) ─────────────────────────────── */}
+      {!hasCenter && (
+        <CompetitionCenterSelect centers={centers} activationCenterName={activationCenter} locale={locale} />
+      )}
 
-        {/* Prediction Status */}
-        <div className="db-card">
-          <div className="db-card-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" aria-hidden>
-              <circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" />
-            </svg>
-            Prediction Status
-          </div>
-          <div className="db-pred-row">
-            <span>Predictions submitted</span>
-            <span className="db-pred-val" style={{ color: "var(--green)" }}>{made} / {total}</span>
-          </div>
-          <div className="db-pred-row">
-            <span>Missing predictions</span>
-            <span className="db-pred-val" style={{ color: missing > 0 ? "var(--live)" : "var(--green)" }}>{missing}</span>
-          </div>
-          {/* progress bar */}
-          <div className="db-progress-bar">
-            <div className="db-progress-fill" style={{ width: `${pct}%` }} />
+      {/* ── PREDICTIONS + STATS ROW ───────────────────────────────────── */}
+      <div className="d2-row-2">
+
+        {/* Your Predictions */}
+        <div className="d2-card">
+          <div className="d2-card-head">
+            <span className="d2-card-icon" style={{ color: "var(--d2-green)" }}><IconTarget /></span>
+            <span className="d2-card-title">Your Predictions</span>
           </div>
 
-          {nextToPredict ? (
-            <div className="db-next-match">
-              <div className="db-next-label">Next match to predict</div>
-              <div className="db-next-row">
-                <TeamFlag fifaCode={nextToPredict.homeTeam.fifaCode} name={nextToPredict.homeTeam.name} />
-                <span className="db-team-code">{nextToPredict.homeTeam.fifaCode ?? nextToPredict.homeTeam.name.slice(0, 3).toUpperCase()}</span>
-                <span className="db-vs">vs</span>
-                <span className="db-team-code">{nextToPredict.awayTeam.fifaCode ?? nextToPredict.awayTeam.name.slice(0, 3).toUpperCase()}</span>
-                <TeamFlag fifaCode={nextToPredict.awayTeam.fifaCode} name={nextToPredict.awayTeam.name} />
-              </div>
-              <div className="db-next-time">
-                {formatKickoff(nextToPredict.kickoffAt instanceof Date ? nextToPredict.kickoffAt.toISOString() : String(nextToPredict.kickoffAt), locale)}
+          <div className="d2-pred-nums">
+            <div>
+              <div className="d2-pred-big">{made} <span className="d2-pred-sep">/ {total}</span></div>
+              <div className="d2-pred-lbl">Predictions Made</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div className="d2-pred-big" style={{ color: missing > 0 ? "#ff6b6b" : "var(--d2-green)" }}>{missing}</div>
+              <div className="d2-pred-lbl">Missing</div>
+            </div>
+          </div>
+
+          <div className="d2-prog-bar">
+            <div className="d2-prog-fill" style={{ width: `${pct}%` }} />
+            <span className="d2-prog-pct">{pct}%</span>
+          </div>
+
+          {nextMatch ? (
+            <div className="d2-next-wrap">
+              <div className="d2-next-lbl">Next match to predict</div>
+              <div className="d2-next-match">
+                <div className="d2-flag-pair">
+                  <span className="d2-flag-code">{nextMatch.homeTeam.fifaCode ?? nextMatch.homeTeam.name.slice(0, 3).toUpperCase()}</span>
+                  <span className="d2-vs">vs</span>
+                  <span className="d2-flag-code">{nextMatch.awayTeam.fifaCode ?? nextMatch.awayTeam.name.slice(0, 3).toUpperCase()}</span>
+                </div>
+                <div className="d2-next-time">
+                  <IconCalendar />
+                  {fmtKickoff(nextMatch.kickoffAt)}
+                </div>
               </div>
             </div>
           ) : (
-            <div className="db-next-match" style={{ color: "var(--ink-dim)", fontSize: 13 }}>
-              All upcoming matches predicted ✓
-            </div>
+            <div className="d2-all-done">✓ All upcoming matches predicted</div>
           )}
 
-          <Link href="/matches" className="db-cta-btn">
+          <Link href="/matches" className="d2-btn-primary">
             Go to Matches →
           </Link>
         </div>
 
         {/* Your Stats */}
-        <div className="db-card">
-          <div className="db-card-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" aria-hidden>
-              <path d="M5 21V10M12 21V4M19 21v-7" />
-            </svg>
-            Your Stats
+        <div className="d2-card">
+          <div className="d2-card-head">
+            <span className="d2-card-icon" style={{ color: "var(--d2-green)" }}><IconBar /></span>
+            <span className="d2-card-title">Your Stats</span>
           </div>
-          <div className="db-stats-4">
-            <div className="db-stat-cell">
-              <div className="db-stat-label">Points</div>
-              <div className="db-stat-big" style={{ color: "var(--gold)" }}>{userPoints.toLocaleString()}</div>
-            </div>
-            <div className="db-stat-cell">
-              <div className="db-stat-label">Correct Scores</div>
-              <div className="db-stat-big" style={{ color: "var(--green)" }}>{correctScores}</div>
-            </div>
-            <div className="db-stat-cell">
-              <div className="db-stat-label">Correct Outcomes</div>
-              <div className="db-stat-big" style={{ color: "var(--green)" }}>{correctOutcomes}</div>
-            </div>
-            <div className="db-stat-cell">
-              <div className="db-stat-label">Rank</div>
-              <div className="db-stat-big" style={{ color: "var(--ink)" }}>
+
+          <div className="d2-stats-grid">
+            <div className="d2-stat-cell">
+              <div className="d2-stat-num" style={{ color: "var(--d2-green)" }}>
                 {userRank ? `#${userRank}` : "—"}
               </div>
-              {userRank && total > 0 && (
-                <div style={{ fontSize: 11, color: "var(--ink-faint)", marginTop: 2 }}>
-                  Top {Math.max(1, Math.round((userRank / Math.max(total, 1)) * 100))}%
-                </div>
-              )}
+              <div className="d2-stat-lbl">Your Ranking</div>
             </div>
-          </div>
-          <Link href="/leaderboards" className="db-link-row">
-            View full statistics →
-          </Link>
-        </div>
-      </div>
-
-      {/* ── Competition center picker (if not chosen) ─────────────────────── */}
-      {!hasCompetitionCenter && (
-        <CompetitionCenterSelect
-          centers={centers}
-          activationCenterName={activationCenterName}
-          locale={locale}
-        />
-      )}
-
-      {/* ── 2-COL GRID: Upcoming + Leaderboard ────────────────────────────── */}
-      <div className="db-grid-2">
-
-        {/* Upcoming Matches */}
-        <div className="db-card">
-          <div className="db-card-title-row">
-            <div className="db-card-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" aria-hidden>
-                <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
-              Upcoming Matches
-            </div>
-            <Link href="/matches" className="db-view-all">View all →</Link>
-          </div>
-
-          {upcomingMatches.length === 0 ? (
-            <div style={{ color: "var(--ink-dim)", fontSize: 13, padding: "12px 0" }}>
-              No upcoming matches yet.
-            </div>
-          ) : (
-            <div className="db-match-list">
-              {upcomingMatches.map((m) => (
-                <div key={m.id} className="db-match-row">
-                  <div className="db-match-teams">
-                    <TeamFlag fifaCode={m.homeTeam.fifaCode} name={m.homeTeam.name} />
-                    <span className="db-team-code">{m.homeTeam.fifaCode ?? m.homeTeam.name.slice(0, 3).toUpperCase()}</span>
-                    <span className="db-vs">vs</span>
-                    <span className="db-team-code">{m.awayTeam.fifaCode ?? m.awayTeam.name.slice(0, 3).toUpperCase()}</span>
-                    <TeamFlag fifaCode={m.awayTeam.fifaCode} name={m.awayTeam.name} />
-                  </div>
-                  <div className="db-match-time">
-                    {formatKickoff(m.kickoffAt instanceof Date ? m.kickoffAt.toISOString() : String(m.kickoffAt), locale)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <Link href="/matches" className="db-cta-btn">
-            Go to Matches →
-          </Link>
-        </div>
-
-        {/* Leaderboard Top 5 */}
-        <div className="db-card">
-          <div className="db-card-title-row">
-            <div className="db-card-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" aria-hidden>
-                <path d="M7 4h10v3a5 5 0 01-10 0z"/><path d="M5 5H3v1a3 3 0 003 3M19 5h2v1a3 3 0 01-3 3M9 14h6l-1 4h-4z"/>
-              </svg>
-              Leaderboard Top 5
-            </div>
-            <Link href="/leaderboards" className="db-view-all">View all →</Link>
-          </div>
-
-          <div className="db-lb-list">
-            {displayBoard.slice(0, 5).map((row) => {
-              const isMe = row.id === user.id;
-              return (
-                <div key={row.id} className={`db-lb-row${isMe ? " db-lb-row--me" : ""}`}>
-                  <RankBadge rank={row.rank} />
-                  <span className="db-lb-name">{row.name}</span>
-                  <span className="db-lb-pts">{row.points.toLocaleString()} pts</span>
-                </div>
-              );
-            })}
-          </div>
-
-          <Link href="/leaderboards" className="db-cta-btn">
-            View Full Leaderboard →
-          </Link>
-        </div>
-      </div>
-
-      {/* ── Profile + Help ────────────────────────────────────────────────── */}
-      <div className="db-grid-2">
-        {/* Profile */}
-        <div className="db-card db-profile-card">
-          <div className="db-profile-avatar">{initials(displayName)}</div>
-          <div className="db-profile-info">
-            <div className="db-profile-name">{displayName}</div>
-            {userEmail && <div className="db-profile-email">{userEmail}</div>}
-            {(competitionCenterName ?? activationCenterName) && (
-              <div className="db-profile-center">
-                🏟 {competitionCenterName ?? activationCenterName}
+            <div className="d2-stat-cell">
+              <div className="d2-stat-num" style={{ color: "var(--d2-green)" }}>
+                {userPoints.toLocaleString()}
               </div>
+              <div className="d2-stat-lbl">Total Points</div>
+            </div>
+            <div className="d2-stat-cell">
+              <div className="d2-stat-num" style={{ color: "var(--d2-green)" }}>{exactScores}</div>
+              <div className="d2-stat-lbl">Exact Scores</div>
+            </div>
+            <div className="d2-stat-cell">
+              <div className="d2-stat-num" style={{ color: "var(--d2-green)" }}>{correctWinners}</div>
+              <div className="d2-stat-lbl">Correct Winners</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── QUICK ACTIONS ─────────────────────────────────────────────── */}
+      <div className="d2-card">
+        <div className="d2-card-head">
+          <span className="d2-card-icon" style={{ color: "var(--d2-green)" }}><IconZap /></span>
+          <span className="d2-card-title">Quick Actions</span>
+        </div>
+        <div className="d2-actions-row">
+          <Link href="/matches" className="d2-action">
+            <span className="d2-action-icon"><IconMatchNav /></span>
+            <div className="d2-action-text">
+              <div className="d2-action-title">Matches</div>
+              <div className="d2-action-sub">Make your predictions</div>
+            </div>
+            <span className="d2-action-arrow"><IconArrow /></span>
+          </Link>
+          <div className="d2-action-divider" />
+          <Link href="/leaderboards" className="d2-action">
+            <span className="d2-action-icon"><IconTrophy /></span>
+            <div className="d2-action-text">
+              <div className="d2-action-title">Leaderboard</div>
+              <div className="d2-action-sub">See full rankings</div>
+            </div>
+            <span className="d2-action-arrow"><IconArrow /></span>
+          </Link>
+          <div className="d2-action-divider" />
+          <Link href="/dashboard#account" className="d2-action">
+            <span className="d2-action-icon"><IconPerson /></span>
+            <div className="d2-action-text">
+              <div className="d2-action-title">Account</div>
+              <div className="d2-action-sub">Manage your details</div>
+            </div>
+            <span className="d2-action-arrow"><IconArrow /></span>
+          </Link>
+        </div>
+      </div>
+
+      {/* ── TIP ───────────────────────────────────────────────────────── */}
+      <div className="d2-tip">
+        <span className="d2-tip-icon"><IconGift /></span>
+        <div>
+          <div className="d2-tip-title">Tip</div>
+          <div className="d2-tip-body">
+            Make all your predictions before the match starts to earn maximum points!
+            Exact score = 5 pts · Correct result + goal diff = 3 pts · Correct result = 2 pts.
+          </div>
+        </div>
+      </div>
+
+      {/* ── ACCOUNT SECTION ───────────────────────────────────────────── */}
+      <div id="account" className="d2-row-2">
+        <div className="d2-card d2-profile">
+          <div className="d2-avatar">{initials(displayName)}</div>
+          <div className="d2-profile-info">
+            <div className="d2-profile-name">{displayName}</div>
+            <div className="d2-profile-email">{user.email ?? ""}</div>
+            {(centerName ?? activationCenter) && (
+              <div className="d2-profile-center">🏟 {centerName ?? activationCenter}</div>
             )}
           </div>
         </div>
-
-        {/* Help */}
-        <div className="db-card db-help-card">
-          <div className="db-help-icon">?</div>
-          <div>
-            <div className="db-help-title">Need Help?</div>
-            <div className="db-help-body">
-              Check the FAQ or contact support if you have questions about your predictions or account.
-            </div>
-            <a href="https://www.garrincha.be/nl/contact" target="_blank" rel="noopener noreferrer" className="db-link-row">
-              Contact Support →
-            </a>
+        <div className="d2-card d2-center-card">
+          <div className="d2-card-head">
+            <span className="d2-card-icon"><IconTrophy /></span>
+            <span className="d2-card-title">Your Center</span>
           </div>
+          {hasCenter ? (
+            <div className="d2-center-name">{centerName ?? activationCenter}</div>
+          ) : (
+            <p style={{ color: "var(--d2-text-secondary)", fontSize: 14 }}>
+              Choose a GARRINCHA Center to represent before your first prediction.
+            </p>
+          )}
+          {!hasCenter && (
+            <CompetitionCenterSelect centers={centers} activationCenterName={activationCenter} locale={locale} />
+          )}
         </div>
       </div>
 
-      {/* ── Full Match Predictions ────────────────────────────────────────── */}
-      <div className="db-section">
-        <div className="db-section-head">
-          <h2 className="db-section-title">{t(locale, "dashboard.section")}</h2>
-          <span className="db-section-sub">⏱ {t(locale, "dashboard.lockNotice")}</span>
+      {/* ── FULL MATCH PREDICTIONS ────────────────────────────────────── */}
+      <div className="d2-section">
+        <div className="d2-section-head">
+          <h2 className="d2-section-title">{t(locale, "dashboard.section")}</h2>
+          <p className="d2-section-sub">⏱ {t(locale, "dashboard.lockNotice")}</p>
         </div>
         <MatchFilter matches={serializedMatches} locale={locale} nowISO={nowISO} />
       </div>
