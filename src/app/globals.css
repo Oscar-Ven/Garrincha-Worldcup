@@ -339,9 +339,15 @@ body:has(.dash-page) .bottom-nav { display: none !important }
 body:has(.admin-shell) .site-nav,
 body:has(.admin-shell) .site-footer,
 body:has(.admin-shell) .bottom-nav { display: none !important }
+body:has(.admin-root) .site-nav,
+body:has(.admin-root) .site-footer,
+body:has(.admin-root) .bottom-nav { display: none !important }
 body:has(.owner-shell) .site-nav,
 body:has(.owner-shell) .site-footer,
 body:has(.owner-shell) .bottom-nav { display: none !important }
+body:has(.owner-page) .site-nav,
+body:has(.owner-page) .site-footer,
+body:has(.owner-page) .bottom-nav { display: none !important }
 
 /* ── Dashboard ─────────────────────────────────────────────────────────────── */
 .dash-page { min-height: min(100dvh,100vh); background: var(--bg-2); font-family: var(--font-body) }
