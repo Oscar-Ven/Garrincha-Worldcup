@@ -7,15 +7,98 @@ import { prisma } from "@/lib/prisma";
 import { t } from "@/lib/translations";
 import { Role } from "@prisma/client";
 
-function AccessErrorPage({ title, body, linkLabel }: { title: string; body: string; linkLabel: string }) {
+function AccessErrorPage({
+  title,
+  body,
+  linkLabel,
+}: {
+  title: string;
+  body: string;
+  linkLabel: string;
+}) {
   return (
-    <div className="auth-page" style={{ alignItems: "center", justifyContent: "center", textAlign: "center", minHeight: "min(100dvh, 100vh)" }}>
-      <div style={{ width: 88, height: 88, borderRadius: "50%", background: "rgba(255,90,77,0.12)", border: "2px solid rgba(255,90,77,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, marginBottom: 20 }}>🔗</div>
-      <h2 className="disp" style={{ fontSize: 28, color: "var(--ink)", marginBottom: 10 }}>{title}</h2>
-      <p style={{ fontSize: 14, color: "var(--ink-dim)", lineHeight: 1.5, maxWidth: 280, marginBottom: 24 }}>{body}</p>
-      <Link href="/login" className="btn btn-green btn-md btn-auto" style={{ textDecoration: "none", width: "auto", padding: "0 22px" }}>
-        {linkLabel}
-      </Link>
+    <div className="auth-page">
+      <div className="auth-error-card">
+        {/* Error icon */}
+        <div
+          style={{
+            width: 72,
+            height: 72,
+            borderRadius: "50%",
+            background: "#FEF2F2",
+            border: "1.5px solid #FECACA",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 20,
+          }}
+        >
+          <svg
+            width="30"
+            height="30"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden
+          >
+            <circle cx="12" cy="12" r="10" stroke="#DC2626" strokeWidth="2" />
+            <line
+              x1="12"
+              y1="8"
+              x2="12"
+              y2="12"
+              stroke="#DC2626"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <circle cx="12" cy="16" r="1" fill="#DC2626" />
+          </svg>
+        </div>
+
+        <h2
+          style={{
+            fontFamily: "var(--font-saira-condensed), sans-serif",
+            fontStyle: "italic",
+            fontWeight: 800,
+            fontSize: "1.4rem",
+            color: "var(--green-deep)",
+            lineHeight: 1.15,
+            marginBottom: 10,
+          }}
+        >
+          {title}
+        </h2>
+
+        <p
+          style={{
+            fontSize: 14,
+            color: "var(--text-3)",
+            lineHeight: 1.55,
+            maxWidth: 300,
+            marginBottom: 24,
+          }}
+        >
+          {body}
+        </p>
+
+        <Link
+          href="/login"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0.65rem 1.5rem",
+            background: "#1B4332",
+            color: "#FFFFFF",
+            borderRadius: 8,
+            fontWeight: 700,
+            fontSize: "0.9rem",
+            textDecoration: "none",
+            transition: "background 0.15s",
+          }}
+        >
+          {linkLabel}
+        </Link>
+      </div>
     </div>
   );
 }

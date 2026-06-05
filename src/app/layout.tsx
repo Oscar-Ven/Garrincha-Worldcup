@@ -15,7 +15,7 @@ import "./globals.css";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0A0D0A",
+  themeColor: "#1B4332",
 };
 
 // ── Brand display font (Saira Condensed — kept for GARRINCHA logo/headings only)
@@ -73,7 +73,7 @@ function UserAvatar({ name }: { name: string }) {
   return (
     <Link
       href="/dashboard"
-      className="topbar-user-avatar"
+      className="nav-avatar"
       aria-label={`Dashboard — ${name}`}
       title={name}
     >
@@ -94,6 +94,11 @@ export default async function RootLayout({
     ? ((user as { nickname?: string | null }).nickname ?? user.fullName ?? user.email ?? "")
     : "";
 
+  // Determine the admin nav label based on role
+  const adminNavLabel = user?.role === "SUPER_ADMIN"
+    ? "Owner"
+    : "Manager";
+
   return (
     <html
       lang={locale}
@@ -101,12 +106,12 @@ export default async function RootLayout({
     >
       <body>
         <div className="app-shell">
-          {/* ── Desktop topbar ── */}
-          <header className="site-topbar">
-            <div className="site-topbar-inner">
-              <Link href="/" className="site-topbar-brand" aria-label="GARRINCHA home">
+          {/* ── Desktop nav ── */}
+          <header className="nav">
+            <div className="nav-inner">
+              <Link href="/" className="nav-brand" aria-label="GARRINCHA home">
                 <Image
-                  src="/garrincha-white.png"
+                  src="/garrincha-black.png"
                   alt="GARRINCHA"
                   height={26}
                   width={156}
@@ -115,29 +120,29 @@ export default async function RootLayout({
                 />
               </Link>
 
-              <nav className="site-topbar-nav" aria-label="Primary navigation">
-                <NavLink href="/matches" className="site-nav-link">Matches</NavLink>
-                <NavLink href="/leaderboards" className="site-nav-link">Leaderboard</NavLink>
+              <nav className="nav-links" aria-label="Primary navigation">
+                <NavLink href="/matches" className="nav-link">{t(locale, "nav.matches")}</NavLink>
+                <NavLink href="/leaderboards" className="nav-link">{t(locale, "nav.leaderboards")}</NavLink>
                 {user && (
-                  <NavLink href="/dashboard" className="site-nav-link">{t(locale, "nav.predict")}</NavLink>
+                  <NavLink href="/dashboard" className="nav-link">{t(locale, "nav.predict")}</NavLink>
                 )}
                 {isAdmin && (
-                  <NavLink href="/admin" className="site-nav-link">{t(locale, "nav.admin")}</NavLink>
+                  <NavLink href="/admin" className="nav-link">{adminNavLabel}</NavLink>
                 )}
               </nav>
 
-              <div className="site-topbar-right">
+              <div className="nav-right">
                 {user ? (
                   <>
                     <UserAvatar name={displayName} />
                     <form action="/api/auth/logout" method="post">
-                      <button type="submit" className="site-nav-btn site-nav-btn-ghost">
+                      <button type="submit" className="btn-ghost">
                         {t(locale, "nav.logout")}
                       </button>
                     </form>
                   </>
                 ) : (
-                  <Link href="/register" className="site-nav-btn site-nav-btn-primary">
+                  <Link href="/register" className="btn-primary">
                     {t(locale, "nav.register")}
                   </Link>
                 )}

@@ -9,58 +9,75 @@ type Props = {
   locale: Locale;
 };
 
-function NavIcon({ name, on }: { name: string; on: boolean }) {
-  const c = on ? "var(--green)" : "var(--ink-faint)";
-  const sw = on ? 2.3 : 2;
+const ACTIVE_COLOR = "#1B4332";
+const INACTIVE_COLOR = "#9CA3AF";
 
-  const paths: Record<string, React.ReactNode> = {
-    home: (
-      <path
-        d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"
-        stroke={c}
-        strokeWidth={sw}
-        fill={on ? "rgba(95,224,144,0.12)" : "none"}
-        strokeLinejoin="round"
-      />
-    ),
-    ball: (
-      <g>
-        <circle cx="12" cy="12" r="9" stroke={c} strokeWidth={sw} fill={on ? "rgba(95,224,144,0.12)" : "none"} />
-        <path d="M12 7l3 2-1 4h-4l-1-4z" stroke={c} strokeWidth={sw * 0.8} fill="none" strokeLinejoin="round" />
-      </g>
-    ),
-    chart: (
-      <g>
-        <path d="M5 21V10M12 21V4M19 21v-7" stroke={c} strokeWidth={sw} strokeLinecap="round" />
-      </g>
-    ),
-    trophy: (
-      <path
-        d="M7 4h10v3a5 5 0 01-10 0zM5 5H3v1a3 3 0 003 3M19 5h2v1a3 3 0 01-3 3M9 14h6l-1 4h-4z"
-        stroke={c}
-        strokeWidth={sw}
-        fill={on ? "rgba(95,224,144,0.12)" : "none"}
-        strokeLinejoin="round"
-      />
-    ),
-    user: (
-      <g>
-        <circle cx="12" cy="8" r="4" stroke={c} strokeWidth={sw} fill={on ? "rgba(95,224,144,0.12)" : "none"} />
-        <path d="M4 21c0-4 4-6 8-6s8 2 8 6" stroke={c} strokeWidth={sw} fill="none" strokeLinecap="round" />
-      </g>
-    ),
-    logout: (
-      <g>
-        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke={c} strokeWidth={sw} fill="none" strokeLinecap="round" />
-        <polyline points="16,17 21,12 16,7" stroke={c} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        <line x1="21" y1="12" x2="9" y2="12" stroke={c} strokeWidth={sw} strokeLinecap="round" />
-      </g>
-    ),
-  };
-
+function HomeIcon({ on }: { on: boolean }) {
+  const c = on ? ACTIVE_COLOR : INACTIVE_COLOR;
   return (
-    <svg width="23" height="23" viewBox="0 0 24 24">
-      {paths[name]}
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-5h-6v5H4a1 1 0 01-1-1z"
+        stroke={c}
+        strokeWidth="2"
+        strokeLinejoin="round"
+        fill={on ? "rgba(27,67,50,0.1)" : "none"}
+      />
+    </svg>
+  );
+}
+
+function MatchesIcon({ on }: { on: boolean }) {
+  const c = on ? ACTIVE_COLOR : INACTIVE_COLOR;
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="16" rx="2" stroke={c} strokeWidth="2" fill={on ? "rgba(27,67,50,0.1)" : "none"} />
+      <path d="M3 9h18" stroke={c} strokeWidth="2" strokeLinecap="round" />
+      <path d="M8 4v5M16 4v5" stroke={c} strokeWidth="2" strokeLinecap="round" />
+      <path d="M7 14h2M11 14h2M15 14h2" stroke={c} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function LeaderboardIcon({ on }: { on: boolean }) {
+  const c = on ? ACTIVE_COLOR : INACTIVE_COLOR;
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M7 4h10v3a5 5 0 01-10 0z"
+        stroke={c}
+        strokeWidth="2"
+        strokeLinejoin="round"
+        fill={on ? "rgba(27,67,50,0.1)" : "none"}
+      />
+      <path d="M5 5H3v1a3 3 0 003 3" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M19 5h2v1a3 3 0 01-3 3" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 12h6l-1 4H10l-1-4z" stroke={c} strokeWidth="2" strokeLinejoin="round" fill={on ? "rgba(27,67,50,0.1)" : "none"} />
+      <path d="M9 20h6" stroke={c} strokeWidth="2" strokeLinecap="round" />
+      <path d="M12 16v4" stroke={c} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function AccountIcon({ on }: { on: boolean }) {
+  const c = on ? ACTIVE_COLOR : INACTIVE_COLOR;
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle
+        cx="12"
+        cy="8"
+        r="4"
+        stroke={c}
+        strokeWidth="2"
+        fill={on ? "rgba(27,67,50,0.1)" : "none"}
+      />
+      <path
+        d="M4 21c0-4 3.6-6 8-6s8 2 8 6"
+        stroke={c}
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+      />
     </svg>
   );
 }
@@ -73,29 +90,52 @@ export function MobileNav({ isLoggedIn, locale }: Props) {
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(href));
 
-  // Reference design: Home · Matches · Leaderboard · Account (always 4 items)
   const items = [
-    { k: "home",    href: "/",             icon: "home",   label: t(locale, "nav.home") },
-    { k: "matches", href: "/matches",      icon: "ball",   label: t(locale, "nav.matches") },
-    { k: "ranks",   href: "/leaderboards", icon: "chart",  label: "Leaderboard" },
-    { k: "account", href: isLoggedIn ? "/dashboard" : "/register", icon: "user", label: "Account" },
+    {
+      k: "home",
+      href: "/",
+      icon: "home",
+      label: t(locale, "nav.home"),
+    },
+    {
+      k: "matches",
+      href: "/matches",
+      icon: "matches",
+      label: t(locale, "nav.matches"),
+    },
+    {
+      k: "ranks",
+      href: "/leaderboards",
+      icon: "leaderboard",
+      label: "Leaderboard",
+    },
+    {
+      k: "account",
+      href: isLoggedIn ? "/dashboard" : "/register",
+      icon: "account",
+      label: "Account",
+    },
   ];
 
   return (
-    <div className="btm-nav-garrincha" aria-label="Mobile navigation">
-      <nav className="btm-nav-pill">
+    <div className="bottom-nav" aria-label="Mobile navigation">
+      <nav className="bottom-nav-inner">
         {items.map((item) => {
           const on = isActive(item.href);
           return (
-            <Link key={item.k} href={item.href} className={`btm-nav-item${on ? " active" : ""}`}>
-              {on && <span className="btm-nav-dot" />}
-              <NavIcon name={item.icon} on={on} />
-              <span className="btm-nav-label">{item.label}</span>
+            <Link
+              key={item.k}
+              href={item.href}
+              className={`bottom-nav-item${on ? " active" : ""}`}
+            >
+              {item.icon === "home" && <HomeIcon on={on} />}
+              {item.icon === "matches" && <MatchesIcon on={on} />}
+              {item.icon === "leaderboard" && <LeaderboardIcon on={on} />}
+              {item.icon === "account" && <AccountIcon on={on} />}
+              <span className="bottom-nav-label">{item.label}</span>
             </Link>
           );
         })}
-
-        {/* Account item already in items array above — no extra slot needed */}
       </nav>
     </div>
   );

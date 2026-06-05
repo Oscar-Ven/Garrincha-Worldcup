@@ -1,58 +1,14 @@
-/* ============================================================
-   GARRINCHA · Mobile-specific overrides
-   ============================================================ */
-
-/* Prevent iOS zoom on input focus — 16px minimum required */
+/* Mobile-specific overrides */
 @media (max-width: 640px) {
-  .field,
-  input[type="text"],
-  input[type="email"],
-  input[type="tel"],
-  input[type="password"],
-  input[type="number"],
-  select,
-  textarea {
+  .field, input[type="text"], input[type="email"], input[type="tel"],
+  input[type="password"], input[type="number"], select, textarea {
     font-size: 16px;
   }
 }
-
-/* Touch feedback — no highlight flash */
-a, button, [role="button"], .btm-nav-item {
+a, button, [role="button"] {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
-
-/* ============================================================
-   SCORE BOX — DaisyUI join overrides (PredictionForm)
-   ============================================================ */
-
-.score-box-btn {
-  background: var(--surface-2);
-  border: 1px solid var(--line-2);
-  border-radius: 11px;
-  color: var(--ink);
-  width: 48px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.1s;
-  flex-shrink: 0;
-}
-
-.score-box-btn:disabled { color: var(--ink-faint); cursor: default; opacity: 0.5; }
-.score-box-btn:active:not(:disabled) { background: var(--surface); }
-
-/* ============================================================
-   RESPONSIVE UTILITIES
-   ============================================================ */
-
 @media (max-width: 480px) {
-  /* Hide leaderboard secondary columns on very small screens */
   .lb-hide-mobile { display: none; }
-
-  /* Admin table: trim columns */
-  .tbl th:nth-child(3),
-  .tbl td:nth-child(3) { display: none; }
 }
