@@ -40,6 +40,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "User not found." }, { status: 404 });
   }
 
+  const recentDuplicate = await prisma.pointEvent.findFirst({
+    where: {
+      userId: parsed.data.userId,
+      points: parsed.data.points,
+      reason: parsed.data.reason,
+      awardedBy: admin.email,
+      createdAt: { gte: new Date(Date.now() - 30_000) },
+    },
+  });
+  if (recentDuplicate) {
+    return NextResponse.json(
+      { error: "This bonus was already awarded. Wait 30 seconds before awarding again." },
+      { status: 409 },
+    );
+  }
+
   try {
     await prisma.pointEvent.create({
       data: {
