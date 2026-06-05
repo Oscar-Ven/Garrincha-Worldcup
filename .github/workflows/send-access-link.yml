@@ -1,0 +1,32 @@
+name: Send access link (one-time manual trigger)
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: "Player email to send access link to"
+        required: true
+        type: string
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request access link via production API
+        run: |
+          echo "Requesting access link for: ${{ inputs.email }}"
+          RESP=$(curl -s -w "\n%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            -H "Origin: https://worldcup-garrincha.com" \
+            "https://worldcup-garrincha.com/api/auth/request-link" \
+            -d "{\"email\": \"${{ inputs.email }}\"}")
+          BODY=$(echo "$RESP" | head -1)
+          CODE=$(echo "$RESP" | tail -1)
+          echo "HTTP: $CODE"
+          echo "Response: $BODY"
+          if [ "$CODE" = "200" ]; then
+            echo "✓ Access link request sent successfully."
+          else
+            echo "✗ Request failed."
+            exit 1
+          fi
