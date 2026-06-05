@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MatchFilter } from "@/components/MatchFilter";
 import type { FilterableMatch } from "@/components/MatchFilter";
+import { AvatarUpload } from "@/components/AvatarUpload";
 import CompetitionCenterSelect from "@/components/CompetitionCenterSelect";
 import { DataModeNotice } from "@/components/DataModeNotice";
 import { getCurrentUser } from "@/lib/auth";
@@ -124,6 +125,7 @@ export default async function DashboardPage() {
   const centerName = isDemo ? user.center?.name : user.competitionCenter?.name ?? null;
   const activationCenter = user.center?.name ?? "";
   const displayName = (user as { nickname?: string | null }).nickname ?? user.fullName ?? "Player";
+  const avatarUrl = isDemo ? null : (user as { avatarUrl?: string | null }).avatarUrl ?? null;
 
   // Serialize for MatchFilter
   const serializedMatches: FilterableMatch[] = matches.map((m) => ({
@@ -306,14 +308,23 @@ export default async function DashboardPage() {
 
       {/* ── ACCOUNT SECTION ───────────────────────────────────────────── */}
       <div id="account" className="d2-row-2">
-        <div className="d2-card d2-profile">
-          <div className="d2-avatar">{initials(displayName)}</div>
-          <div className="d2-profile-info">
-            <div className="d2-profile-name">{displayName}</div>
-            <div className="d2-profile-email">{user.email ?? ""}</div>
-            {(centerName ?? activationCenter) && (
-              <div className="d2-profile-center">🏟 {centerName ?? activationCenter}</div>
-            )}
+        <div className="d2-card">
+          <div className="d2-card-head">
+            <span className="d2-card-icon"><IconPerson /></span>
+            <span className="d2-card-title">Your Profile</span>
+          </div>
+          <div className="d2-profile-body">
+            <AvatarUpload
+              currentUrl={avatarUrl}
+              initials={initials(displayName)}
+            />
+            <div className="d2-profile-info">
+              <div className="d2-profile-name">{displayName}</div>
+              <div className="d2-profile-email">{user.email ?? ""}</div>
+              {(centerName ?? activationCenter) && (
+                <div className="d2-profile-center">🏟 {centerName ?? activationCenter}</div>
+              )}
+            </div>
           </div>
         </div>
         <div className="d2-card d2-center-card">

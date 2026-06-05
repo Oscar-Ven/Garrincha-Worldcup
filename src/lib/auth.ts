@@ -79,6 +79,7 @@ export const currentUserSelect = {
   nickname: true,
   nationality: true,
   role: true,
+  avatarUrl: true,
   competitionCenterId: true,
   competitionCenterLockedAt: true,
   firstActivatedAt: true,

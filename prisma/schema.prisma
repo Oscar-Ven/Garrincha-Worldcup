@@ -59,6 +59,7 @@ model User {
   competitionCenterId         String?
   competitionCenter           GarrinchaCenter? @relation("CompetitionCenter", fields: [competitionCenterId], references: [id])
   competitionCenterLockedAt   DateTime?
+  avatarUrl                   String?
   accessTokenHash             String?
   accessTokenCreatedAt        DateTime?
   accessTokenRevokedAt        DateTime?
