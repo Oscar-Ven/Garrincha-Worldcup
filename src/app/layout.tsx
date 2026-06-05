@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Saira_Condensed, Saira, Hanken_Grotesk } from "next/font/google";
+import { Saira_Condensed, Saira, Roboto } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -18,6 +18,7 @@ export const viewport: Viewport = {
   themeColor: "#0A0D0A",
 };
 
+// ── Brand display font (Saira Condensed — kept for GARRINCHA logo/headings only)
 const sairaCondensed = Saira_Condensed({
   subsets: ["latin"],
   weight: ["700", "800", "900"],
@@ -32,10 +33,11 @@ const saira = Saira({
   display: "swap",
 });
 
-const hankenGrotesk = Hanken_Grotesk({
+// ── Body/UI font — Roboto (same as www.garrincha.be)
+const roboto = Roboto({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-hanken",
+  weight: ["400", "500", "700"],
+  variable: "--font-roboto",
   display: "swap",
 });
 
@@ -63,6 +65,23 @@ export const metadata: Metadata = {
   authors: [{ name: "Kempes BV", url: "https://www.garrincha.be" }],
 };
 
+function UserAvatar({ name }: { name: string }) {
+  const parts = name.trim().split(/\s+/);
+  const initials = parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase();
+  return (
+    <Link
+      href="/dashboard"
+      className="topbar-user-avatar"
+      aria-label={`Dashboard — ${name}`}
+      title={name}
+    >
+      {initials}
+    </Link>
+  );
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -71,11 +90,14 @@ export default async function RootLayout({
   const locale = await getLocale();
   const user = hasDatabaseConfig() ? await getCurrentUser() : null;
   const isAdmin = user?.role === "ADMIN" || user?.role === "CENTER_ADMIN" || user?.role === "SUPER_ADMIN";
+  const displayName = user
+    ? ((user as { nickname?: string | null }).nickname ?? user.fullName ?? user.email ?? "")
+    : "";
 
   return (
     <html
       lang={locale}
-      className={`${sairaCondensed.variable} ${saira.variable} ${hankenGrotesk.variable}`}
+      className={`${sairaCondensed.variable} ${saira.variable} ${roboto.variable}`}
     >
       <body>
         <div className="app-shell">
@@ -106,14 +128,18 @@ export default async function RootLayout({
 
               <div className="site-topbar-right">
                 {user ? (
-                  <form action="/api/auth/logout" method="post">
-                    <button type="submit" className="site-nav-btn site-nav-btn-ghost">
-                      {t(locale, "nav.logout")}
-                    </button>
-                  </form>
+                  <>
+                    <UserAvatar name={displayName} />
+                    <form action="/api/auth/logout" method="post">
+                      <button type="submit" className="site-nav-btn site-nav-btn-ghost">
+                        {t(locale, "nav.logout")}
+                      </button>
+                    </form>
+                  </>
                 ) : (
-                  /* No "Log in" — app uses email-link access after registration */
-                  <Link href="/register" className="site-nav-btn site-nav-btn-primary">{t(locale, "nav.register")}</Link>
+                  <Link href="/register" className="site-nav-btn site-nav-btn-primary">
+                    {t(locale, "nav.register")}
+                  </Link>
                 )}
                 <LanguageSwitcher locale={locale} />
               </div>
@@ -122,13 +148,10 @@ export default async function RootLayout({
 
           {children}
 
-          {/* ── Shared footer — same on every public page.
-              Hidden on landing page (which renders its own PublicFooter inside landing-root) ── */}
           <div className="layout-footer-slot">
             <PublicFooter />
           </div>
 
-          {/* Mobile bottom nav */}
           <MobileNav isLoggedIn={!!user} locale={locale} />
         </div>
       </body>

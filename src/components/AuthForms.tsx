@@ -172,22 +172,26 @@ export function RegisterForm({
         </div>
       ))}
 
-      {/* ── Consent ── */}
-      <button
-        type="button"
-        className="consent-row"
-        onClick={() => { setConsent(!consent); setConsentErr(false); }}
-      >
-        <div className={`consent-box${consent ? " checked" : ""}${consentErr ? " error" : ""}`}>
+      {/* ── Consent — real checkbox for screen reader accessibility ── */}
+      <label className={`consent-row${consentErr ? " consent-row--error" : ""}`} htmlFor="consent-check">
+        <input
+          type="checkbox"
+          id="consent-check"
+          className="consent-checkbox-real"
+          checked={consent}
+          onChange={(e) => { setConsent(e.target.checked); setConsentErr(false); }}
+          aria-describedby={consentErr ? "consent-err-msg" : undefined}
+        />
+        <span className={`consent-box${consent ? " checked" : ""}${consentErr ? " error" : ""}`} aria-hidden>
           {consent && (
-            <svg width="15" height="15" viewBox="0 0 24 24">
-              <path d="M5 13l4 4L19 7" stroke="#06210F" strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="13" height="13" viewBox="0 0 24 24">
+              <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           )}
-        </div>
+        </span>
         <span className="consent-text">{t(locale, "consent")}</span>
-      </button>
-      {consentErr && <div className="field-err-msg">⚠ {t(locale, "err_consent")}</div>}
+      </label>
+      {consentErr && <div id="consent-err-msg" className="field-err-msg" role="alert">⚠ {t(locale, "err_consent")}</div>}
       <input type="hidden" name="termsAccepted" value={consent ? "true" : "false"} />
 
       {/* ── Submit ── */}

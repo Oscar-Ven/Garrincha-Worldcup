@@ -1,8 +1,7 @@
-/* Google Fonts — Saira Condensed (incl. italic for .disp), Saira, Hanken Grotesk
-   CSP allows fonts.googleapis.com + fonts.gstatic.com for these only.
-   next/font self-hosts regular weights; this @import adds the italic variant
-   of Saira Condensed which is required by .disp { font-style: italic }. */
-@import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Saira:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap');
+/* Saira Condensed italic variant only (not covered by next/font self-hosting)
+   Roboto is loaded via next/font in layout.tsx — no @import needed for it.
+   Hanken Grotesk removed: replaced by Roboto (same as www.garrincha.be). */
+@import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@1,700;1,800;1,900&display=swap');
 @import "tailwindcss";
 @plugin "daisyui" { themes: false; }
 
@@ -52,7 +51,8 @@
      system fallback last                                              */
   --f-disp: var(--font-saira-condensed), 'Saira Condensed', 'Arial Narrow', sans-serif;
   --f-num:  var(--font-saira), 'Saira', sans-serif;
-  --f-body: var(--font-hanken), 'Hanken Grotesk', system-ui, sans-serif;
+  /* Roboto = same font as www.garrincha.be */
+  --f-body: var(--font-roboto), 'Roboto', Arial, sans-serif;
 
   /* radii */
   --r-sm: 10px;
@@ -60,11 +60,11 @@
   --r-lg: 22px;
   --r-xl: 28px;
 
-  /* shadows */
-  --sh-1:     0 2px 8px rgba(0,0,0,0.25);
-  --sh-2:     0 10px 30px rgba(0,0,0,0.35);
-  --sh-green: 0 10px 30px -8px var(--green-glow);
-  --sh-gold:  0 10px 30px -8px var(--gold-glow);
+  /* shadows — no neon/glow, clean subtle only */
+  --sh-1:     0 1px 4px rgba(0,0,0,0.18);
+  --sh-2:     0 4px 16px rgba(0,0,0,0.22);
+  --sh-green: 0 4px 12px rgba(0,0,0,0.15);
+  --sh-gold:  0 4px 12px rgba(0,0,0,0.15);
 }
 
 /* ---- reset ---- */
@@ -5583,3 +5583,108 @@ body:has(.landing-root) .btm-nav-garrincha{ display: none !important; }
 .owner-toggle button.active { background: #16C784; color: #FFFFFF; font-weight: 600; }
 .owner-scores-list { display: flex; flex-direction: column; gap: 0; }
 .owner-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* ============================================================
+   GLOBAL FIXES — applied after all other rules
+   1. Roboto body font everywhere
+   2. No neon/glow effects
+   3. Fix 100vh → min(100dvh,100vh) for iOS Safari
+   4. Topbar user avatar
+   ============================================================ */
+
+/* ── 1. Roboto everywhere in the app ── */
+body,
+input, button, select, textarea, label,
+.site-topbar, .site-topbar-nav, .site-nav-link, .site-nav-btn,
+.btm-nav-label,
+.field, .field-label, .field-hint, .consent-text,
+.auth-form, .auth-title, .auth-sub,
+.d2-root, .admin-root, .owner-shell,
+.dashboard-page, .db-page,
+.mc-page, .mc-card, .mc-filter-btn,
+.lb-table, .lb-mobile-card,
+.acard, .kpi-label, .kpi-value,
+.owner-section, .owner-tab, .owner-stat,
+.badge, .chip,
+p, li, td, th, span, div {
+  font-family: var(--font-roboto), Roboto, Arial, sans-serif;
+}
+
+/* Brand/display font kept for logo/hero elements only */
+.disp, .f-disp, [class*="hero-name"], [class*="hero-title"],
+h1.mc-hero-title, .lp-h1, .lp-h2, .lp-score-pts,
+.d2-hero-welcome, .mc-eyebrow {
+  font-family: var(--f-disp);
+}
+
+/* ── 2. Remove all neon / glow effects ── */
+
+/* Kill all colored glow box-shadows */
+.d2-badge-dot { box-shadow: none !important; }
+.db-status-dot { box-shadow: none !important; }
+.btm-nav-dot { box-shadow: none !important; }
+.lp-phone, .lp-phone * { box-shadow: none !important; }
+.cta-green, .btn-green, .d2-btn-primary { box-shadow: none !important; }
+.prediction-steppers .btn { box-shadow: none !important; }
+
+/* Kill all radial glow overlay divs */
+.d2-hero-glow { display: none !important; }
+.db-hero-glow { display: none !important; }
+.lp-phone-glow { display: none !important; }
+.lp-prize-glow { display: none !important; }
+.hero-glow { display: none !important; }
+.prize-teaser-glow { display: none !important; }
+.mc-trophy-glow { display: none !important; }
+
+/* Kill drop-shadow filter glows on images/icons */
+.mc-trophy-img { filter: none !important; }
+.d2-trophy-img { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.20)) !important; }
+
+/* Kill green glow on focus/active states — replace with clean border */
+.field:focus { box-shadow: 0 0 0 3px rgba(95,224,144,0.15) !important; }
+.consent-box { box-shadow: none !important; }
+
+/* Progress bar — no glow */
+.d2-prog-fill { box-shadow: none !important; }
+.db-progress-fill { box-shadow: none !important; }
+
+/* Status live dot — no neon pulse */
+.mc-status--live { animation: none !important; }
+.mc-status--live::before { box-shadow: none !important; animation: none !important; }
+
+/* ── 3. Fix 100vh → min(100dvh, 100vh) for iOS Safari ── */
+.app-shell    { min-height: min(100dvh, 100vh) !important; }
+.admin-root   { min-height: min(100dvh, 100vh) !important; }
+.admin-side   { height:     min(100dvh, 100vh) !important; }
+.owner-shell  { min-height: min(100dvh, 100vh) !important; }
+.mc-page      { min-height: min(100dvh, 100vh) !important; }
+.owner-center-card { min-height: auto !important; }
+
+/* ── 4. Topbar user avatar ── */
+.topbar-user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  font-family: var(--font-roboto), Roboto, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  flex-shrink: 0;
+  letter-spacing: 0;
+  transition: opacity 0.15s;
+}
+.topbar-user-avatar:hover { opacity: 0.85; }
+
+/* ── 5. Consent checkbox — accessible real checkbox ── */
+.consent-checkbox-real {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
