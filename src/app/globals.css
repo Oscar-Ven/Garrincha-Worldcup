@@ -5487,3 +5487,99 @@ body:has(.landing-root) .btm-nav-garrincha{ display: none !important; }
 /* Bottom nav light refinements */
 .btm-nav-pill { background: rgba(255,255,255,0.98); border: 1px solid #E5E7EB; }
 .btm-nav-label { font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 10px; }
+
+/* ============================================================
+   LIGHT THEME SCOPE OVERRIDE — owner-shell & admin-root
+   Redefines all dark CSS variables within these scopes so
+   every nested class that uses var(--bg), var(--ink) etc.
+   automatically gets the light values.
+   ============================================================ */
+
+.owner-shell,
+.admin-root {
+  /* backgrounds */
+  --bg:        #F5F6F8;
+  --bg-2:      #FFFFFF;
+  --surface:   #F9FAFB;
+  --surface-2: #F0F1F4;
+  /* borders */
+  --line:      #E5E7EB;
+  --line-2:    #D1D5DB;
+  /* text */
+  --ink:       #111111;
+  --ink-dim:   #374151;
+  --ink-faint: #667085;
+  --ink-dark:  #111111;
+  /* accent */
+  --green:      #16C784;
+  --green-2:    #14b377;
+  --green-deep: #F0FDF7;
+  --green-glow: rgba(22,199,132,0.15);
+  --gold:       #D97706;
+  --gold-2:     #B45309;
+  --gold-deep:  #FEF3C7;
+  --live:       #EF4444;
+  --info:       #3B82F6;
+  /* shadows */
+  --sh-1: 0 1px 3px rgba(0,0,0,0.06);
+  --sh-2: 0 2px 8px rgba(0,0,0,0.06);
+  --sh-green: 0 2px 8px rgba(22,199,132,0.20);
+
+  /* font */
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  color: #111111;
+}
+
+/* Additional targeted fixes for inner elements */
+.owner-shell .badge { font-size: 11px; font-weight: 600; }
+.owner-shell .badge.green { background: #DCFCE7; color: #15803D; border-color: #BBF7D0; }
+.owner-shell .badge.gold  { background: #FEF9C3; color: #854D0E; border-color: #FDE68A; }
+.owner-shell .badge.red   { background: #FEE2E2; color: #B91C1C; border-color: #FECACA; }
+.owner-shell .badge.dark  { background: #F3F4F6; color: #374151; border-color: #E5E7EB; }
+.owner-shell .badge.locked{ background: #F3F4F6; color: #6B7280; border-color: #E5E7EB; }
+.owner-shell .empty-state { color: #9CA3AF; padding: 32px; text-align: center; font-size: 14px; }
+.owner-shell .muted       { color: #667085; }
+.owner-shell h2, .owner-shell h3 { color: #111111; }
+
+.admin-root .badge.green { background: #DCFCE7; color: #15803D; border-color: #BBF7D0; }
+.admin-root .badge.gold  { background: #FEF9C3; color: #854D0E; border-color: #FDE68A; }
+.admin-root .badge.red   { background: #FEE2E2; color: #B91C1C; border-color: #FECACA; }
+.admin-root .badge.dark  { background: #F3F4F6; color: #374151; border-color: #E5E7EB; }
+.admin-root .empty-state { color: #9CA3AF; padding: 32px; text-align: center; font-size: 14px; }
+.admin-root .muted       { color: #667085; }
+
+/* Sidebar nav items */
+.admin-side { background: #FFFFFF; border-right: 1px solid #E5E7EB; }
+.admin-side-top { border-bottom: 1px solid #E5E7EB; }
+.admin-side-tag { color: #667085; border-color: #E5E7EB; font-size: 9px; }
+.admin-side-nav a, .admin-side-nav button {
+  color: #374151;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px; font-weight: 500;
+}
+.admin-side-nav a:hover, .admin-side-nav button:hover {
+  background: #F5F6F8; color: #111111;
+}
+.admin-side-nav a.active, .admin-side-nav button.active {
+  background: rgba(22,199,132,0.10);
+  color: #16C784; font-weight: 600;
+}
+.admin-side-foot { border-top: 1px solid #E5E7EB; }
+
+/* Highlight row (current leader card) */
+.owner-highlight-row { gap: 12px; }
+.owner-highlight {
+  background: #FFFFFF; border: 1px solid #E5E7EB;
+  border-radius: 12px; padding: 14px 16px; color: #111111;
+}
+.owner-highlight-label { color: #667085; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.owner-score-row { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; }
+.owner-score-row.scored { background: #F0FDF7; border-color: #A7F3D0; }
+.owner-score-row.locked-row { opacity: 0.75; }
+.owner-score-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.owner-score-teams { display: flex; align-items: center; gap: 12px; }
+.owner-toggle { display: flex; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; }
+.owner-toggle button { padding: 6px 12px; font-size: 13px; background: transparent; color: #667085; border: none; cursor: pointer; }
+.owner-toggle button.active { background: #16C784; color: #FFFFFF; font-weight: 600; }
+.owner-scores-list { display: flex; flex-direction: column; gap: 0; }
+.owner-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
