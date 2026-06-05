@@ -16,15 +16,13 @@ export function PublicFooter() {
           Kempes BV · BE0635670989 · Kortrijksesteenweg 1166, 9051 Gent, Belgium
         </span>
 
-        {/* Middle — legal links */}
+        {/* Middle — legal links (removed duplicate "Legal Notice" → same as "Legal") */}
         <nav className="sf-links" aria-label="Legal links">
           <Link href="/legal">Legal</Link>
           <span className="sf-dot" aria-hidden>·</span>
           <Link href="/privacy">Privacy policy</Link>
           <span className="sf-dot" aria-hidden>·</span>
           <Link href="/terms">Terms</Link>
-          <span className="sf-dot" aria-hidden>·</span>
-          <Link href="/legal">Legal Notice</Link>
           <span className="sf-dot" aria-hidden>·</span>
           <Link href="/cookies">Cookie Policy</Link>
         </nav>
