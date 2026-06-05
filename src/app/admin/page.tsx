@@ -66,6 +66,11 @@ export default async function AdminPage() {
         <div className="admin-content">
           <DataModeNotice locale={locale} />
 
+          <div className="admin-desktop-notice">
+            <span style={{ flexShrink: 0 }}>💻</span>
+            <span>This dashboard is optimized for desktop. For the best experience, use a laptop or larger screen.</span>
+          </div>
+
           {/* KPI row */}
           <div className="kpi-row">
             {[

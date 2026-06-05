@@ -9,7 +9,7 @@ import { Role } from "@prisma/client";
 
 function AccessErrorPage({ title, body, linkLabel }: { title: string; body: string; linkLabel: string }) {
   return (
-    <div className="auth-page" style={{ alignItems: "center", justifyContent: "center", textAlign: "center", minHeight: "100vh" }}>
+    <div className="auth-page" style={{ alignItems: "center", justifyContent: "center", textAlign: "center", minHeight: "min(100dvh, 100vh)" }}>
       <div style={{ width: 88, height: 88, borderRadius: "50%", background: "rgba(255,90,77,0.12)", border: "2px solid rgba(255,90,77,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, marginBottom: 20 }}>🔗</div>
       <h2 className="disp" style={{ fontSize: 28, color: "var(--ink)", marginBottom: 10 }}>{title}</h2>
       <p style={{ fontSize: 14, color: "var(--ink-dim)", lineHeight: 1.5, maxWidth: 280, marginBottom: 24 }}>{body}</p>
