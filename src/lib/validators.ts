@@ -1,13 +1,6 @@
 import { z } from "zod";
 
 const score = z.coerce.number().int().min(0).max(30);
-const minimumAge = 16;
-
-export function isAtLeastAge(dateOfBirth: Date, age = minimumAge, now = new Date()) {
-  const birthdayThisYear = new Date(Date.UTC(now.getUTCFullYear(), dateOfBirth.getUTCMonth(), dateOfBirth.getUTCDate()));
-  const ageYears = now.getUTCFullYear() - dateOfBirth.getUTCFullYear() - (now < birthdayThisYear ? 1 : 0);
-  return ageYears >= age;
-}
 
 const acceptedConsent = z.preprocess(
   (value) => value === true || value === "true" || value === "on",
@@ -23,7 +16,6 @@ export const registerSchema = z.object({
   activationCode: z.string().trim().max(16).toUpperCase().optional(),
   centerId: z.string().trim().min(1).optional(), // for direct registration
   phoneNumber: z.string().trim().min(6).max(32),
-  dateOfBirth: z.coerce.date().optional(),
   nationality: z.string().trim().max(80).optional(),
   termsAccepted: acceptedConsent,
 });
