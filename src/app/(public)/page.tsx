@@ -52,6 +52,19 @@ export default function HomePage() {
               <span className="sr-only">Register for free</span>
             </Link>
           </div>
+          <div className="lp-campaign-graphic lp-campaign-graphic--secondary">
+            <Image
+              src="/images/landing-scoring-centers.png"
+              alt="Simple scoring rules and GARRINCHA center leaderboard information. See leaderboard."
+              width={1672}
+              height={941}
+              sizes="(max-width: 1200px) 100vw, 1180px"
+              className="lp-campaign-image"
+            />
+            <Link href="/leaderboards" className="lp-campaign-leaderboard-link">
+              <span className="sr-only">See leaderboard</span>
+            </Link>
+          </div>
         </div>
       </section>
 
