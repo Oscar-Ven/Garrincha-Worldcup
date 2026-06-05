@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Saira_Condensed, Saira, Roboto } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { MobileNav } from "@/components/MobileNav";
 import { NavLink } from "@/components/NavLink";
 import { PublicFooter } from "@/components/PublicFooter";
@@ -15,10 +14,9 @@ import "./globals.css";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1B4332",
+  themeColor: "#ffffff",
 };
 
-// ── Brand display font (Saira Condensed — kept for GARRINCHA logo/headings only)
 const sairaCondensed = Saira_Condensed({
   subsets: ["latin"],
   weight: ["700", "800", "900"],
@@ -33,7 +31,6 @@ const saira = Saira({
   display: "swap",
 });
 
-// ── Body/UI font — Roboto (same as www.garrincha.be)
 const roboto = Roboto({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
@@ -67,13 +64,14 @@ export const metadata: Metadata = {
 
 function UserAvatar({ name }: { name: string }) {
   const parts = name.trim().split(/\s+/);
-  const initials = parts.length >= 2
-    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-    : name.slice(0, 2).toUpperCase();
+  const initials =
+    parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : name.slice(0, 2).toUpperCase();
   return (
     <Link
       href="/dashboard"
-      className="nav-avatar"
+      className="topbar-user-avatar"
       aria-label={`Dashboard — ${name}`}
       title={name}
     >
@@ -84,20 +82,16 @@ function UserAvatar({ name }: { name: string }) {
 
 export default async function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
   const user = hasDatabaseConfig() ? await getCurrentUser() : null;
-  const isAdmin = user?.role === "ADMIN" || user?.role === "CENTER_ADMIN" || user?.role === "SUPER_ADMIN";
+  const isAdmin =
+    user?.role === "ADMIN" ||
+    user?.role === "CENTER_ADMIN" ||
+    user?.role === "SUPER_ADMIN";
   const displayName = user
     ? ((user as { nickname?: string | null }).nickname ?? user.fullName ?? user.email ?? "")
     : "";
-
-  // Determine the admin nav label based on role
-  const adminNavLabel = user?.role === "SUPER_ADMIN"
-    ? "Owner"
-    : "Manager";
 
   return (
     <html
@@ -105,60 +99,68 @@ export default async function RootLayout({
       className={`${sairaCondensed.variable} ${saira.variable} ${roboto.variable}`}
     >
       <body>
-        <div className="app-shell">
-          {/* ── Desktop nav ── */}
-          <header className="nav">
-            <div className="nav-inner">
-              <Link href="/" className="nav-brand" aria-label="GARRINCHA home">
+        {/* ── Site nav ── */}
+        <header className="site-nav">
+          <div className="container site-nav-inner">
+            {/* Brand */}
+            <Link href="/" className="site-nav-brand" aria-label="GARRINCHA home">
+              <div className="site-nav-logo">
                 <Image
-                  src="/garrincha-black.png"
-                  alt="GARRINCHA"
-                  height={26}
-                  width={156}
-                  style={{ height: 26, width: "auto" }}
+                  src="/images/player-medal.png"
+                  alt="GARRINCHA logo"
+                  width={44}
+                  height={44}
                   priority
                 />
-              </Link>
+              </div>
+              <div className="site-nav-brand-text">
+                <span className="site-nav-brand-name">GARRINCHA</span>
+                <span className="site-nav-brand-sub">World Cup 2026</span>
+              </div>
+            </Link>
 
-              <nav className="nav-links" aria-label="Primary navigation">
-                <NavLink href="/matches" className="nav-link">{t(locale, "nav.matches")}</NavLink>
-                <NavLink href="/leaderboards" className="nav-link">{t(locale, "nav.leaderboards")}</NavLink>
+            {/* Center links */}
+            <nav aria-label="Primary navigation" className="site-nav-desktop-only">
+              <ul className="site-nav-links">
+                <li><NavLink href="/matches">Matches</NavLink></li>
+                <li><NavLink href="/leaderboards">Leaderboard</NavLink></li>
                 {user && (
-                  <NavLink href="/dashboard" className="nav-link">{t(locale, "nav.predict")}</NavLink>
+                  <li><NavLink href="/dashboard">{t(locale, "nav.predict")}</NavLink></li>
                 )}
                 {isAdmin && (
-                  <NavLink href="/admin" className="nav-link">{adminNavLabel}</NavLink>
+                  <li><NavLink href="/admin">{t(locale, "nav.admin")}</NavLink></li>
                 )}
-              </nav>
+              </ul>
+            </nav>
 
-              <div className="nav-right">
-                {user ? (
-                  <>
-                    <UserAvatar name={displayName} />
-                    <form action="/api/auth/logout" method="post">
-                      <button type="submit" className="btn-ghost">
-                        {t(locale, "nav.logout")}
-                      </button>
-                    </form>
-                  </>
-                ) : (
-                  <Link href="/register" className="btn-primary">
-                    {t(locale, "nav.register")}
-                  </Link>
-                )}
-                <LanguageSwitcher locale={locale} />
-              </div>
+            {/* Right */}
+            <div className="site-nav-right">
+              {user ? (
+                <>
+                  <UserAvatar name={displayName} />
+                  <form action="/api/auth/logout" method="post">
+                    <button
+                      type="submit"
+                      className="btn btn-secondary btn-sm site-nav-desktop-only"
+                    >
+                      {t(locale, "nav.logout")}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <Link href="/register" className="btn btn-primary btn-sm">
+                  {t(locale, "nav.register")}
+                </Link>
+              )}
             </div>
-          </header>
-
-          {children}
-
-          <div className="layout-footer-slot">
-            <PublicFooter />
           </div>
+        </header>
 
-          <MobileNav isLoggedIn={!!user} locale={locale} />
-        </div>
+        {children}
+
+        <PublicFooter />
+
+        <MobileNav isLoggedIn={!!user} locale={locale} />
       </body>
     </html>
   );
