@@ -47,7 +47,7 @@ export default async function PublicLayout({
         <div className="container site-nav-inner">
           <Link href="/" className="site-nav-brand" aria-label="GARRINCHA home">
             <Image
-              src="/branding/garrincha-white.png"
+              src="/branding/garrincha-black.png"
               alt=""
               width={270}
               height={66}
