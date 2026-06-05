@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { getAllMatches } from "@/lib/matches";
 import { hasDatabaseConfig } from "@/lib/app-mode";
 import { demoAllMatches } from "@/lib/ui-demo-data";
@@ -57,16 +56,6 @@ export default async function MatchesPage() {
             <p className="page-hero-lead">
               {matches.length} matches · {groupMatches} group stage · {knockoutMatches} knockout · Jun 11 – Jul 19, 2026
             </p>
-          </div>
-          <div className="page-hero-visual">
-            <Image
-              src="/images/hero-banner.png"
-              alt="FIFA World Cup 2026"
-              fill
-              style={{ objectFit: "cover", objectPosition: "center" }}
-              priority
-              sizes="(max-width:768px) 0vw, 45vw"
-            />
           </div>
         </div>
       </section>

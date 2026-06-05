@@ -49,7 +49,7 @@ export function RegisterForm({
           </div>
           <div style={{ position: "absolute", right: -10, bottom: -10, width: 36, height: 36, borderRadius: "50%", background: "var(--green)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--sh-green)" }}>
             <svg width="18" height="18" viewBox="0 0 24 24">
-              <path d="M5 13l4 4L19 7" stroke="#06210F" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M5 13l4 4L19 7" stroke="#111111" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
         </div>
@@ -185,7 +185,7 @@ export function RegisterForm({
         <span className={`consent-box${consent ? " checked" : ""}${consentErr ? " error" : ""}`} aria-hidden>
           {consent && (
             <svg width="13" height="13" viewBox="0 0 24 24">
-              <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           )}
         </span>

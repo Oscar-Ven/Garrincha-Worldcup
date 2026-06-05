@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 export default function NotFound() {
   return (
@@ -15,14 +14,13 @@ export default function NotFound() {
         gap: 20,
       }}
     >
-      <Image src="/garrincha-white.png" alt="GARRINCHA" height={20} width={120} style={{ height: 20, width: "auto", opacity: 0.7 }} />
       <div
         style={{
           color: "var(--green)",
           fontSize: "clamp(5rem,20vw,10rem)",
-          fontFamily: "var(--f-disp)",
+          fontFamily: "Arial, Helvetica, sans-serif",
           fontWeight: 900,
-          fontStyle: "italic",
+          fontStyle: "normal",
           lineHeight: 0.9,
           letterSpacing: "-0.04em",
         }}

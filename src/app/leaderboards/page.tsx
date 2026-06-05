@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { getLeaderboardWithMeta } from "@/lib/leaderboards";
 import { hasDatabaseConfig } from "@/lib/app-mode";
 import { demoLeaderboard } from "@/lib/ui-demo-data";
@@ -39,16 +38,6 @@ export default async function LeaderboardsPage() {
           <div className="lb-page-header-text">
             <h1 className="lb-page-title">Leaderboard</h1>
             <p className="lb-page-sub">FIFA World Cup 2026 — Track rankings, points and predictions.</p>
-          </div>
-          <div className="lb-page-trophy" aria-hidden>
-            <Image
-              src="/images/world-cup-trophy.png"
-              alt="FIFA World Cup trophy"
-              width={72}
-              height={106}
-              priority
-              unoptimized
-            />
           </div>
         </div>
       </div>

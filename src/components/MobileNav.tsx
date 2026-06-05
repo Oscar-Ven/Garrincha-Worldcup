@@ -9,8 +9,8 @@ type Props = {
   locale: Locale;
 };
 
-const ACTIVE_COLOR = "#1B4332";
-const INACTIVE_COLOR = "#9CA3AF";
+const ACTIVE_COLOR = "#111111";
+const INACTIVE_COLOR = "#666666";
 
 function HomeIcon({ on }: { on: boolean }) {
   const c = on ? ACTIVE_COLOR : INACTIVE_COLOR;

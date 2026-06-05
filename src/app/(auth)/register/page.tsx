@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { RegisterForm } from "@/components/AuthForms";
 import { getLocale } from "@/lib/i18n";
@@ -31,14 +30,6 @@ export default async function RegisterPage({
 
         {/* ── Logo row ── */}
         <div className="auth-logo-row">
-          <div className="auth-logo-img">
-            <Image
-              src="/images/player-medal.png"
-              alt="GARRINCHA"
-              width={42}
-              height={42}
-            />
-          </div>
           <div>
             <div style={{ fontSize: ".9375rem", fontWeight: 800, color: "var(--g-dark)", letterSpacing: "-.01em" }}>
               GARRINCHA
@@ -62,7 +53,7 @@ export default async function RegisterPage({
               alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
               <svg width="14" height="14" viewBox="0 0 24 24">
-                <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
             <span style={{ fontSize: 13, color: "var(--g-dark)", fontWeight: 600 }}>

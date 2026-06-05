@@ -3,7 +3,6 @@ import { ArrowRight, Gift, Lock, Medal, QrCode, ShieldCheck, Trophy, UserPlus } 
 import Link from "next/link";
 import { DataModeNotice } from "@/components/DataModeNotice";
 import { TeamFlag } from "@/components/Flag";
-import { GarrinchaLogo } from "@/components/GarrinchaLogo";
 import { getLocale } from "@/lib/i18n";
 import { demoLeaderboard, demoMatches } from "@/lib/ui-demo-data";
 
@@ -68,13 +67,13 @@ export default async function DemoVideoPage() {
     <main className="demo-video-page">
       <DataModeNotice locale={locale} />
       <div className="notice" role="status">
-        Demo recording page: all screens below use preview data and placeholder campaign assets.
+        Demo recording page: all screens below use preview data.
       </div>
 
       <section className="demo-video-hero">
         <div className="demo-video-hero-copy">
           <span className="eyebrow">Demo recording route</span>
-          <GarrinchaLogo />
+          <strong>GARRINCHA</strong>
           <h1>World Cup Prediction Campaign</h1>
           <p>
             A simple QR-first pronostiek platform for GARRINCHA Centers: register, predict scores, earn

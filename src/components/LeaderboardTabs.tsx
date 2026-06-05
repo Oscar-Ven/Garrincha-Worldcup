@@ -5,12 +5,12 @@ import { type Locale, t } from "@/lib/translations";
 
 type Row = { id: string; name: string; nationality: string; center: string; points: number };
 
-const MEDAL = ["var(--gold)", "#C8CDD4", "#CD8B5B"];
+const MEDAL = ["var(--gold)", "#666666", "#666666"];
 
 function RankRow({ row, rank, highlight }: { row: Row; rank: number; highlight?: boolean }) {
   const medal = rank <= 3 ? MEDAL[rank - 1] : null;
   return (
-    <div className="card rank-row" style={medal && highlight ? { background: `linear-gradient(100deg,${medal}14,transparent)`, borderColor: `${medal}40` } : undefined}>
+    <div className="card rank-row" style={medal && highlight ? { borderColor: "#dddddd" } : undefined}>
       <span className="rank-num" style={{ color: medal ?? "var(--ink-faint)" }}>{rank}</span>
       <div className="rank-nick">
         <div className="rank-nick-name">{row.name}</div>
@@ -45,8 +45,8 @@ function PodiumBoard({ rows }: { rows: Row[]; locale?: Locale }) {
                   className="podium-col"
                   style={{
                     height: heights[rank] ?? 70,
-                    background: `linear-gradient(180deg,${medal}33,${medal}08)`,
-                    border: `1px solid ${medal}55`,
+                    background: "#ffffff",
+                    border: "1px solid #dddddd",
                   }}
                 >
                   <span className="podium-rank" style={{ color: medal }}>{rank}</span>
@@ -106,7 +106,7 @@ export function LeaderboardTabs({
       {/* center filter chips */}
       {tab === "center" && (
         <div className="g-scroll" style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8 }}>
-          <button className={`filter-chip${centerFilter === "all" ? " active" : ""}`} onClick={() => setCenterFilter("all")} style={centerFilter === "all" ? { background: "var(--green)", color: "#06210F" } : undefined}>
+          <button className={`filter-chip${centerFilter === "all" ? " active" : ""}`} onClick={() => setCenterFilter("all")} style={centerFilter === "all" ? { background: "var(--green)", color: "#111111" } : undefined}>
             {t(locale, "leaderboard.centers")}
           </button>
           {centers.map((c) => (
@@ -114,7 +114,7 @@ export function LeaderboardTabs({
               key={c.id}
               className={`filter-chip${centerFilter === c.id ? " active" : ""}`}
               onClick={() => setCenterFilter(c.id)}
-              style={centerFilter === c.id ? { background: "var(--green)", color: "#06210F" } : undefined}
+              style={centerFilter === c.id ? { background: "var(--green)", color: "#111111" } : undefined}
             >
               {c.name.replace("GARRINCHA ", "")}
             </button>

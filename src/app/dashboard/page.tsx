@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MatchFilter } from "@/components/MatchFilter";
@@ -147,16 +146,6 @@ export default async function DashboardPage() {
 
         {/* ── WELCOME CARD ──────────────────────────────────────────────── */}
         <div className="dash-welcome-card">
-          <div className="dash-welcome-trophy">
-            <Image
-              src="/images/world-cup-trophy.png"
-              alt="World Cup trophy"
-              width={72}
-              height={90}
-              priority
-              unoptimized
-            />
-          </div>
           <div className="dash-welcome-body">
             <div className="dash-welcome-name">Welcome back, {displayName}!</div>
             <div className="dash-welcome-sub">World Cup Pronostiek 2026</div>

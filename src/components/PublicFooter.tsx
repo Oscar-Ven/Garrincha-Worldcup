@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export function PublicFooter() {
@@ -6,23 +5,13 @@ export function PublicFooter() {
     <footer className="site-footer" aria-label="Site footer">
       <div className="container">
         <div className="site-footer-main">
-          {/* Brand */}
           <Link href="/" className="site-footer-brand" aria-label="GARRINCHA home">
-            <div className="site-footer-logo">
-              <Image
-                src="/images/player-medal.png"
-                alt="GARRINCHA logo"
-                width={44}
-                height={44}
-              />
-            </div>
             <div>
               <span className="site-footer-brand-name">GARRINCHA</span>
               <span className="site-footer-brand-sub">World Cup 2026</span>
             </div>
           </Link>
 
-          {/* Social icons */}
           <div className="site-footer-social">
             <a
               href="https://www.instagram.com/garrincha_belgium/"
@@ -60,7 +49,6 @@ export function PublicFooter() {
           </div>
         </div>
 
-        {/* Legal row */}
         <div className="site-footer-legal">
           <span>©2026 Kempes BV</span>
           <span className="site-footer-sep">·</span>

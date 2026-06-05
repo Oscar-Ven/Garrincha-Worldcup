@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm } from "@/components/AuthForms";
@@ -18,9 +17,6 @@ export default async function LoginPage() {
 
         {/* ── Logo row ── */}
         <div className="auth-logo-row">
-          <div className="auth-logo-img">
-            <Image src="/images/player-medal.png" alt="GARRINCHA" width={42} height={42} />
-          </div>
           <div>
             <div style={{ fontSize: ".9375rem", fontWeight: 800, color: "var(--g-dark)", letterSpacing: "-.01em" }}>
               GARRINCHA
@@ -36,8 +32,8 @@ export default async function LoginPage() {
           <div style={{
             display: "flex", alignItems: "center", gap: 8,
             padding: "10px 14px", borderRadius: 10,
-            background: "#eff6ff", border: "1px solid #bfdbfe",
-            marginBottom: 16, fontSize: 13, color: "#1e3a5f",
+            background: "#ffffff", border: "1px solid #dddddd",
+            marginBottom: 16, fontSize: 13, color: "#111111",
           }}>
             <span>👁</span>
             <span>{t(locale, "auth.previewModeNotice")}</span>

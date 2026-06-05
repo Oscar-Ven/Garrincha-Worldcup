@@ -18,7 +18,7 @@ async function patchJson(url: string, form: HTMLFormElement) {
   if (!response.ok) throw new Error(body.error || "Request failed.");
 }
 
-const inputStyle = { background: "var(--surface-2)", border: "1.5px solid var(--line-2)", color: "var(--ink)", fontFamily: "var(--f-body)", fontSize: 15, padding: "0 14px", outline: "none", borderRadius: 10 } as React.CSSProperties;
+const inputStyle = { background: "var(--surface-2)", border: "1.5px solid var(--line-2)", color: "var(--ink)", fontFamily: "Arial, Helvetica, sans-serif", fontSize: 15, padding: "0 14px", outline: "none", borderRadius: 10 } as React.CSSProperties;
 
 export function FinalScoreForm({ matchId, homeScore, awayScore, locale }: { matchId: string; homeScore?: number | null; awayScore?: number | null; locale: Locale }) {
   const router = useRouter();
@@ -33,10 +33,10 @@ export function FinalScoreForm({ matchId, homeScore, awayScore, locale }: { matc
   return (
     <form style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }} onSubmit={submit}>
       <input aria-label="Home" defaultValue={homeScore ?? ""} min={0} max={30} name="homeScore" required type="number"
-        style={{ ...inputStyle, width: 64, height: 44, fontFamily: "var(--f-num)", fontWeight: 800, fontSize: 20, textAlign: "center" }} />
+        style={{ ...inputStyle, width: 64, height: 44, fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", fontWeight: 800, fontSize: 20, textAlign: "center" }} />
       <span className="num" style={{ fontSize: 20, color: "var(--ink-faint)" }}>:</span>
       <input aria-label="Away" defaultValue={awayScore ?? ""} min={0} max={30} name="awayScore" required type="number"
-        style={{ ...inputStyle, width: 64, height: 44, fontFamily: "var(--f-num)", fontWeight: 800, fontSize: 20, textAlign: "center" }} />
+        style={{ ...inputStyle, width: 64, height: 44, fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", fontWeight: 800, fontSize: 20, textAlign: "center" }} />
       <button type="submit" className="abtn abtn-green">{t(locale, "admin.saveScore")}</button>
       {status && <span style={{ fontSize: 12.5, color: "var(--green)", fontWeight: 700 }}>{status}</span>}
     </form>
@@ -65,7 +65,7 @@ export function BonusForm({ users, locale }: { users: UserOption[]; locale: Loca
       <div>
         <label className="label" style={{ fontSize: 10.5, color: "var(--ink-dim)", display: "block", marginBottom: 8 }}>{t(locale, "form.points")}</label>
         <input name="points" type="number" min={-100} max={100} required
-          style={{ ...inputStyle, width: 120, height: 50, borderRadius: 12, fontFamily: "var(--f-num)", fontWeight: 800, fontSize: 18 }} />
+          style={{ ...inputStyle, width: 120, height: 50, borderRadius: 12, fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", fontWeight: 800, fontSize: 18 }} />
       </div>
       <div>
         <label className="label" style={{ fontSize: 10.5, color: "var(--ink-dim)", display: "block", marginBottom: 8 }}>{t(locale, "form.reason")}</label>
@@ -98,7 +98,7 @@ export function CheckInCodeForm({ centerId, initialCode, initialExpiresAt, local
     <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 480 }}>
       {code ? (
         <div>
-          <div style={{ background: "var(--bg-2)", padding: 20, borderRadius: 12, fontFamily: "var(--f-disp)", fontStyle: "italic", fontWeight: 900, fontSize: "clamp(2.4rem,10vw,4rem)", color: "var(--green)", letterSpacing: "0.18em", textAlign: "center" }}>
+          <div style={{ background: "var(--bg-2)", padding: 20, borderRadius: 12, fontFamily: "Arial, Helvetica, sans-serif", fontStyle: "normal", fontWeight: 900, fontSize: "clamp(2.4rem,10vw,4rem)", color: "var(--green)", letterSpacing: "0.18em", textAlign: "center" }}>
             {code}
           </div>
           {expiresAt && (

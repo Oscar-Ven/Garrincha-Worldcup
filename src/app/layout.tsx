@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Saira_Condensed, Saira, Roboto } from "next/font/google";
 import Link from "next/link";
-import Image from "next/image";
 import { MobileNav } from "@/components/MobileNav";
 import { NavLink } from "@/components/NavLink";
 import { PublicFooter } from "@/components/PublicFooter";
@@ -16,27 +14,6 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: "#ffffff",
 };
-
-const sairaCondensed = Saira_Condensed({
-  subsets: ["latin"],
-  weight: ["700", "800", "900"],
-  variable: "--font-saira-condensed",
-  display: "swap",
-});
-
-const saira = Saira({
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  variable: "--font-saira",
-  display: "swap",
-});
-
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-roboto",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -94,25 +71,12 @@ export default async function RootLayout({
     : "";
 
   return (
-    <html
-      lang={locale}
-      className={`${sairaCondensed.variable} ${saira.variable} ${roboto.variable}`}
-    >
+    <html lang={locale}>
       <body>
         {/* ── Site nav ── */}
         <header className="site-nav">
           <div className="container site-nav-inner">
-            {/* Brand */}
             <Link href="/" className="site-nav-brand" aria-label="GARRINCHA home">
-              <div className="site-nav-logo">
-                <Image
-                  src="/images/player-medal.png"
-                  alt="GARRINCHA logo"
-                  width={44}
-                  height={44}
-                  priority
-                />
-              </div>
               <div className="site-nav-brand-text">
                 <span className="site-nav-brand-name">GARRINCHA</span>
                 <span className="site-nav-brand-sub">World Cup 2026</span>

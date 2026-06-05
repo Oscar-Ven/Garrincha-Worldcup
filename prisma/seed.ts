@@ -210,8 +210,8 @@ async function main() {
   for (const center of centers) {
     await prisma.garrinchaCenter.upsert({
       where: { name: center.name },
-      create: { ...center, bannerUrl: "/branding/garrincha-banner.svg" },
-      update: { ...center, bannerUrl: "/branding/garrincha-banner.svg" },
+      create: { ...center, bannerUrl: null },
+      update: { ...center, bannerUrl: null },
     });
   }
 

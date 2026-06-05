@@ -7,16 +7,16 @@ import { type Locale, t } from "@/lib/translations";
 interface Center { id: string; name: string; city: string; country: string; }
 
 const CENTER_COLORS: Record<string, string> = {
-  antwerp: "#5FE090", brussels: "#F5C242", ghent: "#6FB3FF", liege: "#FF8C66",
-  leuven: "#C792EA", bruges: "#4ED9C0",
-  "antwerpen-noord": "#5FE090", "antwerpen-zuid": "#F5C242", "gent-arsenaal": "#6FB3FF",
-  "gent-theloop": "#46C878", charleroi: "#FF8C66", kortrijk: "#C792EA",
-  luik: "#4ED9C0", diegem: "#FFB347", "westgate-dilbeek": "#E879F9",
+  antwerp: "#ffffff", brussels: "#ffffff", ghent: "#ffffff", liege: "#ffffff",
+  leuven: "#ffffff", bruges: "#ffffff",
+  "antwerpen-noord": "#ffffff", "antwerpen-zuid": "#ffffff", "gent-arsenaal": "#ffffff",
+  "gent-theloop": "#ffffff", charleroi: "#ffffff", kortrijk: "#ffffff",
+  luik: "#ffffff", diegem: "#ffffff", "westgate-dilbeek": "#ffffff",
 };
 
 function getColor(name: string): string {
   const key = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z-]/g, "");
-  return CENTER_COLORS[key] ?? "#5FE090";
+  return CENTER_COLORS[key] ?? "#ffffff";
 }
 
 function getShort(name: string): string {
@@ -31,7 +31,7 @@ function CenterShield({ name, size = 32 }: { name: string; size?: number }) {
       <svg viewBox="0 0 40 44" width={size} height={size * 1.1} style={{ position: "absolute", inset: 0 }}>
         <path d="M20 1 L38 7 V22 C38 33 30 40 20 43 C10 40 2 33 2 22 V7 Z" fill={color} fillOpacity="0.16" stroke={color} strokeWidth="1.6" />
       </svg>
-      <span style={{ position: "relative", fontFamily: "var(--f-disp)", fontWeight: 900, fontStyle: "italic", fontSize: size * 0.34, color, letterSpacing: "-0.02em" }}>{short}</span>
+      <span style={{ position: "relative", fontFamily: "Arial, Helvetica, sans-serif", fontWeight: 900, fontStyle: "normal", fontSize: size * 0.34, color, letterSpacing: "-0.02em" }}>{short}</span>
     </div>
   );
 }

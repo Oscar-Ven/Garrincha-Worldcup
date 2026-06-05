@@ -25,8 +25,8 @@ function AccessErrorPage({
             width: 72,
             height: 72,
             borderRadius: "50%",
-            background: "#FEF2F2",
-            border: "1.5px solid #FECACA",
+            background: "#ffffff",
+            border: "1.5px solid #dddddd",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -40,24 +40,24 @@ function AccessErrorPage({
             fill="none"
             aria-hidden
           >
-            <circle cx="12" cy="12" r="10" stroke="#DC2626" strokeWidth="2" />
+            <circle cx="12" cy="12" r="10" stroke="#111111" strokeWidth="2" />
             <line
               x1="12"
               y1="8"
               x2="12"
               y2="12"
-              stroke="#DC2626"
+              stroke="#111111"
               strokeWidth="2"
               strokeLinecap="round"
             />
-            <circle cx="12" cy="16" r="1" fill="#DC2626" />
+            <circle cx="12" cy="16" r="1" fill="#111111" />
           </svg>
         </div>
 
         <h2
           style={{
-            fontFamily: "var(--font-saira-condensed), sans-serif",
-            fontStyle: "italic",
+            fontFamily: "Arial, Helvetica, sans-serif",
+            fontStyle: "normal",
             fontWeight: 800,
             fontSize: "1.4rem",
             color: "var(--green-deep)",
@@ -87,13 +87,12 @@ function AccessErrorPage({
             alignItems: "center",
             justifyContent: "center",
             padding: "0.65rem 1.5rem",
-            background: "#1B4332",
+            background: "#111111",
             color: "#FFFFFF",
             borderRadius: 8,
             fontWeight: 700,
             fontSize: "0.9rem",
             textDecoration: "none",
-            transition: "background 0.15s",
           }}
         >
           {linkLabel}

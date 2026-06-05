@@ -2,7 +2,7 @@ export default function DashboardLoading() {
   return (
     <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
       {/* Greeting skeleton */}
-      <div style={{ padding: "58px 18px 16px", background: "radial-gradient(120% 80% at 80% -20%, #16331F, var(--bg) 60%)" }}>
+      <div style={{ padding: "58px 18px 16px", background: "#ffffff" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 13, marginTop: 18 }}>
           <div className="skeleton" style={{ width: 50, height: 50, borderRadius: "50%" }} />
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>

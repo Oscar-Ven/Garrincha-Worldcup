@@ -90,7 +90,7 @@ export default async function AdminMatchesPage() {
 
                   {/* Teams + score */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                    <span style={{ fontFamily: "'Saira Condensed', sans-serif", fontStyle: "italic", fontWeight: 800, fontSize: 18, color: "var(--green-deep)" }}>
+                    <span style={{ fontFamily: "Arial, Helvetica, sans-serif", fontStyle: "normal", fontWeight: 800, fontSize: 18, color: "var(--green-deep)" }}>
                       {homeTeam}
                     </span>
                     <div style={{ textAlign: "center" }}>
@@ -102,7 +102,7 @@ export default async function AdminMatchesPage() {
                         <span style={{ fontSize: 13, color: "var(--text-3)" }}>{kickoff}</span>
                       )}
                     </div>
-                    <span style={{ fontFamily: "'Saira Condensed', sans-serif", fontStyle: "italic", fontWeight: 800, fontSize: 18, color: "var(--green-deep)" }}>
+                    <span style={{ fontFamily: "Arial, Helvetica, sans-serif", fontStyle: "normal", fontWeight: 800, fontSize: 18, color: "var(--green-deep)" }}>
                       {awayTeam}
                     </span>
                   </div>

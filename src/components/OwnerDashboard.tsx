@@ -157,14 +157,14 @@ const STAGE_LABELS: Record<string, string> = {
 const S = {
   // Page shell
   page: {
-    background: "#F8FAFB",
+    background: "#ffffff",
     minHeight: "100vh",
   } as React.CSSProperties,
 
   // Header strip
   header: {
     background: "#FFFFFF",
-    borderBottom: "1px solid #E5E7EB",
+    borderBottom: "1px solid #dddddd",
     padding: "1.25rem 1.5rem",
   } as React.CSSProperties,
 
@@ -185,17 +185,17 @@ const S = {
   } as React.CSSProperties,
 
   titleText: {
-    fontFamily: "'Saira Condensed', sans-serif",
-    fontStyle: "italic" as const,
+    fontFamily: "Arial, Helvetica, sans-serif",
+    fontStyle: "normal" as const,
     fontWeight: 800,
     fontSize: "1.4rem",
-    color: "#1B4332",
+    color: "#111111",
     lineHeight: 1.1,
   } as React.CSSProperties,
 
   subtitle: {
     fontSize: "0.8rem",
-    color: "#6B7280",
+    color: "#666666",
     marginTop: "0.25rem",
   } as React.CSSProperties,
 
@@ -207,8 +207,8 @@ const S = {
 
   quickStat: {
     fontSize: "0.82rem",
-    color: "#374151",
-    background: "#F3F4F6",
+    color: "#333333",
+    background: "#ffffff",
     padding: "0.3rem 0.75rem",
     borderRadius: 9999,
     display: "flex",
@@ -219,7 +219,7 @@ const S = {
   // Tab nav
   tabs: {
     background: "#FFFFFF",
-    borderBottom: "1px solid #E5E7EB",
+    borderBottom: "1px solid #dddddd",
     display: "flex",
     overflowX: "auto" as const,
     padding: "0 1rem",
@@ -233,17 +233,16 @@ const S = {
     padding: "0.75rem 1rem",
     fontSize: "0.85rem",
     fontWeight: active ? 600 : 500,
-    color: active ? "#1B4332" : "#6B7280",
-    borderBottom: active ? "2px solid #1B4332" : "2px solid transparent",
+    color: active ? "#111111" : "#666666",
+    borderBottom: active ? "2px solid #111111" : "2px solid transparent",
     marginBottom: -1,
     cursor: "pointer",
     background: "none",
     border: "none",
     borderBottomStyle: "solid",
     borderBottomWidth: 2,
-    borderBottomColor: active ? "#1B4332" : "transparent",
+    borderBottomColor: active ? "#111111" : "transparent",
     whiteSpace: "nowrap" as const,
-    transition: "color 0.12s, border-color 0.12s",
   }),
 
   // Content area
@@ -269,20 +268,20 @@ const S = {
   } as React.CSSProperties,
 
   sectionTitle: {
-    fontFamily: "'Saira Condensed', sans-serif",
-    fontStyle: "italic" as const,
+    fontFamily: "Arial, Helvetica, sans-serif",
+    fontStyle: "normal" as const,
     fontWeight: 800,
     fontSize: "1.3rem",
-    color: "#1B4332",
+    color: "#111111",
     margin: 0,
   } as React.CSSProperties,
 
   sectionSubtitle: {
-    fontFamily: "'Saira Condensed', sans-serif",
-    fontStyle: "italic" as const,
+    fontFamily: "Arial, Helvetica, sans-serif",
+    fontStyle: "normal" as const,
     fontWeight: 700,
     fontSize: "1rem",
-    color: "#374151",
+    color: "#333333",
     margin: "0 0 0.75rem",
   } as React.CSSProperties,
 
@@ -296,7 +295,7 @@ const S = {
   // White card
   card: {
     background: "#FFFFFF",
-    border: "1px solid #E5E7EB",
+    border: "1px solid #dddddd",
     borderRadius: 12,
     padding: "1.25rem",
     boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
@@ -311,21 +310,21 @@ const S = {
 
   statCard: (accent?: "green" | "gold" | "red" | "amber"): React.CSSProperties => {
     const borders: Record<string, string> = {
-      green: "#16A34A",
-      gold: "#D97706",
-      red: "#DC2626",
-      amber: "#F59E0B",
+      green: "#111111",
+      gold: "#111111",
+      red: "#111111",
+      amber: "#111111",
     };
     const bgs: Record<string, string> = {
-      green: "#F0FDF4",
-      gold: "#FFFBEB",
-      red: "#FEF2F2",
-      amber: "#FFFBEB",
+      green: "#ffffff",
+      gold: "#ffffff",
+      red: "#ffffff",
+      amber: "#ffffff",
     };
     return {
       background: accent ? bgs[accent] : "#FFFFFF",
-      border: `1px solid ${accent ? borders[accent] + "40" : "#E5E7EB"}`,
-      borderTop: `3px solid ${accent ? borders[accent] : "#E5E7EB"}`,
+      border: `1px solid ${accent ? borders[accent] + "40" : "#dddddd"}`,
+      borderTop: `3px solid ${accent ? borders[accent] : "#dddddd"}`,
       borderRadius: 10,
       padding: "1rem 1.125rem",
       display: "flex",
@@ -336,18 +335,18 @@ const S = {
   },
 
   statValue: {
-    fontFamily: "'Saira Condensed', sans-serif",
-    fontStyle: "italic" as const,
+    fontFamily: "Arial, Helvetica, sans-serif",
+    fontStyle: "normal" as const,
     fontWeight: 900,
     fontSize: "2rem",
-    color: "#1B4332",
+    color: "#111111",
     lineHeight: 1,
   } as React.CSSProperties,
 
   statLabel: {
     fontSize: "0.75rem",
     fontWeight: 600,
-    color: "#6B7280",
+    color: "#666666",
     textTransform: "uppercase" as const,
     letterSpacing: "0.04em",
   } as React.CSSProperties,
@@ -361,10 +360,10 @@ const S = {
 
   healthCard: (status: string): React.CSSProperties => {
     const cfg: Record<string, { bg: string; border: string }> = {
-      healthy:      { bg: "#F0FDF4", border: "#BBF7D0" },
-      warning:      { bg: "#FFFBEB", border: "#FDE68A" },
-      error:        { bg: "#FEF2F2", border: "#FECACA" },
-      unconfigured: { bg: "#F9FAFB", border: "#E5E7EB" },
+      healthy:      { bg: "#ffffff", border: "#dddddd" },
+      warning:      { bg: "#ffffff", border: "#dddddd" },
+      error:        { bg: "#ffffff", border: "#dddddd" },
+      unconfigured: { bg: "#ffffff", border: "#dddddd" },
     };
     const c = cfg[status] ?? cfg.unconfigured;
     return {
@@ -380,16 +379,16 @@ const S = {
 
   healthDot: (status: string): React.CSSProperties => {
     const colors: Record<string, string> = {
-      healthy:      "#16A34A",
-      warning:      "#D97706",
-      error:        "#DC2626",
-      unconfigured: "#9CA3AF",
+      healthy:      "#111111",
+      warning:      "#111111",
+      error:        "#111111",
+      unconfigured: "#666666",
     };
     return {
       width: 10,
       height: 10,
       borderRadius: "50%",
-      background: colors[status] ?? "#9CA3AF",
+      background: colors[status] ?? "#666666",
       flexShrink: 0,
       marginTop: 4,
     };
@@ -398,22 +397,22 @@ const S = {
   healthLabel: {
     fontSize: "0.82rem",
     fontWeight: 600,
-    color: "#111827",
+    color: "#111111",
     lineHeight: 1.3,
   } as React.CSSProperties,
 
   healthDetail: {
     fontSize: "0.76rem",
-    color: "#6B7280",
+    color: "#666666",
     marginTop: 2,
   } as React.CSSProperties,
 
   healthPill: (status: string): React.CSSProperties => {
     const cfg: Record<string, { bg: string; color: string }> = {
-      healthy:      { bg: "#DCFCE7", color: "#15803D" },
-      warning:      { bg: "#FEF3C7", color: "#92400E" },
-      error:        { bg: "#FEE2E2", color: "#B91C1C" },
-      unconfigured: { bg: "#F3F4F6", color: "#6B7280" },
+      healthy:      { bg: "#ffffff", color: "#111111" },
+      warning:      { bg: "#ffffff", color: "#111111" },
+      error:        { bg: "#ffffff", color: "#111111" },
+      unconfigured: { bg: "#ffffff", color: "#666666" },
     };
     const c = cfg[status] ?? cfg.unconfigured;
     return {
@@ -434,12 +433,12 @@ const S = {
   // Badges
   badge: (variant: "green" | "gold" | "red" | "blue" | "gray" | "dark"): React.CSSProperties => {
     const cfg: Record<string, { bg: string; color: string }> = {
-      green: { bg: "#DCFCE7", color: "#15803D" },
-      gold:  { bg: "#FEF3C7", color: "#92400E" },
-      red:   { bg: "#FEE2E2", color: "#B91C1C" },
-      blue:  { bg: "#EFF6FF", color: "#2563EB" },
-      gray:  { bg: "#F3F4F6", color: "#6B7280" },
-      dark:  { bg: "#1B4332", color: "#FFFFFF" },
+      green: { bg: "#ffffff", color: "#111111" },
+      gold:  { bg: "#ffffff", color: "#111111" },
+      red:   { bg: "#ffffff", color: "#111111" },
+      blue:  { bg: "#ffffff", color: "#111111" },
+      gray:  { bg: "#ffffff", color: "#666666" },
+      dark:  { bg: "#111111", color: "#FFFFFF" },
     };
     return {
       display: "inline-flex",
@@ -465,14 +464,14 @@ const S = {
     fontWeight: 700,
     letterSpacing: "0.04em",
     textTransform: "uppercase" as const,
-    background: "#FEF3C7",
-    color: "#92400E",
+    background: "#ffffff",
+    color: "#111111",
   } as React.CSSProperties,
 
   // Table
   tableWrap: {
     background: "#FFFFFF",
-    border: "1px solid #E5E7EB",
+    border: "1px solid #dddddd",
     borderRadius: 10,
     overflowX: "auto" as const,
     boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
@@ -491,36 +490,36 @@ const S = {
     fontWeight: 700,
     letterSpacing: "0.05em",
     textTransform: "uppercase" as const,
-    color: "#6B7280",
-    background: "#F9FAFB",
-    borderBottom: "1px solid #E5E7EB",
+    color: "#666666",
+    background: "#ffffff",
+    borderBottom: "1px solid #dddddd",
     whiteSpace: "nowrap" as const,
   } as React.CSSProperties,
 
   td: {
     padding: "0.625rem 0.875rem",
-    borderBottom: "1px solid #F3F4F6",
-    color: "#111827",
+    borderBottom: "1px solid #ffffff",
+    color: "#111111",
     verticalAlign: "middle" as const,
   } as React.CSSProperties,
 
   muted: {
-    color: "#9CA3AF",
+    color: "#666666",
     fontSize: "0.78rem",
   } as React.CSSProperties,
 
   greenText: {
-    color: "#16A34A",
+    color: "#111111",
     fontWeight: 700,
   } as React.CSSProperties,
 
   // Search / select inputs
   searchInput: {
     padding: "0.45rem 0.75rem",
-    border: "1.5px solid #D1D5DB",
+    border: "1.5px solid #cccccc",
     borderRadius: 8,
     fontSize: "0.85rem",
-    color: "#111827",
+    color: "#111111",
     background: "#FFFFFF",
     outline: "none",
     minWidth: 180,
@@ -528,10 +527,10 @@ const S = {
 
   select: {
     padding: "0.45rem 0.75rem",
-    border: "1.5px solid #D1D5DB",
+    border: "1.5px solid #cccccc",
     borderRadius: 8,
     fontSize: "0.85rem",
-    color: "#111827",
+    color: "#111111",
     background: "#FFFFFF",
     outline: "none",
     cursor: "pointer",
@@ -543,7 +542,7 @@ const S = {
     alignItems: "center",
     gap: "0.375rem",
     padding: "0.5rem 1rem",
-    background: "#1B4332",
+    background: "#111111",
     color: "#FFFFFF",
     border: "none",
     borderRadius: 8,
@@ -559,8 +558,8 @@ const S = {
     gap: "0.375rem",
     padding: "0.5rem 1rem",
     background: "#FFFFFF",
-    color: "#374151",
-    border: "1.5px solid #D1D5DB",
+    color: "#333333",
+    border: "1.5px solid #cccccc",
     borderRadius: 8,
     fontSize: "0.85rem",
     fontWeight: 600,
@@ -573,9 +572,9 @@ const S = {
     alignItems: "center",
     gap: "0.3rem",
     padding: "0.35rem 0.625rem",
-    background: "#FEF2F2",
-    color: "#B91C1C",
-    border: "1px solid #FECACA",
+    background: "#ffffff",
+    color: "#111111",
+    border: "1px solid #dddddd",
     borderRadius: 6,
     fontSize: "0.78rem",
     fontWeight: 600,
@@ -585,7 +584,7 @@ const S = {
   // Toggle bar
   toggleBar: {
     display: "flex",
-    background: "#F3F4F6",
+    background: "#ffffff",
     borderRadius: 8,
     padding: 3,
     gap: 2,
@@ -598,7 +597,7 @@ const S = {
     fontSize: "0.8rem",
     fontWeight: active ? 600 : 500,
     background: active ? "#FFFFFF" : "transparent",
-    color: active ? "#1B4332" : "#6B7280",
+    color: active ? "#111111" : "#666666",
     cursor: "pointer",
     boxShadow: active ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
     whiteSpace: "nowrap" as const,
@@ -606,8 +605,8 @@ const S = {
 
   // Score row
   scoreRow: (scored: boolean, locked: boolean): React.CSSProperties => ({
-    background: scored ? "#F9FAFB" : locked ? "#FFFBEB" : "#FFFFFF",
-    border: `1px solid ${scored ? "#E5E7EB" : locked ? "#FDE68A" : "#E5E7EB"}`,
+    background: scored ? "#ffffff" : locked ? "#ffffff" : "#FFFFFF",
+    border: `1px solid ${scored ? "#dddddd" : locked ? "#dddddd" : "#dddddd"}`,
     borderRadius: 10,
     padding: "0.875rem 1rem",
     display: "flex",
@@ -651,15 +650,15 @@ const S = {
     fontSize: "1.1rem",
     fontWeight: 700,
     background: "#FFFFFF",
-    border: "2px solid #D1D5DB",
+    border: "2px solid #cccccc",
     borderRadius: 6,
-    color: "#1B4332",
+    color: "#111111",
     outline: "none",
   } as React.CSSProperties,
 
   scoreDash: {
     fontWeight: 700,
-    color: "#9CA3AF",
+    color: "#666666",
     fontSize: "1rem",
   } as React.CSSProperties,
 
@@ -671,9 +670,9 @@ const S = {
   } as React.CSSProperties,
 
   centerCard: (leader: boolean): React.CSSProperties => ({
-    background: leader ? "#FFFBEB" : "#FFFFFF",
-    border: `1px solid ${leader ? "#FDE68A" : "#E5E7EB"}`,
-    borderTop: `3px solid ${leader ? "#D97706" : "#E5E7EB"}`,
+    background: leader ? "#ffffff" : "#FFFFFF",
+    border: `1px solid ${leader ? "#dddddd" : "#dddddd"}`,
+    borderTop: `3px solid ${leader ? "#111111" : "#dddddd"}`,
     borderRadius: 10,
     padding: "1.125rem",
     display: "flex",
@@ -713,8 +712,8 @@ const S = {
     display: "flex",
     alignItems: "center",
     gap: "0.75rem",
-    background: "#F0FDF4",
-    border: "1px solid #BBF7D0",
+    background: "#ffffff",
+    border: "1px solid #dddddd",
     borderRadius: 10,
     padding: "0.875rem 1.25rem",
     flex: 1,
@@ -725,10 +724,10 @@ const S = {
   emptyState: {
     textAlign: "center" as const,
     padding: "2.5rem 1rem",
-    color: "#9CA3AF",
+    color: "#666666",
     fontSize: "0.9rem",
     background: "#FFFFFF",
-    border: "1px solid #E5E7EB",
+    border: "1px solid #dddddd",
     borderRadius: 10,
   } as React.CSSProperties,
 
@@ -738,10 +737,10 @@ const S = {
     alignItems: "center",
     gap: "0.75rem",
     padding: "0.75rem 1rem",
-    background: "#FEF2F2",
-    border: "1px solid #FECACA",
+    background: "#ffffff",
+    border: "1px solid #dddddd",
     borderRadius: 8,
-    color: "#B91C1C",
+    color: "#111111",
     fontSize: "0.875rem",
     fontWeight: 500,
   } as React.CSSProperties,
@@ -759,15 +758,15 @@ const S = {
     gap: "0.3rem",
     fontSize: "0.85rem",
     fontWeight: 600,
-    color: "#374151",
+    color: "#333333",
   } as React.CSSProperties,
 
   fieldInput: {
     padding: "0.5rem 0.75rem",
-    border: "1.5px solid #D1D5DB",
+    border: "1.5px solid #cccccc",
     borderRadius: 8,
     fontSize: "0.9rem",
-    color: "#111827",
+    color: "#111111",
     background: "#FFFFFF",
     outline: "none",
   } as React.CSSProperties,
@@ -785,14 +784,13 @@ const S = {
     gap: "0.625rem",
     padding: "0.875rem 1rem",
     background: "#FFFFFF",
-    border: "1px solid #E5E7EB",
+    border: "1px solid #dddddd",
     borderRadius: 10,
     fontSize: "0.875rem",
     fontWeight: 500,
-    color: "#1B4332",
+    color: "#111111",
     cursor: "pointer",
     textDecoration: "none",
-    transition: "background 0.12s, box-shadow 0.12s",
     boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
   } as React.CSSProperties,
 
@@ -803,7 +801,7 @@ const S = {
     flexWrap: "wrap" as const,
     padding: "0.875rem 1.125rem",
     background: "#FFFFFF",
-    border: "1px solid #E5E7EB",
+    border: "1px solid #dddddd",
     borderRadius: 10,
     alignItems: "center",
   } as React.CSSProperties,
@@ -846,7 +844,7 @@ export function OwnerDashboard({
         <div style={S.headerInner} className="owner-header-inner">
           <div>
             <div style={S.titleRow}>
-              <Shield size={18} color="#1B4332" aria-hidden />
+              <Shield size={18} color="#111111" aria-hidden />
               <span style={S.titleText}>GARRINCHA Owner Dashboard</span>
             </div>
             <div style={S.subtitle}>{ownerEmail} &middot; Owner &middot; Full Authority</div>
@@ -854,7 +852,7 @@ export function OwnerDashboard({
           <div style={S.quickStats}>
             <span style={S.quickStat}><strong>{stats.playerCount}</strong> players</span>
             <span style={S.quickStat}><strong>{stats.finalizedMatchCount}</strong> scored</span>
-            <span style={{ ...S.quickStat, background: stats.pendingMatchCount > 0 ? "#FEF3C7" : "#F3F4F6", color: stats.pendingMatchCount > 0 ? "#92400E" : "#374151" }}>
+            <span style={{ ...S.quickStat, background: stats.pendingMatchCount > 0 ? "#ffffff" : "#ffffff", color: stats.pendingMatchCount > 0 ? "#111111" : "#333333" }}>
               <strong>{stats.pendingMatchCount}</strong> pending
             </span>
           </div>
@@ -909,15 +907,15 @@ function OverviewTab({
   const topCenter = [...centerStats].sort((a, b) => b.totalPoints - a.totalPoints)[0];
 
   const overviewStats: Array<{ label: string; value: number | string; accent?: "green" | "gold" | "red" | "amber"; icon: React.ReactNode }> = [
-    { label: "Registered Players", value: stats.playerCount, accent: "green", icon: <Users size={18} color="#16A34A" /> },
-    { label: "Centers Active", value: centerStats.length, icon: <Globe size={18} color="#6B7280" /> },
-    { label: "Matches Total", value: matches.length, icon: <CalendarCheck size={18} color="#6B7280" /> },
-    { label: "Predictions Submitted", value: stats.predictionCount, icon: <ListChecks size={18} color="#6B7280" /> },
-    { label: "Bonus Events", value: stats.bonusEventCount, icon: <Gift size={18} color="#6B7280" /> },
-    { label: "Total Points Awarded", value: stats.totalPointsAwarded, accent: "gold", icon: <Award size={18} color="#D97706" /> },
-    { label: "Matches Scored", value: stats.finalizedMatchCount, accent: "green", icon: <CheckCircle size={18} color="#16A34A" /> },
-    { label: "Matches Pending", value: stats.pendingMatchCount, accent: stats.pendingMatchCount > 0 ? "amber" : undefined, icon: <XCircle size={18} color={stats.pendingMatchCount > 0 ? "#F59E0B" : "#6B7280"} /> },
-    ...(needsScore > 0 ? [{ label: "Played — Needs Score", value: needsScore, accent: "red" as const, icon: <AlertTriangle size={18} color="#DC2626" /> }] : []),
+    { label: "Registered Players", value: stats.playerCount, accent: "green", icon: <Users size={18} color="#111111" /> },
+    { label: "Centers Active", value: centerStats.length, icon: <Globe size={18} color="#666666" /> },
+    { label: "Matches Total", value: matches.length, icon: <CalendarCheck size={18} color="#666666" /> },
+    { label: "Predictions Submitted", value: stats.predictionCount, icon: <ListChecks size={18} color="#666666" /> },
+    { label: "Bonus Events", value: stats.bonusEventCount, icon: <Gift size={18} color="#666666" /> },
+    { label: "Total Points Awarded", value: stats.totalPointsAwarded, accent: "gold", icon: <Award size={18} color="#111111" /> },
+    { label: "Matches Scored", value: stats.finalizedMatchCount, accent: "green", icon: <CheckCircle size={18} color="#111111" /> },
+    { label: "Matches Pending", value: stats.pendingMatchCount, accent: stats.pendingMatchCount > 0 ? "amber" : undefined, icon: <XCircle size={18} color={stats.pendingMatchCount > 0 ? "#111111" : "#666666"} /> },
+    ...(needsScore > 0 ? [{ label: "Played — Needs Score", value: needsScore, accent: "red" as const, icon: <AlertTriangle size={18} color="#111111" /> }] : []),
   ];
 
   return (
@@ -940,20 +938,20 @@ function OverviewTab({
         <div style={S.highlightRow}>
           {topUser && (
             <div style={S.highlightCard}>
-              <Trophy size={20} color="#D97706" />
+              <Trophy size={20} color="#111111" />
               <div>
-                <div style={{ fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#6B7280", marginBottom: 2 }}>Current Leader</div>
-                <div style={{ fontWeight: 700, color: "#111827" }}>{topUser.displayName ?? topUser.email}</div>
+                <div style={{ fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#666666", marginBottom: 2 }}>Current Leader</div>
+                <div style={{ fontWeight: 700, color: "#111111" }}>{topUser.displayName ?? topUser.email}</div>
                 <div style={S.muted}>{topUser.center.name} &middot; {topUser.totalPoints} pts</div>
               </div>
             </div>
           )}
           {topCenter && (
             <div style={S.highlightCard}>
-              <Globe size={20} color="#16A34A" />
+              <Globe size={20} color="#111111" />
               <div>
-                <div style={{ fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#6B7280", marginBottom: 2 }}>Leading Center</div>
-                <div style={{ fontWeight: 700, color: "#111827" }}>{topCenter.name}</div>
+                <div style={{ fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "#666666", marginBottom: 2 }}>Leading Center</div>
+                <div style={{ fontWeight: 700, color: "#111111" }}>{topCenter.name}</div>
                 <div style={S.muted}>{topCenter.city}, {topCenter.country} &middot; {topCenter.totalPoints} pts</div>
               </div>
             </div>
@@ -1004,9 +1002,9 @@ function OverviewTab({
           { href: "/api/admin/leaderboard/recalculate", label: "Recalculate Scores", icon: <Activity size={16} /> },
         ].map(({ href, label, icon }) => (
           <a key={href} href={href} style={S.quickLink} className="owner-quick-link">
-            <span style={{ color: "#1B4332", flexShrink: 0 }}>{icon}</span>
+            <span style={{ color: "#111111", flexShrink: 0 }}>{icon}</span>
             {label}
-            <Link2 size={13} color="#9CA3AF" style={{ marginLeft: "auto" }} />
+            <Link2 size={13} color="#666666" style={{ marginLeft: "auto" }} />
           </a>
         ))}
       </div>
@@ -1057,15 +1055,15 @@ function HealthTab({ healthChecks }: { healthChecks: HealthCheck[] }) {
       {/* Summary bar */}
       <div style={S.healthSummary} className="health-summary">
         {[
-          { status: "healthy",      count: counts.healthy,      label: "Healthy",      color: "#16A34A" },
-          { status: "warning",      count: counts.warning,      label: "Warnings",     color: "#D97706" },
-          { status: "error",        count: counts.error,        label: "Errors",       color: "#DC2626" },
-          { status: "unconfigured", count: counts.unconfigured, label: "Not Configured", color: "#9CA3AF" },
+          { status: "healthy",      count: counts.healthy,      label: "Healthy",      color: "#111111" },
+          { status: "warning",      count: counts.warning,      label: "Warnings",     color: "#111111" },
+          { status: "error",        count: counts.error,        label: "Errors",       color: "#111111" },
+          { status: "unconfigured", count: counts.unconfigured, label: "Not Configured", color: "#666666" },
         ].map(({ status, count, label, color }) => (
           <div key={status} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <span style={{ width: 10, height: 10, borderRadius: "50%", background: color, flexShrink: 0, display: "inline-block" }} />
-            <span style={{ fontWeight: 700, color: "#111827", fontSize: "0.9rem" }}>{count}</span>
-            <span style={{ color: "#6B7280", fontSize: "0.82rem" }}>{label}</span>
+            <span style={{ fontWeight: 700, color: "#111111", fontSize: "0.9rem" }}>{count}</span>
+            <span style={{ color: "#666666", fontSize: "0.82rem" }}>{label}</span>
           </div>
         ))}
         <div style={{ marginLeft: "auto" }}>
@@ -1251,7 +1249,7 @@ function ScoreRow({ match, now, locale }: { match: OwnerMatch; now: Date; locale
             aria-label="Away score"
           />
           <button
-            style={{ ...S.btnPrimary, background: isScored ? "#374151" : "#1B4332", opacity: saving || home === "" || away === "" ? 0.5 : 1 }}
+            style={{ ...S.btnPrimary, background: isScored ? "#333333" : "#111111", opacity: saving || home === "" || away === "" ? 0.5 : 1 }}
             onClick={save}
             disabled={saving || home === "" || away === ""}
           >
@@ -1259,7 +1257,7 @@ function ScoreRow({ match, now, locale }: { match: OwnerMatch; now: Date; locale
             {saving ? "Saving…" : isScored ? "Update" : t(locale, "admin.saveScore")}
           </button>
           {saveStatus && (
-            <span style={{ fontSize: "0.8rem", color: saveStatus.ok ? "#16A34A" : "#DC2626", fontWeight: 500 }}>
+            <span style={{ fontSize: "0.8rem", color: saveStatus.ok ? "#111111" : "#111111", fontWeight: 500 }}>
               {saveStatus.ok ? "Saved" : saveStatus.msg}
             </span>
           )}
@@ -1332,7 +1330,7 @@ function PlayersTab({ users, ownerId }: { users: OwnerUser[]; ownerId: string })
       <div style={S.sectionHeader}>
         <h2 style={S.sectionTitle}>
           Players{" "}
-          <span style={{ fontWeight: 400, color: "#9CA3AF", fontSize: "1rem" }}>({visible.length} shown)</span>
+          <span style={{ fontWeight: 400, color: "#666666", fontSize: "1rem" }}>({visible.length} shown)</span>
         </h2>
         <div style={S.controls}>
           <input style={S.searchInput} placeholder="Search name or email" value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -1361,7 +1359,7 @@ function PlayersTab({ users, ownerId }: { users: OwnerUser[]; ownerId: string })
           </thead>
           <tbody>
             {visible.map((user) => (
-              <tr key={user.id} style={{ borderBottom: "1px solid #F3F4F6" }}>
+              <tr key={user.id} style={{ borderBottom: "1px solid #ffffff" }}>
                 <td style={S.td}>
                   <strong style={{ display: "block" }}>{user.displayName ?? user.email}</strong>
                   <span style={S.muted}>{user.email}</span>
@@ -1385,7 +1383,7 @@ function PlayersTab({ users, ownerId }: { users: OwnerUser[]; ownerId: string })
                         <option value="SUPER_ADMIN">Super Admin</option>
                       </select>
                       {roleStatus[user.id] && (
-                        <span style={{ ...S.muted, color: roleStatus[user.id].startsWith("Updated") ? "#16A34A" : "#DC2626" }}>
+                        <span style={{ ...S.muted, color: roleStatus[user.id].startsWith("Updated") ? "#111111" : "#111111" }}>
                           {roleStatus[user.id]}
                         </span>
                       )}
@@ -1417,7 +1415,7 @@ function PlayersTab({ users, ownerId }: { users: OwnerUser[]; ownerId: string })
           {deleteError}
           <button
             onClick={() => setDeleteError(null)}
-            style={{ marginLeft: "auto", background: "transparent", border: "none", cursor: "pointer", color: "#B91C1C", fontWeight: 700 }}
+            style={{ marginLeft: "auto", background: "transparent", border: "none", cursor: "pointer", color: "#111111", fontWeight: 700 }}
           >
             ×
           </button>
@@ -1456,7 +1454,7 @@ function CentersTab({ centerStats }: { centerStats: CenterStat[] }) {
                 {i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"} {rankLabel[i]}
               </span>
             )}
-            <h3 style={{ fontFamily: "'Saira Condensed', sans-serif", fontStyle: "italic", fontWeight: 800, fontSize: "1rem", color: "#1B4332", margin: 0 }}>
+            <h3 style={{ fontFamily: "Arial, Helvetica, sans-serif", fontStyle: "normal", fontWeight: 800, fontSize: "1rem", color: "#111111", margin: 0 }}>
               {c.name}
             </h3>
             <p style={S.muted}>{c.city}, {c.country}</p>
@@ -1467,14 +1465,14 @@ function CentersTab({ centerStats }: { centerStats: CenterStat[] }) {
                 { label: "Points", value: c.totalPoints, green: true },
               ].map(({ label, value, green }) => (
                 <div key={label} style={S.centerStat}>
-                  <strong style={{ fontSize: "1rem", color: green ? "#16A34A" : "#111827" }}>{value}</strong>
+                  <strong style={{ fontSize: "1rem", color: green ? "#111111" : "#111111" }}>{value}</strong>
                   <span style={S.muted}>{label}</span>
                 </div>
               ))}
             </div>
             {c.topPlayer && (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.78rem", color: "#6B7280", marginTop: 2 }}>
-                <Trophy size={12} color="#D97706" />
+              <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.78rem", color: "#666666", marginTop: 2 }}>
+                <Trophy size={12} color="#111111" />
                 <span>Top: {c.topPlayer}</span>
               </div>
             )}
@@ -1521,7 +1519,7 @@ function BonusTab({ users, bonusEvents }: { users: OwnerUser[]; bonusEvents: Bon
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
         {/* Award form */}
         <div style={S.card}>
-          <h3 style={{ fontFamily: "'Saira Condensed', sans-serif", fontStyle: "italic", fontWeight: 800, fontSize: "1.1rem", color: "#1B4332", margin: "0 0 0.375rem" }}>
+          <h3 style={{ fontFamily: "Arial, Helvetica, sans-serif", fontStyle: "normal", fontWeight: 800, fontSize: "1.1rem", color: "#111111", margin: "0 0 0.375rem" }}>
             Award Bonus Points
           </h3>
           <p style={{ ...S.muted, marginBottom: "1rem" }}>
@@ -1550,7 +1548,7 @@ function BonusTab({ users, bonusEvents }: { users: OwnerUser[]; bonusEvents: Bon
               {saving ? "Awarding…" : "Award Bonus"}
             </button>
             {formStatus && (
-              <div style={{ fontSize: "0.85rem", color: formStatus.ok ? "#16A34A" : "#DC2626", fontWeight: 500 }}>
+              <div style={{ fontSize: "0.85rem", color: formStatus.ok ? "#111111" : "#111111", fontWeight: 500 }}>
                 {formStatus.msg}
               </div>
             )}
@@ -1560,13 +1558,13 @@ function BonusTab({ users, bonusEvents }: { users: OwnerUser[]; bonusEvents: Bon
         {/* History */}
         <div style={S.card}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.875rem" }}>
-            <h3 style={{ fontFamily: "'Saira Condensed', sans-serif", fontStyle: "italic", fontWeight: 800, fontSize: "1.1rem", color: "#1B4332", margin: 0 }}>
+            <h3 style={{ fontFamily: "Arial, Helvetica, sans-serif", fontStyle: "normal", fontWeight: 800, fontSize: "1.1rem", color: "#111111", margin: 0 }}>
               History ({bonusEvents.length})
             </h3>
             <input style={{ ...S.searchInput, width: 160 }} placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           {filteredEvents.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "1.5rem", color: "#9CA3AF", fontSize: "0.875rem" }}>No bonus events yet.</div>
+            <div style={{ textAlign: "center", padding: "1.5rem", color: "#666666", fontSize: "0.875rem" }}>No bonus events yet.</div>
           ) : (
             <div style={{ overflowX: "auto" }}>
               <table style={S.table}>
@@ -1614,14 +1612,14 @@ function LeaderboardTab({ leaderboard }: { leaderboard: LeaderboardEntry[] }) {
     );
   }
 
-  const medalColors: Record<number, string> = { 1: "#D97706", 2: "#6B7280", 3: "#B45309" };
+  const medalColors: Record<number, string> = { 1: "#111111", 2: "#666666", 3: "#111111" };
 
   return (
     <div style={S.section} className="owner-section">
       <div style={S.sectionHeader}>
         <h2 style={S.sectionTitle}>
           Full Leaderboard{" "}
-          <span style={{ fontWeight: 400, color: "#9CA3AF", fontSize: "1rem" }}>({leaderboard.length} players)</span>
+          <span style={{ fontWeight: 400, color: "#666666", fontSize: "1rem" }}>({leaderboard.length} players)</span>
         </h2>
         <div style={S.controls}>
           <input style={S.searchInput} placeholder="Search player, center, nationality…" value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -1640,12 +1638,12 @@ function LeaderboardTab({ leaderboard }: { leaderboard: LeaderboardEntry[] }) {
           </thead>
           <tbody>
             {visible.map((row) => (
-              <tr key={row.id} style={{ background: row.rank <= 3 ? "#FFFBEB" : "transparent", borderBottom: "1px solid #F3F4F6" }}>
+              <tr key={row.id} style={{ background: row.rank <= 3 ? "#ffffff" : "transparent", borderBottom: "1px solid #ffffff" }}>
                 <td style={{ ...S.td, width: 48, textAlign: "center" }}>
                   <span style={{
                     fontWeight: 800,
                     fontSize: "0.9rem",
-                    color: medalColors[row.rank] ?? "#9CA3AF",
+                    color: medalColors[row.rank] ?? "#666666",
                     fontVariantNumeric: "tabular-nums",
                   }}>
                     {row.rank}
@@ -1707,7 +1705,7 @@ function PrizesTab({ prizeWinners }: { prizeWinners: PrizeCenterGroup[] }) {
         <div style={S.prizesGrid}>
           {prizeWinners.map((center) => (
             <div key={center.centerId} style={S.card}>
-              <h3 style={{ fontFamily: "'Saira Condensed', sans-serif", fontStyle: "italic", fontWeight: 800, fontSize: "1rem", color: "#1B4332", margin: "0 0 0.875rem" }}>
+              <h3 style={{ fontFamily: "Arial, Helvetica, sans-serif", fontStyle: "normal", fontWeight: 800, fontSize: "1rem", color: "#111111", margin: "0 0 0.875rem" }}>
                 {center.centerName}
               </h3>
               {center.players.length === 0 ? (
@@ -1720,15 +1718,15 @@ function PrizesTab({ prizeWinners }: { prizeWinners: PrizeCenterGroup[] }) {
                       alignItems: "center",
                       gap: "0.625rem",
                       padding: "0.5rem 0",
-                      borderBottom: "1px solid #F3F4F6",
-                      background: p.rank <= 3 ? "#FFFBEB" : "transparent",
+                      borderBottom: "1px solid #ffffff",
+                      background: p.rank <= 3 ? "#ffffff" : "transparent",
                       borderRadius: p.rank <= 3 ? 6 : 0,
                       paddingLeft: p.rank <= 3 ? "0.5rem" : 0,
                     }}>
                       <span style={{ fontWeight: 700, fontSize: "1rem", minWidth: 28 }}>
                         {p.rank <= 3 ? MEDAL[p.rank - 1] : `#${p.rank}`}
                       </span>
-                      <span style={{ flex: 1, fontWeight: 500, fontSize: "0.875rem", color: "#111827" }}>{p.name}</span>
+                      <span style={{ flex: 1, fontWeight: 500, fontSize: "0.875rem", color: "#111111" }}>{p.name}</span>
                       <span style={S.badge("gold")}>{p.points} pts</span>
                     </li>
                   ))}

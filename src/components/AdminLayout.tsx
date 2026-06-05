@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 interface NavItem { k: string; label: string; ic: string; }
@@ -44,20 +43,17 @@ export function AdminLayout({ role, page, onNavigate, children, pageTitle, bread
 
   return (
     <div className="admin-root">
-      {/* sidebar */}
       <aside className={`admin-side${navOpen ? " open" : ""}`}>
         <div className="admin-side-top">
-          <Image src="/garrincha-white.png" alt="GARRINCHA" height={20} width={120} style={{ height: 20, width: "auto" }} />
+          <span>GARRINCHA</span>
           <span className="admin-side-tag">ADMIN</span>
         </div>
 
-        {/* role switch */}
         <div className="admin-role-switch">
           <Link href="/admin" className={`admin-role-btn${role === "super" ? " active" : ""}`} style={{ textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center" }}>Super</Link>
           <button className={`admin-role-btn${role === "center" ? " active" : ""}`} onClick={() => {}}>Center</button>
         </div>
 
-        {/* nav */}
         <nav className="admin-side-nav">
           {nav.map((n) => (
             <button
@@ -84,7 +80,6 @@ export function AdminLayout({ role, page, onNavigate, children, pageTitle, bread
 
       {navOpen && <div className="admin-scrim" onClick={() => setNavOpen(false)} />}
 
-      {/* main */}
       <main className="admin-main">
         <header className="admin-topbar">
           <button className="admin-hamb" onClick={() => setNavOpen(true)}>☰</button>

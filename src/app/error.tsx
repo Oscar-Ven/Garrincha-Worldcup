@@ -25,11 +25,11 @@ export default function GlobalError({
       <div
         style={{
           color: "var(--green)",
-          fontFamily: "var(--f-disp)",
+          fontFamily: "Arial, Helvetica, sans-serif",
           fontSize: "clamp(2.5rem,10vw,5rem)",
           fontWeight: 900,
           lineHeight: 0.9,
-          fontStyle: "italic",
+          fontStyle: "normal",
         }}
       >
         Oops
