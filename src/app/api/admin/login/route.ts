@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
     if (
       !user ||
-      (user.role !== Role.ADMIN && user.role !== Role.SUPER_ADMIN) ||
+      (user.role !== Role.ADMIN && user.role !== Role.CENTER_ADMIN && user.role !== Role.SUPER_ADMIN) ||
       !user.passwordHash || !(await verifyPassword(parsed.data.password, user.passwordHash))
     ) {
       return NextResponse.json({ error: "Invalid admin credentials." }, { status: 401 });

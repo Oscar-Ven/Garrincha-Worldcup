@@ -25,7 +25,7 @@ export async function proxy(request: NextRequest) {
 
     try {
       const { payload } = await jwtVerify(token, secret);
-      if (payload.role !== "ADMIN" && payload.role !== "SUPER_ADMIN") {
+      if (payload.role !== "ADMIN" && payload.role !== "CENTER_ADMIN" && payload.role !== "SUPER_ADMIN") {
         const url = new URL("/admin/login", request.url);
         url.searchParams.set("next", pathname);
         return NextResponse.redirect(url);

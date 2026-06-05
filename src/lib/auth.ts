@@ -120,7 +120,7 @@ export async function requireUser() {
 
 export async function requireAdmin() {
   const user = await getCurrentUser();
-  if (!user || (user.role !== Role.ADMIN && user.role !== Role.SUPER_ADMIN)) throw new Error("Admin access required.");
+  if (!user || (user.role !== Role.ADMIN && user.role !== Role.CENTER_ADMIN && user.role !== Role.SUPER_ADMIN)) throw new Error("Admin access required.");
   return user;
 }
 
