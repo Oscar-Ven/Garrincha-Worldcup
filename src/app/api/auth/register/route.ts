@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
     phoneNumber,
     activationCode,
     centerId: directCenterId,
-    dateOfBirth,
     nationality,
   } = parsed.data;
 
@@ -90,7 +89,6 @@ export async function POST(request: NextRequest) {
         displayName: nickname,
         phoneNumber,
         nationality: nationality ?? null,
-        dateOfBirth: dateOfBirth ?? null,
         centerId: resolvedCenterId,
         firstActivatedAt: new Date(),
         passwordHash: null,

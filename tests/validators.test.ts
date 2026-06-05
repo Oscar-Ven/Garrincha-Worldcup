@@ -3,7 +3,6 @@ import {
   bonusSchema,
   checkInSchema,
   finalScoreSchema,
-  isAtLeastAge,
   loginSchema,
   predictionSchema,
   registerSchema,
@@ -65,31 +64,6 @@ describe("registration validation", () => {
   });
 });
 
-describe("age validation (isAtLeastAge)", () => {
-  it("accepts a person exactly 16 years old today", () => {
-    const now = new Date("2026-06-01T00:00:00.000Z");
-    const dob = new Date("2010-06-01T00:00:00.000Z");
-    expect(isAtLeastAge(dob, 16, now)).toBe(true);
-  });
-
-  it("rejects a person one day short of 16", () => {
-    const now = new Date("2026-05-31T00:00:00.000Z");
-    const dob = new Date("2010-06-01T00:00:00.000Z");
-    expect(isAtLeastAge(dob, 16, now)).toBe(false);
-  });
-
-  it("accepts adults well over the minimum age", () => {
-    const now = new Date("2026-06-01T00:00:00.000Z");
-    const dob = new Date("1990-01-01T00:00:00.000Z");
-    expect(isAtLeastAge(dob, 16, now)).toBe(true);
-  });
-
-  it("handles birthday not yet reached this year", () => {
-    const now = new Date("2026-06-01T00:00:00.000Z");
-    const dob = new Date("2010-12-31T00:00:00.000Z");
-    expect(isAtLeastAge(dob, 16, now)).toBe(false);
-  });
-});
 
 describe("login validation", () => {
   it("accepts valid credentials", () => {
