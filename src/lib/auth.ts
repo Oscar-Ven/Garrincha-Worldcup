@@ -144,12 +144,6 @@ export function canManageCenter(user: { role: string; centerId: string }, target
   return false;
 }
 
-export function requireCenterAccess(user: { role: string; centerId: string }, targetCenterId: string): void {
-  if (!canManageCenter(user, targetCenterId)) {
-    throw new Error("You do not have access to this center.");
-  }
-}
-
 export function generateAccessToken(): { raw: string; hash: string } {
   const raw = crypto.randomBytes(32).toString("base64url");
   const tokenHash = crypto.createHash("sha256").update(raw).digest("hex");

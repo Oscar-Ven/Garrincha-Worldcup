@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { MatchStatus, Role } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/AdminSidebar";
@@ -91,13 +91,15 @@ export default async function AdminPage() {
 
   const isSuperAdmin = currentAdmin?.role === Role.SUPER_ADMIN || !hasDatabaseConfig();
 
-  const [users, matches, predictions] = hasDatabaseConfig()
+  const [users, matches, predictions, centersCount, finalizedCount] = hasDatabaseConfig()
     ? await Promise.all([
         prisma.user.count({ where: { role: Role.USER } }),
         prisma.match.count(),
         prisma.prediction.count(),
+        prisma.garrinchaCenter.count(),
+        prisma.match.count({ where: { status: MatchStatus.FINAL } }),
       ])
-    : [demoLeaderboard.length, demoMatches.length, demoMatches.filter((m) => m.predictions.length > 0).length];
+    : [demoLeaderboard.length, demoMatches.length, demoMatches.filter((m) => m.predictions.length > 0).length, 10, 0];
 
   const tools = [
     { href: "/admin/matches", label: t(locale, "admin.finalScores"), Icon: IconScore,  meta: "Enter results after full time" },
@@ -152,7 +154,7 @@ export default async function AdminPage() {
               { value: users.toLocaleString(),       label: t(locale, "admin.players"),      color: "var(--green-deep)" },
               { value: matches.toLocaleString(),     label: t(locale, "admin.matches"),      color: "var(--text)" },
               { value: predictions.toLocaleString(), label: t(locale, "admin.predictions"),  color: "var(--gold)" },
-              { value: "6",                          label: "Active centers",                color: "var(--text)" },
+              { value: centersCount.toLocaleString(), label: "Active centers",                color: "var(--text)" },
             ].map((kpi, i) => (
               <div key={i} className="mcard">
                 <div className="mcard-kpi-value" style={{ color: kpi.color }}>{kpi.value}</div>
@@ -193,15 +195,15 @@ export default async function AdminPage() {
               <span className="mbadge mbadge-green">Active</span>
             </div>
             <div className="mcard-mini-stat">
-              <span className="m-muted" style={{ fontSize: 13 }}>Matchday</span>
-              <strong style={{ fontFamily: "ui-monospace,monospace", fontSize: 13 }}>1 / 8</strong>
+              <span className="m-muted" style={{ fontSize: 13 }}>Matches finalized</span>
+              <strong style={{ fontFamily: "ui-monospace,monospace", fontSize: 13 }}>{finalizedCount} / {matches}</strong>
             </div>
             <div className="mcard-mini-stat">
               <span className="m-muted" style={{ fontSize: 13 }}>Domain</span>
               <span className="m-mono">worldcup-garrincha.com</span>
             </div>
             <div className="manager-progress">
-              <div className="manager-progress-fill" style={{ width: "13%" }} />
+              <div className="manager-progress-fill" style={{ width: `${Math.round((finalizedCount / Math.max(matches, 1)) * 100)}%` }} />
             </div>
           </div>
         </div>

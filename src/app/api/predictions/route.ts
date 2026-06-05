@@ -62,12 +62,14 @@ export async function POST(request: NextRequest) {
   if (!permission.allowed) {
     return NextResponse.json({ error: permission.reason }, { status: permission.status });
   }
+  if (!session) {
+    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  }
 
-  // session is non-null: canSavePrediction rejects null sessions above
   await prisma.prediction.upsert({
-    where: { userId_matchId: { userId: session!.userId, matchId: parsed.data.matchId } },
+    where: { userId_matchId: { userId: session.userId, matchId: parsed.data.matchId } },
     create: {
-      userId: session!.userId,
+      userId: session.userId,
       matchId: parsed.data.matchId,
       homeScore: parsed.data.homeScore,
       awayScore: parsed.data.awayScore,
@@ -84,7 +86,7 @@ export async function POST(request: NextRequest) {
   // updateMany with competitionCenterLockedAt: null means it only fires once and is a no-op on all subsequent predictions.
   if (!isPreviewMode()) {
     await prisma.user.updateMany({
-      where: { id: session!.userId, competitionCenterLockedAt: null },
+      where: { id: session.userId, competitionCenterLockedAt: null },
       data: { competitionCenterLockedAt: new Date() },
     });
   }
