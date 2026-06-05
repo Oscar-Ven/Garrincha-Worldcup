@@ -5,18 +5,17 @@ import { prisma } from "@/lib/prisma";
 import { isPreviewMode } from "@/lib/app-mode";
 
 export async function GET(request: NextRequest) {
+  const base = new URL(request.url).origin;
+
   if (isPreviewMode()) {
-    return NextResponse.json(
-      { error: "Access links require a live database." },
-      { status: 503 }
-    );
+    return NextResponse.redirect(`${base}/login?error=preview`);
   }
 
   const { searchParams } = new URL(request.url);
   const token = searchParams.get("token");
 
   if (!token) {
-    return NextResponse.json({ error: "Invalid access link." }, { status: 400 });
+    return NextResponse.redirect(`${base}/login?error=missing`);
   }
 
   const hash = hashToken(token);
@@ -30,15 +29,11 @@ export async function GET(request: NextRequest) {
   });
 
   if (!user) {
-    return NextResponse.json(
-      { error: "This access link is invalid or has been revoked." },
-      { status: 404 }
-    );
+    // Invalid or revoked — redirect to login with error flag
+    return NextResponse.redirect(`${base}/login?error=invalid`);
   }
-
-  console.log(`[auth/access] Session created for user: ${user.id}`);
 
   await createSession({ userId: user.id, role: user.role });
 
-  return NextResponse.redirect(new URL("/dashboard", request.url));
+  return NextResponse.redirect(`${base}/dashboard`);
 }

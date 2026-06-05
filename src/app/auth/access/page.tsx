@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isPreviewMode } from "@/lib/app-mode";
-import { hashToken, createSession } from "@/lib/auth";
+import { hashToken } from "@/lib/auth";
 import { getLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { t } from "@/lib/translations";
@@ -64,6 +64,8 @@ export default async function AccessPage({
     );
   }
 
-  await createSession({ userId: user.id, role: user.role });
-  redirect("/dashboard");
+  // Next.js 15: cookies().set() is only allowed in Route Handlers / Server Actions,
+  // NOT in Server Component pages. Redirect to the API route which handles the
+  // session cookie correctly and then redirects to /dashboard.
+  redirect(`/api/auth/access?token=${encodeURIComponent(token)}`);
 }
