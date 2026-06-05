@@ -11,15 +11,19 @@ import { hasDatabaseConfig } from "@/lib/ui-demo-data";
 export default async function AdminCheckInPage() {
   const locale = await getLocale();
 
+  // Demo / preview mode
   if (!hasDatabaseConfig()) {
     return (
-      <div className="admin-root" style={{ minHeight: "100vh" }}>
+      <div className="manager-shell">
         <AdminSidebar active="/admin/checkin" isSuperAdmin />
-        <main className="admin-main">
-          <header className="admin-topbar">
-            <div><h1 className="admin-topbar-title">{t(locale, "admin.checkinTitle")}</h1></div>
+        <main className="manager-main">
+          <header className="manager-topbar">
+            <div>
+              <div className="manager-topbar-crumb">Platform Owner</div>
+              <h1 className="manager-topbar-title">{t(locale, "admin.checkinTitle")}</h1>
+            </div>
           </header>
-          <div className="admin-content">
+          <div className="manager-content">
             <DataModeNotice locale={locale} />
           </div>
         </main>
@@ -35,28 +39,33 @@ export default async function AdminCheckInPage() {
   const isSuperAdmin = admin.role === "SUPER_ADMIN" || admin.role === "ADMIN";
 
   return (
-    <div className="admin-root" style={{ minHeight: "100vh" }}>
+    <div className="manager-shell">
       <AdminSidebar
         active="/admin/checkin"
         isSuperAdmin={isSuperAdmin}
         centerName={admin.center.name}
         adminName={admin.fullName ?? admin.displayName ?? undefined}
       />
-      <main className="admin-main">
-        <header className="admin-topbar">
+
+      <main className="manager-main">
+        <header className="manager-topbar">
           <div>
-            <div className="admin-topbar-crumb">{admin.center.name}</div>
-            <h1 className="admin-topbar-title">{t(locale, "admin.checkinTitle")}</h1>
+            <div className="manager-topbar-crumb">{admin.center.name}</div>
+            <h1 className="manager-topbar-title">{t(locale, "admin.checkinTitle")}</h1>
           </div>
         </header>
-        <div className="admin-content">
-          <div className="acard" style={{ maxWidth: 560 }}>
-            <div className="panel-header" style={{ marginBottom: 6 }}>
-              <h3 className="panel-title">{admin.center.name}</h3>
+
+        <div className="manager-content">
+          <div className="mcard" style={{ maxWidth: 560 }}>
+            <div className="mcard-header">
+              <h3 className="mcard-title">{admin.center.name}</h3>
+              <span className="mbadge mbadge-green">● Active</span>
             </div>
-            <p style={{ fontSize: 13.5, color: "var(--ink-dim)", marginBottom: 22, lineHeight: 1.5 }}>
+
+            <p style={{ fontSize: 13.5, color: "var(--text-3)", marginBottom: 22, lineHeight: 1.5 }}>
               {t(locale, "admin.checkinInstructions")}
             </p>
+
             <CheckInCodeForm
               centerId={admin.center.id}
               initialCode={session?.code ?? null}

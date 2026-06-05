@@ -28,53 +28,84 @@ export default async function RegisterPage({
   const hasCode = Boolean(activationCode);
 
   return (
-    <div className="auth-page auth-page-radial">
-      {/* ── Header ── */}
-      <div className="auth-header">
-        <GarrinchaLogo height={20} />
-        <LanguageSwitcher locale={locale} />
-      </div>
-
-      {/* ── QR badge (shown only when code is present) ── */}
-      {hasCode && (
-        <div className="auth-center-detected">
-          <div style={{ width: 30, height: 33, flexShrink: 0, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg viewBox="0 0 40 44" width="30" height="33" style={{ position: "absolute", inset: 0 }}>
-              <path d="M20 1 L38 7 V22 C38 33 30 40 20 43 C10 40 2 33 2 22 V7 Z"
-                fill="#5FE090" fillOpacity="0.16" stroke="#5FE090" strokeWidth="1.6" />
-            </svg>
-            <span style={{ position: "relative", fontFamily: "var(--f-disp)", fontWeight: 900, fontStyle: "italic", fontSize: 10, color: "#5FE090" }}>✓</span>
-          </div>
-          <div style={{ flex: 1 }}>
-            <div className="label" style={{ fontSize: 9, color: "var(--green)" }}>
-              {t(locale, "auth.registerFree")} · QR activated
-            </div>
-            <div className="disp" style={{ fontSize: 17, color: "var(--ink)" }}>GARRINCHA Center</div>
-          </div>
+    <div className="auth-page">
+      <div className="auth-card">
+        {/* ── Logo + language switcher ── */}
+        <div className="auth-logo">
+          <GarrinchaLogo height={22} variant="black" />
+          <LanguageSwitcher locale={locale} />
         </div>
-      )}
 
-      {/* ── Title block ── */}
-      <div className="kick" style={{ fontSize: 13, color: "var(--green)", marginBottom: 8 }}>
-        {t(locale, "register.eyebrow")}
-      </div>
-      <h1 className="auth-title">
-        {hasCode ? t(locale, "reg_title") : t(locale, "register.directTitle")}
-      </h1>
-      <p className="auth-sub">{t(locale, "reg_sub")}</p>
+        {/* ── QR / center-detected badge ── */}
+        {hasCode && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "10px 14px",
+              borderRadius: 10,
+              background: "var(--green-tint)",
+              border: "1px solid var(--green-light)",
+              marginBottom: 16,
+            }}
+          >
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: "var(--green)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24">
+                <path
+                  d="M5 13l4 4L19 7"
+                  stroke="#fff"
+                  strokeWidth="3"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <span style={{ fontSize: 13, color: "var(--green-deep)", fontWeight: 600 }}>
+              GARRINCHA Center · QR activated
+            </span>
+          </div>
+        )}
 
-      {/* ── Registration form ── */}
-      <RegisterForm
-        activationCode={activationCode}
-        centers={centers}
-        locale={locale}
-      />
+        {/* ── Heading ── */}
+        <h1 className="auth-title">
+          {hasCode ? t(locale, "reg_title") : t(locale, "register.directTitle")}
+        </h1>
+        <p className="auth-sub">{t(locale, "reg_sub")}</p>
 
-      {/* ── Footer links ── */}
-      <div style={{ textAlign: "center", marginTop: 24, display: "flex", flexDirection: "column", gap: 10 }}>
-        <p style={{ fontSize: 13.5, color: "var(--ink-dim)", margin: 0 }}>
+        {/* ── Registration form ── */}
+        <RegisterForm
+          activationCode={activationCode}
+          centers={centers}
+          locale={locale}
+        />
+
+        {/* ── Footer link ── */}
+        <p
+          style={{
+            textAlign: "center",
+            marginTop: 20,
+            fontSize: 13.5,
+            color: "var(--text-3)",
+          }}
+        >
           {t(locale, "register.alreadyHaveLink")}{" "}
-          <Link href="/login" style={{ color: "var(--green)", fontWeight: 700 }}>
+          <Link
+            href="/login"
+            style={{ color: "var(--green)", fontWeight: 700 }}
+          >
             {t(locale, "register.requestLink")}
           </Link>
         </p>

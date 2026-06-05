@@ -2,6 +2,7 @@ import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { OwnerDashboard, type PrizeCenterGroup } from "@/components/OwnerDashboard";
 import { requireSuperAdmin } from "@/lib/auth";
+import { getHealthReport } from "@/lib/health";
 import { getLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { hasDatabaseConfig, demoCenters, demoLeaderboard, demoMatches, demoBonusEvents } from "@/lib/ui-demo-data";
@@ -37,32 +38,94 @@ export default async function OwnerPage() {
     };
 
     const demoUsers = [
-      { id: "demo-owner", email: "owner@garrincha.local", displayName: "GARRINCHA Owner", nationality: "Belgium", role: Role.SUPER_ADMIN, center: { id: "demo-gent", name: "GARRINCHA Gent Arsenaal" }, totalPoints: 0, predictionCount: 0, createdAt: new Date().toISOString() },
-      { id: "demo-admin", email: "admin@garrincha.local", displayName: "GARRINCHA Admin", nationality: "Belgium", role: Role.ADMIN, center: { id: "demo-gent", name: "GARRINCHA Gent Arsenaal" }, totalPoints: 0, predictionCount: 0, createdAt: new Date().toISOString() },
-      ...demoLeaderboard.map((row) => ({ id: row.id, email: `${row.name.toLowerCase().replace(/ /g, ".")}@example.com`, displayName: row.name, nationality: row.nationality, role: Role.USER, center: { id: "demo", name: row.center }, totalPoints: row.points, predictionCount: 3, createdAt: new Date().toISOString() })),
+      {
+        id: "demo-owner",
+        email: "owner@garrincha.local",
+        displayName: "GARRINCHA Owner",
+        nationality: "Belgium",
+        role: Role.SUPER_ADMIN,
+        center: { id: "demo-gent", name: "GARRINCHA Gent Arsenaal" },
+        totalPoints: 0,
+        predictionCount: 0,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "demo-admin",
+        email: "admin@garrincha.local",
+        displayName: "GARRINCHA Admin",
+        nationality: "Belgium",
+        role: Role.ADMIN,
+        center: { id: "demo-gent", name: "GARRINCHA Gent Arsenaal" },
+        totalPoints: 0,
+        predictionCount: 0,
+        createdAt: new Date().toISOString(),
+      },
+      ...demoLeaderboard.map((row) => ({
+        id: row.id,
+        email: `${row.name.toLowerCase().replace(/ /g, ".")}@example.com`,
+        displayName: row.name,
+        nationality: row.nationality,
+        role: Role.USER,
+        center: { id: "demo", name: row.center },
+        totalPoints: row.points,
+        predictionCount: 3,
+        createdAt: new Date().toISOString(),
+      })),
     ];
 
     const demoCenterStats = demoCenters.map((c) => ({
-      id: c.id, name: c.name, city: c.city, country: c.country,
-      playerCount: 1, predictionCount: 3, totalPoints: demoLeaderboard.find((r) => r.center === c.name)?.points ?? 0,
+      id: c.id,
+      name: c.name,
+      city: c.city,
+      country: c.country,
+      playerCount: 1,
+      predictionCount: 3,
+      totalPoints: demoLeaderboard.find((r) => r.center === c.name)?.points ?? 0,
       topPlayer: demoLeaderboard.find((r) => r.center === c.name)?.name ?? null,
     }));
 
     const demoMatchesSerialized = demoMatches.map((m) => ({
-      id: m.id, fifaMatchNo: m.fifaMatchNo, stage: m.stage, venue: m.venue,
+      id: m.id,
+      fifaMatchNo: m.fifaMatchNo,
+      stage: m.stage,
+      venue: m.venue,
       kickoffAt: new Date(m.kickoffAt).toISOString(),
-      homeTeam: { name: m.homeTeam.name, fifaCode: m.homeTeam.fifaCode, flagUrl: m.homeTeam.flagUrl, groupName: m.homeTeam.groupName ?? null },
-      awayTeam: { name: m.awayTeam.name, fifaCode: m.awayTeam.fifaCode, flagUrl: m.awayTeam.flagUrl, groupName: m.awayTeam.groupName ?? null },
-      homeScore: m.homeScore, awayScore: m.awayScore, status: m.status, predictionCount: m.predictions.length,
+      homeTeam: {
+        name: m.homeTeam.name,
+        fifaCode: m.homeTeam.fifaCode,
+        flagUrl: m.homeTeam.flagUrl,
+        groupName: m.homeTeam.groupName ?? null,
+      },
+      awayTeam: {
+        name: m.awayTeam.name,
+        fifaCode: m.awayTeam.fifaCode,
+        flagUrl: m.awayTeam.flagUrl,
+        groupName: m.awayTeam.groupName ?? null,
+      },
+      homeScore: m.homeScore,
+      awayScore: m.awayScore,
+      status: m.status,
+      predictionCount: m.predictions.length,
     }));
 
     const demoBonusSerialized = demoBonusEvents.map((e) => ({
-      id: e.id, points: e.points, reason: e.reason, awardedBy: "admin@garrincha.local",
+      id: e.id,
+      points: e.points,
+      reason: e.reason,
+      awardedBy: "admin@garrincha.local",
       createdAt: new Date().toISOString(),
       user: { email: e.user.email, displayName: e.user.displayName },
     }));
 
-    const demoBoard = demoLeaderboard.map((r, i) => ({ id: r.id, name: r.name, center: r.center, nationality: r.nationality, points: r.points, predictionCount: 3, rank: i + 1 }));
+    const demoBoard = demoLeaderboard.map((r, i) => ({
+      id: r.id,
+      name: r.name,
+      center: r.center,
+      nationality: r.nationality,
+      points: r.points,
+      predictionCount: 3,
+      rank: i + 1,
+    }));
 
     const demoPrizes: PrizeCenterGroup[] = demoCenters.map((c) => ({
       centerId: c.id,
@@ -73,6 +136,7 @@ export default async function OwnerPage() {
         .map((r, i) => ({ rank: i + 1, id: r.id, name: r.name, points: r.points })),
     }));
 
+    // Demo health — no DB, so skip getHealthReport
     return (
       <OwnerDashboard
         ownerId={ownerId}
@@ -85,11 +149,12 @@ export default async function OwnerPage() {
         leaderboard={demoBoard}
         prizeWinners={demoPrizes}
         locale={locale}
+        healthChecks={[]}
       />
     );
   }
 
-  // Live mode — fetch all data in parallel
+  // Live mode — fetch all data in parallel (health report included)
   const [
     playerCount,
     adminCount,
@@ -103,6 +168,7 @@ export default async function OwnerPage() {
     rawMatches,
     rawBonusEvents,
     rawCenters,
+    healthReport,
   ] = await Promise.all([
     prisma.user.count({ where: { role: Role.USER } }),
     prisma.user.count({ where: { role: { in: [Role.ADMIN, Role.SUPER_ADMIN] } } }),
@@ -154,12 +220,21 @@ export default async function OwnerPage() {
         _count: { select: { competingUsers: true } },
       },
     }),
+    getHealthReport(),
   ]);
 
   const totalPointsAwarded =
     (pointsAggregate._sum.pointsAwarded ?? 0) + (bonusAggregate._sum.points ?? 0);
 
-  const stats = { playerCount, adminCount, predictionCount, totalPointsAwarded, finalizedMatchCount, pendingMatchCount, bonusEventCount };
+  const stats = {
+    playerCount,
+    adminCount,
+    predictionCount,
+    totalPointsAwarded,
+    finalizedMatchCount,
+    pendingMatchCount,
+    bonusEventCount,
+  };
 
   const users = rawUsers.map((u) => ({
     id: u.id,
@@ -168,8 +243,12 @@ export default async function OwnerPage() {
     nationality: u.nationality,
     role: u.role,
     center: { id: u.center.id, name: u.center.name },
-    competitionCenter: u.competitionCenter ? { id: u.competitionCenter.id, name: u.competitionCenter.name } : null,
-    totalPoints: u.predictions.reduce((s, p) => s + p.pointsAwarded, 0) + u.pointEvents.reduce((s, e) => s + e.points, 0),
+    competitionCenter: u.competitionCenter
+      ? { id: u.competitionCenter.id, name: u.competitionCenter.name }
+      : null,
+    totalPoints:
+      u.predictions.reduce((s, p) => s + p.pointsAwarded, 0) +
+      u.pointEvents.reduce((s, e) => s + e.points, 0),
     predictionCount: u.predictions.length,
     createdAt: u.createdAt.toISOString(),
   }));
@@ -180,8 +259,18 @@ export default async function OwnerPage() {
     stage: m.stage,
     venue: m.venue,
     kickoffAt: m.kickoffAt.toISOString(),
-    homeTeam: { name: m.homeTeam.name, fifaCode: m.homeTeam.fifaCode, flagUrl: m.homeTeam.flagUrl, groupName: m.homeTeam.groupName },
-    awayTeam: { name: m.awayTeam.name, fifaCode: m.awayTeam.fifaCode, flagUrl: m.awayTeam.flagUrl, groupName: m.awayTeam.groupName },
+    homeTeam: {
+      name: m.homeTeam.name,
+      fifaCode: m.homeTeam.fifaCode,
+      flagUrl: m.homeTeam.flagUrl,
+      groupName: m.homeTeam.groupName,
+    },
+    awayTeam: {
+      name: m.awayTeam.name,
+      fifaCode: m.awayTeam.fifaCode,
+      flagUrl: m.awayTeam.flagUrl,
+      groupName: m.awayTeam.groupName,
+    },
     homeScore: m.homeScore,
     awayScore: m.awayScore,
     status: m.status,
@@ -200,15 +289,24 @@ export default async function OwnerPage() {
   const centerStats = rawCenters.map((c) => {
     const allUsers = c.competingUsers;
     const totalPoints = allUsers.reduce((sum, u) => {
-      return sum + u.predictions.reduce((s, p) => s + p.pointsAwarded, 0) + u.pointEvents.reduce((s, e) => s + e.points, 0);
+      return (
+        sum +
+        u.predictions.reduce((s, p) => s + p.pointsAwarded, 0) +
+        u.pointEvents.reduce((s, e) => s + e.points, 0)
+      );
     }, 0);
     const topUser = allUsers.reduce<{ name: string; pts: number } | null>((best, u) => {
-      const pts = u.predictions.reduce((s, p) => s + p.pointsAwarded, 0) + u.pointEvents.reduce((s, e) => s + e.points, 0);
+      const pts =
+        u.predictions.reduce((s, p) => s + p.pointsAwarded, 0) +
+        u.pointEvents.reduce((s, e) => s + e.points, 0);
       if (!best || pts > best.pts) return { name: u.displayName ?? u.email, pts };
       return best;
     }, null);
     return {
-      id: c.id, name: c.name, city: c.city, country: c.country,
+      id: c.id,
+      name: c.name,
+      city: c.city,
+      country: c.country,
       playerCount: c._count.competingUsers,
       predictionCount: allUsers.reduce((s, u) => s + u.predictions.length, 0),
       totalPoints,
@@ -219,7 +317,15 @@ export default async function OwnerPage() {
   const leaderboard = users
     .filter((u) => u.role === Role.USER && u.competitionCenter !== null)
     .sort((a, b) => b.totalPoints - a.totalPoints || a.email.localeCompare(b.email))
-    .map((u, i) => ({ id: u.id, name: u.displayName ?? u.email, center: u.competitionCenter!.name, nationality: u.nationality, points: u.totalPoints, predictionCount: u.predictionCount, rank: i + 1 }));
+    .map((u, i) => ({
+      id: u.id,
+      name: u.displayName ?? u.email,
+      center: u.competitionCenter!.name,
+      nationality: u.nationality,
+      points: u.totalPoints,
+      predictionCount: u.predictionCount,
+      rank: i + 1,
+    }));
 
   const prizeWinners: PrizeCenterGroup[] = rawCenters.map((c) => ({
     centerId: c.id,
@@ -228,7 +334,12 @@ export default async function OwnerPage() {
       .filter((u) => u.competitionCenter?.id === c.id && u.role === Role.USER)
       .sort((a, b) => b.totalPoints - a.totalPoints)
       .slice(0, 10)
-      .map((u, i) => ({ rank: i + 1, id: u.id, name: u.displayName ?? u.email, points: u.totalPoints })),
+      .map((u, i) => ({
+        rank: i + 1,
+        id: u.id,
+        name: u.displayName ?? u.email,
+        points: u.totalPoints,
+      })),
   }));
 
   return (
@@ -243,6 +354,7 @@ export default async function OwnerPage() {
       leaderboard={leaderboard}
       prizeWinners={prizeWinners}
       locale={locale}
+      healthChecks={healthReport.checks}
     />
   );
 }

@@ -11,25 +11,65 @@ export default async function AdminLoginPage() {
   const isPreview = !hasDatabaseConfig();
 
   return (
-    <div className="auth-page" style={{ background: "var(--bg-2)", minHeight: "100vh", justifyContent: "center", alignItems: "center" }}>
+    <div style={{ minHeight: "100vh", background: "#F8FAFB", display: "flex", alignItems: "center", justifyContent: "center", padding: "2.5rem 1rem" }}>
       <div style={{ width: "100%", maxWidth: 400 }}>
-        {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <Image src="/garrincha-white.png" alt="GARRINCHA" height={22} width={132} style={{ height: 22, width: "auto", display: "inline-block", opacity: 0.9 }} />
-          <div className="admin-side-tag" style={{ display: "inline-block", marginLeft: 10 }}>ADMIN</div>
+
+        {/* Logo + badge */}
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <Image
+              src="/garrincha-white.png"
+              alt="GARRINCHA"
+              height={22}
+              width={132}
+              style={{ height: 22, width: "auto", display: "inline-block" }}
+            />
+            <span style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "3px 9px",
+              borderRadius: 4,
+              fontSize: 9,
+              fontWeight: 800,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              background: "var(--green-tint)",
+              color: "var(--green-deep)",
+              border: "1px solid var(--green-light)",
+            }}>
+              MANAGER
+            </span>
+          </div>
         </div>
 
-        <div className="acard" style={{ padding: "28px 24px" }}>
-          <div className="kick" style={{ fontSize: 12, color: "var(--green)", marginBottom: 8 }}>{t(locale, "auth.adminEyebrow")}</div>
-          <h1 className="disp" style={{ fontSize: 28, color: "var(--ink)", margin: "0 0 6px" }}>{t(locale, "auth.adminTitle")}</h1>
-          <p style={{ fontSize: 13, color: "var(--ink-dim)", margin: "0 0 24px", lineHeight: 1.5 }}>
-            {isPreview ? "Login requires a live Supabase database." : t(locale, "auth.adminCopy")}
+        {/* Card */}
+        <div style={{
+          background: "#FFFFFF",
+          border: "1px solid var(--line)",
+          borderRadius: "var(--radius-lg)",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
+          padding: "28px 24px",
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--green)", marginBottom: 8 }}>
+            {t(locale, "auth.adminEyebrow")}
+          </div>
+          <h1 style={{ fontFamily: "'Saira Condensed', sans-serif", fontStyle: "italic", fontWeight: 800, fontSize: 28, color: "var(--green-deep)", margin: "0 0 6px" }}>
+            Center Manager
+          </h1>
+          <p style={{ fontSize: 13, color: "var(--text-3)", margin: "0 0 24px", lineHeight: 1.5 }}>
+            {isPreview
+              ? "Login requires a live Supabase database."
+              : t(locale, "auth.adminCopy")}
           </p>
 
           {isPreview ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <Link href="/admin" className="btn btn-green btn-md" style={{ textDecoration: "none" }}>Admin dashboard (preview)</Link>
-              <Link href="/dashboard" className="btn btn-ghost btn-md" style={{ textDecoration: "none" }}>Back to app</Link>
+              <Link href="/admin" className="btn btn-primary btn-full btn-md" style={{ textDecoration: "none" }}>
+                Manager dashboard (preview)
+              </Link>
+              <Link href="/dashboard" className="btn btn-ghost btn-full btn-md" style={{ textDecoration: "none" }}>
+                Back to app
+              </Link>
             </div>
           ) : (
             <Suspense>
@@ -38,7 +78,7 @@ export default async function AdminLoginPage() {
           )}
         </div>
 
-        <p style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "var(--ink-faint)" }}>
+        <p style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "var(--text-4)" }}>
           {t(locale, "auth.adminCredentialsCopy")}
         </p>
       </div>

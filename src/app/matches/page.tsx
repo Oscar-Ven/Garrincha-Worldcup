@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { getAllMatches } from "@/lib/matches";
 import { hasDatabaseConfig } from "@/lib/app-mode";
 import { demoAllMatches } from "@/lib/ui-demo-data";
@@ -11,34 +10,6 @@ export const metadata = {
   title: "World Cup 2026 Matches — GARRINCHA",
   description: "Full FIFA World Cup 2026 match schedule. Group stage, Round of 32, knockout rounds. Predict scores and climb the leaderboard.",
 };
-
-// ─── Tournament stat icons (inline SVG — no extra deps) ───────────────────────
-
-function StatIcon({ type }: { type: "stadium" | "groups" | "nations" | "calendar" }) {
-  const icons = {
-    stadium: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 5v6a9 3 0 01-18 0V5"/><path d="M3 11v3a9 3 0 0018 0v-3"/>
-      </svg>
-    ),
-    groups: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
-      </svg>
-    ),
-    nations: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
-      </svg>
-    ),
-    calendar: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-      </svg>
-    ),
-  };
-  return icons[type];
-}
 
 export default async function MatchesPage() {
   const hasDb = hasDatabaseConfig();
@@ -75,71 +46,67 @@ export default async function MatchesPage() {
   const groupMatches = matches.filter((m) => m.stage === "GROUP").length;
   const knockoutMatches = totalMatches - groupMatches;
 
-  const stats = [
-    { icon: "stadium"  as const, value: String(totalMatches), label: "Total matches" },
-    { icon: "groups"   as const, value: "12",                  label: "Groups" },
-    { icon: "nations"  as const, value: "48",                  label: "Nations" },
-    { icon: "calendar" as const, value: "40",                  label: "Days of football" },
-  ];
-
   return (
-    <div className="mc-page">
-
-      {/* ══ HERO ══════════════════════════════════════════════════════════════ */}
-      <section className="mc-hero" aria-label="World Cup 2026 Matches hero">
-        <div className="mc-hero-bg" aria-hidden />
-        <div className="mc-container">
-          <div className="mc-hero-inner">
-
-            {/* Left — text content */}
-            <div className="mc-hero-content">
-              <span className="mc-eyebrow">FIFA WORLD CUP 2026</span>
-              <h1 className="mc-hero-title">World Cup 2026 Matches</h1>
-              <p className="mc-hero-sub">
-                {totalMatches} matches · {groupMatches} group stage · {knockoutMatches} knockout
-              </p>
-              <p className="mc-hero-date">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline", marginRight: 6, verticalAlign: "middle" }} aria-hidden>
-                  <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                Jun 11 – Jul 19, 2026
-              </p>
-            </div>
-
-            {/* Right — trophy visual */}
-            <div className="mc-hero-visual">
-              <div className="mc-trophy-glow" aria-hidden />
-              <Image
-                src="/images/world-cup-trophy.png"
-                alt="FIFA World Cup trophy"
-                width={150}
-                height={220}
-                className="mc-trophy-img"
-                priority
-                unoptimized
-              />
-            </div>
-          </div>
-
-          {/* Stats row */}
-          <div className="mc-stats-grid">
-            {stats.map((s) => (
-              <div key={s.label} className="mc-stat-card">
-                <div className="mc-stat-icon">
-                  <StatIcon type={s.icon} />
-                </div>
-                <div className="mc-stat-value">{s.value}</div>
-                <div className="mc-stat-label">{s.label}</div>
-              </div>
-            ))}
-          </div>
+    <div className="matches-page">
+      {/* ── Page header ───────────────────────────────────────────────────── */}
+      <div className="matches-page-header">
+        <div className="matches-page-header-inner">
+          <h1 className="matches-page-title">Matches</h1>
+          <p className="matches-page-subtitle">
+            {totalMatches} matches &middot; {groupMatches} group stage &middot; {knockoutMatches} knockout &middot; Jun 11 – Jul 19, 2026
+          </p>
         </div>
-      </section>
+      </div>
 
-      {/* ══ INTERACTIVE BODY (client) ════════════════════════════════════════ */}
-      <div className="mc-container">
+      {/* ── Interactive match list ────────────────────────────────────────── */}
+      <div className="matches-page-body">
         <MatchesClient matches={matches} />
       </div>
+
+      <style>{`
+        .matches-page {
+          min-height: 100vh;
+          background: #F8FAFB;
+        }
+
+        .matches-page-header {
+          background: #FFFFFF;
+          border-bottom: 1px solid #E5E7EB;
+          padding: 2.5rem 1rem 2rem;
+        }
+
+        .matches-page-header-inner {
+          max-width: 900px;
+          margin-inline: auto;
+        }
+
+        .matches-page-title {
+          font-size: clamp(2rem, 5vw, 3rem);
+          color: #1B4332;
+          margin-bottom: 0.5rem;
+        }
+
+        .matches-page-subtitle {
+          font-size: 0.9375rem;
+          color: #6B7280;
+          line-height: 1.5;
+        }
+
+        .matches-page-body {
+          max-width: 900px;
+          margin-inline: auto;
+          padding: 2rem 1rem 4rem;
+        }
+
+        @media (max-width: 480px) {
+          .matches-page-header {
+            padding: 1.5rem 0.75rem 1.25rem;
+          }
+          .matches-page-body {
+            padding: 1rem 0.75rem 3rem;
+          }
+        }
+      `}</style>
     </div>
   );
 }
