@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Role } from "@prisma/client";
-import { createSession, hashToken } from "@/lib/auth";
+import { createSession, hashToken, isAccessTokenExpired } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isPreviewMode } from "@/lib/app-mode";
 
@@ -26,11 +26,15 @@ export async function GET(request: NextRequest) {
       accessTokenRevokedAt: null,
       role: Role.USER,
     },
+    select: { id: true, role: true, accessTokenCreatedAt: true },
   });
 
   if (!user) {
-    // Invalid or revoked — redirect to login with error flag
     return NextResponse.redirect(`${base}/login?error=invalid`);
+  }
+
+  if (isAccessTokenExpired(user.accessTokenCreatedAt)) {
+    return NextResponse.redirect(`${base}/login?error=expired`);
   }
 
   await createSession({ userId: user.id, role: user.role });

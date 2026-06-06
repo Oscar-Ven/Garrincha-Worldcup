@@ -1,4 +1,5 @@
 ﻿import { afterEach, describe, expect, it, vi, beforeEach } from "vitest";
+import { isAccessTokenExpired, ACCESS_TOKEN_EXPIRY_MS } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import {
   createLeaderboardRows,
@@ -431,9 +432,9 @@ describe("access link email copy", () => {
     accessUrl: "https://worldcup.example.com/auth/access?token=abc123",
   };
 
-  it("plain text states the link never expires", () => {
+  it("plain text states link validity is 30 days", () => {
     const { text } = buildEmailContent(payload);
-    expect(text).toContain("never expires");
+    expect(text).toContain("30 days");
   });
 
   it("plain text does not contain 'single-use' or 'expire shortly'", () => {
@@ -442,9 +443,9 @@ describe("access link email copy", () => {
     expect(text.toLowerCase()).not.toContain("expire shortly");
   });
 
-  it("HTML states the link never expires", () => {
+  it("HTML states link validity is 30 days", () => {
     const { html } = buildEmailContent(payload);
-    expect(html).toContain("never expires");
+    expect(html).toContain("30 days");
   });
 
   it("HTML does not contain 'single-use' or 'expire shortly'", () => {
@@ -484,7 +485,41 @@ describe("access link email copy", () => {
   });
 });
 
+
+
 // ---------------------------------------------------------------------------
+// Magic link 30-day expiry -- OD-001
+// ---------------------------------------------------------------------------
+
+describe("magic link 30-day expiry -- OD-001", () => {
+  it("token created just now is not expired", () => {
+    const now = new Date();
+    expect(isAccessTokenExpired(now, now)).toBe(false);
+  });
+
+  it("token created 29 days ago is not expired", () => {
+    const created = new Date(Date.now() - 29 * 24 * 60 * 60 * 1000);
+    expect(isAccessTokenExpired(created)).toBe(false);
+  });
+
+  it("token created exactly 30 days + 1 ms ago is expired", () => {
+    const created = new Date(Date.now() - ACCESS_TOKEN_EXPIRY_MS - 1);
+    expect(isAccessTokenExpired(created)).toBe(true);
+  });
+
+  it("token created 31 days ago is expired", () => {
+    const created = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
+    expect(isAccessTokenExpired(created)).toBe(true);
+  });
+
+  it("null createdAt is treated as expired", () => {
+    expect(isAccessTokenExpired(null)).toBe(true);
+  });
+
+  it("ACCESS_TOKEN_EXPIRY_MS equals exactly 30 days in milliseconds", () => {
+    expect(ACCESS_TOKEN_EXPIRY_MS).toBe(30 * 24 * 60 * 60 * 1000);
+  });
+});// ---------------------------------------------------------------------------
 // Email provider mode (Resend)
 // ---------------------------------------------------------------------------
 

@@ -35,24 +35,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid or expired code. Ask your center admin for today's code." }, { status: 404 });
   }
 
-  if (session.centerId !== user.center.id) {
-    return NextResponse.json(
-      { error: "This code belongs to a different GARRINCHA Center." },
-      { status: 403 },
-    );
-  }
-
   try {
     await prisma.centerCheckIn.upsert({
       where: { userId: user.id },
       create: {
         userId: user.id,
-        centerId: user.center.id,
+        centerId: session.centerId,
         sessionId: session.id,
         expiresAt: session.expiresAt,
       },
       update: {
-        centerId: user.center.id,
+        centerId: session.centerId,
         sessionId: session.id,
         expiresAt: session.expiresAt,
       },
