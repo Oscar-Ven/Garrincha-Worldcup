@@ -47,7 +47,7 @@ model User {
   email                       String          @unique
   passwordHash                String?
   fullName                    String
-  nickname                    String
+  nickname                    String          @unique
   dateOfBirth                 DateTime?
   phoneNumber                 String
   displayName                 String?
