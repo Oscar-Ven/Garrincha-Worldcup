@@ -1,1 +1,3 @@
-﻿export default function Page() { return null; }
+﻿export default function DashboardPage() {
+  return <p>Player app pending.</p>;
+}
