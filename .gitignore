@@ -36,6 +36,15 @@ demo-video/
 garrincha-demo.mp4
 garrincha-prototype.pdf
 
+# Vercel local config
+.vercel/
+
+# Playwright MCP session files
+.playwright-mcp/
+
+# Temporary design/screenshot working directories
+tmp-design-check/
+
 # OS artifacts
 .DS_Store
 Thumbs.db
