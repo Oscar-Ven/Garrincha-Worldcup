@@ -6,7 +6,6 @@ import Image from "next/image";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { t, type Locale } from "@/lib/translations";
 import LanguageSwitcher from "./LanguageSwitcher";
-import CountdownTimer from "./CountdownTimer";
 import { usePathname } from "next/navigation";
 
 export default function Navbar({ locale }: { locale: Locale }) {
@@ -76,9 +75,8 @@ export default function Navbar({ locale }: { locale: Locale }) {
           </Link>
         </div>
 
-        {/* Desktop right: countdown + language + CTA */}
+        {/* Desktop right: language + CTA */}
         <div className="hidden md:flex items-center gap-4">
-          <CountdownTimer />
           <LanguageSwitcher locale={locale} />
           <Link
             href={`/${locale}/register`}
