@@ -109,6 +109,23 @@ export default async function LandingPage({
             </span>
           </h1>
 
+          {/* Belgium vs Morocco featured matchup */}
+          <div className="flex items-center gap-4 mb-8 px-5 py-3 border border-zinc-800 bg-zinc-900/60 backdrop-blur-sm">
+            <div className="flex items-center gap-2.5">
+              <span className="text-3xl leading-none">🇧🇪</span>
+              <span className="text-white font-black uppercase tracking-tight text-sm hidden sm:block">Belgium</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-500">Group Stage</span>
+              <span className="text-lime-400 font-black text-base tracking-widest">VS</span>
+              <span className="text-[9px] font-mono text-zinc-600">Jun 11 · 2026</span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className="text-white font-black uppercase tracking-tight text-sm hidden sm:block">Morocco</span>
+              <span className="text-3xl leading-none">🇲🇦</span>
+            </div>
+          </div>
+
           <p className="text-lg md:text-xl text-zinc-300 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
             {t(locale, "hero_lead")}
           </p>
