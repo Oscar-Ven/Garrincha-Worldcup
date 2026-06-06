@@ -11,8 +11,33 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { t, isLocale, type Locale } from "@/lib/translations";
-import { demoLeaderboard } from "@/lib/ui-demo-data";
 import FAQAccordion from "@/components/public/FAQAccordion";
+import { prisma } from "@/lib/prisma";
+
+async function getTopPlayers() {
+  const users = await prisma.user.findMany({
+    where: { role: "USER" },
+    select: {
+      id: true,
+      nickname: true,
+      nationality: true,
+      competitionCenter: { select: { name: true } },
+      predictions: { select: { pointsAwarded: true } },
+    },
+    take: 100,
+  });
+
+  return users
+    .map((u) => ({
+      id: u.id,
+      name: u.nickname ?? "—",
+      nationality: u.nationality ?? "—",
+      center: (u.competitionCenter?.name ?? "—").replace("GARRINCHA ", ""),
+      points: u.predictions.reduce((s, p) => s + (p.pointsAwarded ?? 0), 0),
+    }))
+    .sort((a, b) => b.points - a.points)
+    .slice(0, 5);
+}
 
 const CENTERS = [
   "Antwerpen Noord",
@@ -44,6 +69,8 @@ export default async function LandingPage({
   const { locale: lp } = await params;
   if (!isLocale(lp)) redirect("/en");
   const locale = lp as Locale;
+
+  const topPlayers = await getTopPlayers();
 
   const faqItems = [
     { q: t(locale, "faq1q"), a: t(locale, "faq1a") },
@@ -343,34 +370,40 @@ export default async function LandingPage({
             </h3>
           </div>
 
-          <div className="border border-zinc-800 overflow-hidden">
-            <div className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-6 py-3 bg-zinc-950 border-b border-zinc-800 text-xs font-bold uppercase tracking-widest text-zinc-500">
-              <span>#</span>
-              <span>{t(locale, "table.player")}</span>
-              <span className="hidden sm:block">{t(locale, "table.center")}</span>
-              <span>{t(locale, "table.points")}</span>
+          {topPlayers.length === 0 ? (
+            <div className="border border-zinc-800 p-14 text-center text-zinc-600 text-sm uppercase tracking-widest font-mono">
+              {locale === "nl" ? "Ranglijst verschijnt zodra de competitie begint." : "Leaderboard appears once the competition starts."}
             </div>
-            {demoLeaderboard.map((player, i) => (
-              <div
-                key={player.id}
-                className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-6 py-4 items-center border-b border-zinc-800/50 last:border-b-0 hover:bg-zinc-950/50 transition-colors"
-              >
-                <span
-                  className={`text-lg font-black w-8 ${i === 0 ? "text-lime-400" : "text-zinc-600"}`}
-                >
-                  {i + 1}
-                </span>
-                <div>
-                  <div className="font-bold text-white text-sm">{player.name}</div>
-                  <div className="text-xs text-zinc-500">{player.nationality}</div>
-                </div>
-                <div className="hidden sm:block text-xs text-zinc-400 max-w-[180px] truncate">
-                  {player.center.replace("GARRINCHA ", "")}
-                </div>
-                <div className="text-lime-400 font-black text-lg">{player.points}</div>
+          ) : (
+            <div className="border border-zinc-800 overflow-hidden">
+              <div className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-6 py-3 bg-zinc-950 border-b border-zinc-800 text-xs font-bold uppercase tracking-widest text-zinc-500">
+                <span>#</span>
+                <span>{t(locale, "table.player")}</span>
+                <span className="hidden sm:block">{t(locale, "table.center")}</span>
+                <span>{t(locale, "table.points")}</span>
               </div>
-            ))}
-          </div>
+              {topPlayers.map((player, i) => (
+                <div
+                  key={player.id}
+                  className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-6 py-4 items-center border-b border-zinc-800/50 last:border-b-0 hover:bg-zinc-950/50 transition-colors"
+                >
+                  <span
+                    className={`text-lg font-black w-8 ${i === 0 ? "text-lime-400" : "text-zinc-600"}`}
+                  >
+                    {i + 1}
+                  </span>
+                  <div>
+                    <div className="font-bold text-white text-sm">{player.name}</div>
+                    <div className="text-xs text-zinc-500">{player.nationality}</div>
+                  </div>
+                  <div className="hidden sm:block text-xs text-zinc-400 max-w-[180px] truncate">
+                    {player.center}
+                  </div>
+                  <div className="text-lime-400 font-black text-lg">{player.points}</div>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="mt-8 text-center">
             <Link
