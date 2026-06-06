@@ -25,7 +25,6 @@ export default function CountdownTimer() {
 
   useEffect(() => {
     const tick = () => setTime(getTimeLeft());
-    // Initial tick via setTimeout to satisfy react-hooks/set-state-in-effect rule
     const init = setTimeout(tick, 0);
     const id = setInterval(tick, 1000);
     return () => {
@@ -37,25 +36,17 @@ export default function CountdownTimer() {
   if (!time) return null;
 
   return (
-    <div className="hidden lg:flex items-center gap-1 border border-lime-400/20 bg-lime-400/5 px-3 py-1.5">
+    <div className="hidden lg:flex items-center gap-0.5 border border-lime-400/20 bg-lime-400/5 px-3 h-8">
       {[
         { value: time.d, label: "D" },
         { value: time.h, label: "H" },
         { value: time.m, label: "M" },
         { value: time.s, label: "S" },
       ].map(({ value, label }, i) => (
-        <span key={label} className="flex items-center">
-          {i > 0 && (
-            <span className="text-lime-400/40 font-black text-xs mx-0.5 tabular-nums">:</span>
-          )}
-          <span className="flex flex-col items-center min-w-8">
-            <span className="text-white font-black text-sm tabular-nums leading-none">
-              {pad(value)}
-            </span>
-            <span className="text-lime-400/50 font-bold text-[9px] uppercase tracking-widest leading-none mt-0.5">
-              {label}
-            </span>
-          </span>
+        <span key={label} className="flex items-baseline gap-px">
+          {i > 0 && <span className="text-lime-400/30 font-bold text-xs mx-1">:</span>}
+          <span className="text-white font-black text-sm tabular-nums leading-none">{pad(value)}</span>
+          <span className="text-lime-400/60 font-bold text-[9px] uppercase leading-none">{label}</span>
         </span>
       ))}
     </div>
