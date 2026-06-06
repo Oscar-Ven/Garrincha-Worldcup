@@ -27,7 +27,7 @@ export async function PATCH(request: NextRequest) {
 
   const parsed = schema.safeParse(await request.json());
   if (!parsed.success) {
-    const msg = parsed.error.errors[0]?.message ?? "Invalid input.";
+    const msg = parsed.error.issues[0]?.message ?? "Invalid input.";
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 
