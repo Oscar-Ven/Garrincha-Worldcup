@@ -24,8 +24,6 @@ export default function Navbar({ locale }: { locale: Locale }) {
   const anchorLinks = [
     { label: t(locale, "how_title_label"), href: isHome ? "#how-it-works" : `/${locale}#how-it-works` },
     { label: t(locale, "nav_scoring"), href: isHome ? "#scoring" : `/${locale}#scoring` },
-    { label: t(locale, "nav_centers"), href: isHome ? "#centers" : `/${locale}#centers` },
-    { label: t(locale, "nav_prize"), href: isHome ? "#prizes" : `/${locale}#prizes` },
   ];
 
   return (
