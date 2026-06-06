@@ -23,9 +23,12 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const centerId = searchParams.get("centerId") ?? admin.center.id;
+  const centerId = searchParams.get("centerId") ?? admin.center?.id;
+  if (!centerId) {
+    return NextResponse.json({ error: "Your account is not linked to a center." }, { status: 403 });
+  }
 
-  if (admin.role === "CENTER_ADMIN" && centerId !== admin.center.id) {
+  if (admin.role === "CENTER_ADMIN" && centerId !== admin.center?.id) {
     return NextResponse.json({ error: "You can only view codes for your assigned center." }, { status: 403 });
   }
 
@@ -59,7 +62,7 @@ export async function POST(request: NextRequest) {
 
   const { centerId } = parsed.data;
 
-  if (admin.role === "CENTER_ADMIN" && centerId !== admin.center.id) {
+  if (admin.role === "CENTER_ADMIN" && centerId !== admin.center?.id) {
     return NextResponse.json(
       { error: "You can only generate codes for your assigned center." },
       { status: 403 },
