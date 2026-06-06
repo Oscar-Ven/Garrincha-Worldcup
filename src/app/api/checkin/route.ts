@@ -18,6 +18,9 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Please log in to check in." }, { status: 401 });
   }
+  if (!user.center) {
+    return NextResponse.json({ error: "Your account is not linked to a valid center." }, { status: 400 });
+  }
 
   const parsed = checkInSchema.safeParse(await request.json());
   if (!parsed.success) {

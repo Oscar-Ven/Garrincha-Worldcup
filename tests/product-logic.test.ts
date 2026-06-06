@@ -12,56 +12,34 @@ import {
   type LeaderboardInputUser,
 } from "@/lib/product-logic";
 
-const beforeKickoff = new Date("2026-06-11T16:59:59.000Z");
+const beforeLock = new Date("2026-06-11T16:54:59.000Z"); // 5 min 1 sec before kickoff — allowed
 const kickoff = new Date("2026-06-11T17:00:00.000Z");
-const afterKickoff = new Date("2026-06-11T17:00:01.000Z"); // 1 sec after kickoff — still within 5-min grace
-const atLockTime = new Date("2026-06-11T17:05:00.000Z"); // exactly 5 min after kickoff — locked
+const atLockTime = new Date("2026-06-11T16:55:00.000Z"); // exactly 5 min before kickoff — locked
+const afterKickoff = new Date("2026-06-11T17:00:01.000Z"); // 1 sec after kickoff — also locked
 
 describe("prediction rules", () => {
-  it("allows a user to create a prediction before kickoff", () => {
+  it("allows a user to create a prediction more than 5 minutes before kickoff", () => {
     expect(
       canSavePrediction({
         session: { userId: "user-1", role: "USER" },
         kickoffAt: kickoff,
-        now: beforeKickoff,
+        now: beforeLock,
       }),
     ).toEqual({ allowed: true });
   });
 
-  it("allows a user to edit their own prediction before kickoff", () => {
+  it("allows a user to edit their own prediction more than 5 minutes before kickoff", () => {
     expect(
       canSavePrediction({
         session: { userId: "user-1", role: "USER" },
         predictionUserId: "user-1",
         kickoffAt: kickoff,
-        now: beforeKickoff,
+        now: beforeLock,
       }),
     ).toEqual({ allowed: true });
   });
 
-  it("still allows prediction at kickoff and within 5-minute grace period", () => {
-    // At kickoff exactly — grace period applies, still allowed
-    expect(
-      canSavePrediction({
-        session: { userId: "user-1", role: "USER" },
-        predictionUserId: "user-1",
-        kickoffAt: kickoff,
-        now: kickoff,
-      }),
-    ).toMatchObject({ allowed: true });
-
-    // 1 second after kickoff — still within grace period
-    expect(
-      canSavePrediction({
-        session: { userId: "user-1", role: "USER" },
-        predictionUserId: "user-1",
-        kickoffAt: kickoff,
-        now: afterKickoff,
-      }),
-    ).toMatchObject({ allowed: true });
-  });
-
-  it("locks predictions exactly 5 minutes after kickoff", () => {
+  it("locks predictions exactly 5 minutes before kickoff", () => {
     expect(
       canSavePrediction({
         session: { userId: "user-1", role: "USER" },
@@ -72,13 +50,35 @@ describe("prediction rules", () => {
     ).toMatchObject({ allowed: false, status: 423 });
   });
 
+  it("locks predictions at kickoff", () => {
+    expect(
+      canSavePrediction({
+        session: { userId: "user-1", role: "USER" },
+        predictionUserId: "user-1",
+        kickoffAt: kickoff,
+        now: kickoff,
+      }),
+    ).toMatchObject({ allowed: false, status: 423 });
+  });
+
+  it("locks predictions after kickoff", () => {
+    expect(
+      canSavePrediction({
+        session: { userId: "user-1", role: "USER" },
+        predictionUserId: "user-1",
+        kickoffAt: kickoff,
+        now: afterKickoff,
+      }),
+    ).toMatchObject({ allowed: false, status: 423 });
+  });
+
   it("prevents a user from editing another user's prediction", () => {
     expect(
       canSavePrediction({
         session: { userId: "user-1", role: "USER" },
         predictionUserId: "user-2",
         kickoffAt: kickoff,
-        now: beforeKickoff,
+        now: beforeLock,
       }),
     ).toMatchObject({ allowed: false, status: 403 });
   });
@@ -88,7 +88,7 @@ describe("prediction rules", () => {
       canSavePrediction({
         session: { userId: "admin-1", role: "ADMIN" },
         kickoffAt: kickoff,
-        now: beforeKickoff,
+        now: beforeLock,
       }),
     ).toMatchObject({ allowed: false, status: 401 });
 
@@ -96,7 +96,7 @@ describe("prediction rules", () => {
       canSavePrediction({
         session: null,
         kickoffAt: kickoff,
-        now: beforeKickoff,
+        now: beforeLock,
       }),
     ).toMatchObject({ allowed: false, status: 401 });
   });

@@ -28,29 +28,41 @@ export async function getLeaderboard(
         fullName: true,
         email: true,
         nationality: true,
+        createdAt: true,
         competitionCenter: { select: { name: true } },
         predictions: { select: { pointsAwarded: true } },
         pointEvents: { select: { points: true } },
       },
     });
 
-    return users
-      .map((u) => ({
-        id: u.id,
-        name:
-          u.nickname?.trim() ||
-          u.fullName?.trim() ||
-          u.displayName?.trim() ||
-          `Player ${u.id.slice(-6).toUpperCase()}`,
-        nationality: u.nationality ?? "Unspecified",
-        center: u.competitionCenter?.name ?? "Unspecified",
-        points:
-          u.predictions.reduce((s, p) => s + p.pointsAwarded, 0) +
-          u.pointEvents.reduce((s, e) => s + e.points, 0),
-        predictionCount: u.predictions.length,
-      }))
-      .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name))
-      .slice(0, limit);
+    const mapped = users.map((u) => ({
+      id: u.id,
+      name:
+        u.nickname?.trim() ||
+        u.fullName?.trim() ||
+        u.displayName?.trim() ||
+        `Player ${u.id.slice(-6).toUpperCase()}`,
+      nationality: u.nationality ?? "Unspecified",
+      center: u.competitionCenter?.name ?? "Unspecified",
+      points:
+        u.predictions.reduce((s, p) => s + p.pointsAwarded, 0) +
+        u.pointEvents.reduce((s, e) => s + e.points, 0),
+      predictionCount: u.predictions.length,
+      _exactCount: u.predictions.filter((p) => p.pointsAwarded === 5).length,
+      _correctCount: u.predictions.filter((p) => p.pointsAwarded >= 2).length,
+      _createdAt: u.createdAt.getTime(),
+    }));
+
+    return mapped
+      .sort(
+        (a, b) =>
+          b.points - a.points ||
+          b._exactCount - a._exactCount ||
+          b._correctCount - a._correctCount ||
+          a._createdAt - b._createdAt,
+      )
+      .slice(0, limit)
+      .map(({ _exactCount: _e, _correctCount: _c, _createdAt: _t, ...row }) => row);
   }
 
   // Fast path — one aggregated SQL query, no in-memory fan-out

@@ -91,7 +91,7 @@ export function canSavePrediction({
   }
 
   if (isPredictionLocked(kickoffAt, now)) {
-    return { allowed: false, status: 423, reason: "Predictions are locked for this match." };
+    return { allowed: false, status: 423, reason: "Predictions close 5 minutes before kickoff." };
   }
 
   return { allowed: true };
