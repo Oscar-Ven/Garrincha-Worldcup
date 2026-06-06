@@ -43,7 +43,7 @@ export default function CountdownTimer() {
         { value: time.m, label: "M" },
         { value: time.s, label: "S" },
       ].map(({ value, label }, i) => (
-        <span key={label} className="flex items-baseline gap-px">
+        <span key={label} className="flex items-center gap-px">
           {i > 0 && <span className="text-lime-400/30 font-bold text-xs mx-1">:</span>}
           <span className="text-white font-black text-sm tabular-nums leading-none">{pad(value)}</span>
           <span className="text-lime-400/60 font-bold text-[9px] uppercase leading-none">{label}</span>
