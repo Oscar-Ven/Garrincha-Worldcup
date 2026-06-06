@@ -398,7 +398,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
               </div>
 
               {error && (
-                <div className="flex items-start gap-2.5 p-2.5 border border-red-900/50 bg-red-900/10 text-red-400 text-xs">
+                <div role="alert" className="flex items-start gap-2.5 p-2.5 border border-red-900/50 bg-red-900/10 text-red-400 text-xs">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>

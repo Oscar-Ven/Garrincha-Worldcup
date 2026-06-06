@@ -242,7 +242,7 @@ export default function CheckinClient({
 
             {/* Error notifications */}
             {error && (
-              <div className="flex items-start gap-2.5 p-2 bg-red-900/10 border border-red-905/30 text-red-400 text-xs">
+              <div role="alert" className="flex items-start gap-2.5 p-2 bg-red-900/10 border border-red-905/30 text-red-400 text-xs">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>

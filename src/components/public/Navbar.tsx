@@ -89,7 +89,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
 
         {/* Mobile toggle */}
         <button
-          className="md:hidden text-white p-1"
+          className="md:hidden text-white p-3"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >

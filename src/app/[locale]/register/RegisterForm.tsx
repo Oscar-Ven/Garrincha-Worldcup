@@ -205,7 +205,7 @@ export default function RegisterForm({ locale, centers, activationCode }: Props)
       </label>
 
       {error && (
-        <div className="px-4 py-3 border border-red-900 bg-red-900/20 text-red-400 text-sm">
+        <div role="alert" className="px-4 py-3 border border-red-900 bg-red-900/20 text-red-400 text-sm">
           {error}
         </div>
       )}

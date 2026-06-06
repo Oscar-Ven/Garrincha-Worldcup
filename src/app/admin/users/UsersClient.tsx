@@ -592,7 +592,7 @@ export default function UsersClient({
               </div>
 
               {error && (
-                <p className="p-2 border border-red-900/50 bg-red-900/10 text-red-400 text-[11px] leading-relaxed">
+                <p role="alert" className="p-2 border border-red-900/50 bg-red-900/10 text-red-400 text-[11px] leading-relaxed">
                   {error}
                 </p>
               )}
@@ -756,7 +756,7 @@ export default function UsersClient({
               )}
 
               {error && (
-                <p className="p-2 border border-red-900/50 bg-red-900/10 text-red-400 text-[11px] leading-relaxed">
+                <p role="alert" className="p-2 border border-red-900/50 bg-red-900/10 text-red-400 text-[11px] leading-relaxed">
                   {error}
                 </p>
               )}

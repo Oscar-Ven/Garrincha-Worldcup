@@ -147,8 +147,13 @@ export default async function LandingPage({
             </a>
           </div>
 
+          {/* Countdown visible on mobile/tablet */}
+          <div className="lg:hidden mt-8">
+            <CountdownTimer />
+          </div>
+
           {/* Stats bar */}
-          <div className="mt-16 flex flex-wrap items-center justify-center gap-8 md:gap-16 text-center">
+          <div className="mt-8 lg:mt-16 flex flex-wrap items-center justify-center gap-8 md:gap-16 text-center">
             {[
               { value: "10", label: t(locale, "stat_centers") },
               { value: "104", label: t(locale, "hero.matches") },

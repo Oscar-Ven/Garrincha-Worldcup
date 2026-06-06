@@ -125,7 +125,7 @@ export default function PlayerShell({ user, labels, children }: PlayerShellProps
             </div>
             <button
               onClick={() => setMobileOpen((open) => !open)}
-              className="rounded-2xl border border-white/10 bg-white/5 p-2 text-zinc-100"
+              className="rounded-2xl border border-white/10 bg-white/5 p-3 text-zinc-100"
               aria-label="Toggle player navigation"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
