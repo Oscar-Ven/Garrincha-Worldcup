@@ -91,6 +91,14 @@ export default function Footer({ locale }: { locale: Locale }) {
                   Cookies
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/admin/login"
+                  className="text-zinc-600 hover:text-zinc-400 transition-colors text-sm uppercase tracking-wide"
+                >
+                  Admin
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
