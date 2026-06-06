@@ -1,6 +1,7 @@
 import "server-only";
 
 import crypto from "node:crypto";
+import { cache } from "react";
 
 import { Prisma, Role } from "@prisma/client";
 import { compare, hash } from "bcryptjs";
@@ -102,7 +103,7 @@ export const currentUserSelect = {
   },
 } satisfies Prisma.UserSelect;
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async function getCurrentUser() {
   const session = await getSession();
   if (!session) return null;
 
@@ -110,7 +111,7 @@ export async function getCurrentUser() {
     where: { id: session.userId },
     select: currentUserSelect,
   });
-}
+});
 
 export async function requireUser() {
   const user = await getCurrentUser();
