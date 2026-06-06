@@ -22,17 +22,19 @@ function pad(n: number) {
 
 export default function CountdownTimer() {
   const [time, setTime] = useState<{ d: number; h: number; m: number; s: number } | null>(null);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    setTime(getTimeLeft());
-    const id = setInterval(() => setTime(getTimeLeft()), 1000);
-    return () => clearInterval(id);
+    const tick = () => setTime(getTimeLeft());
+    // Initial tick via setTimeout to satisfy react-hooks/set-state-in-effect rule
+    const init = setTimeout(tick, 0);
+    const id = setInterval(tick, 1000);
+    return () => {
+      clearTimeout(init);
+      clearInterval(id);
+    };
   }, []);
 
-  // Don't render on server or after kickoff
-  if (!mounted || !time) return null;
+  if (!time) return null;
 
   return (
     <div className="hidden lg:flex items-center gap-1 border border-lime-400/20 bg-lime-400/5 px-3 py-1.5">
@@ -46,7 +48,7 @@ export default function CountdownTimer() {
           {i > 0 && (
             <span className="text-lime-400/40 font-black text-xs mx-0.5 tabular-nums">:</span>
           )}
-          <span className="flex flex-col items-center min-w-[2rem]">
+          <span className="flex flex-col items-center min-w-8">
             <span className="text-white font-black text-sm tabular-nums leading-none">
               {pad(value)}
             </span>

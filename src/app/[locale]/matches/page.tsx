@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { isLocale, type Locale, t } from "@/lib/translations";
 import { isPreviewMode } from "@/lib/app-mode";
@@ -203,10 +204,12 @@ export default async function MatchesPage({
                       {/* Home team */}
                       <div className="flex items-center gap-3">
                         {match.homeFlag ? (
-                          <img
+                          <Image
                             src={match.homeFlag}
                             alt={match.homeTeam}
-                            className="w-7 h-5 object-cover rounded-sm shrink-0"
+                            width={28}
+                            height={20}
+                            className="object-cover rounded-sm shrink-0"
                           />
                         ) : (
                           <div className="w-7 h-5 bg-zinc-800 rounded-sm shrink-0" />
@@ -245,10 +248,12 @@ export default async function MatchesPage({
                           {match.awayTeam}
                         </span>
                         {match.awayFlag ? (
-                          <img
+                          <Image
                             src={match.awayFlag}
                             alt={match.awayTeam}
-                            className="w-7 h-5 object-cover rounded-sm shrink-0"
+                            width={28}
+                            height={20}
+                            className="object-cover rounded-sm shrink-0"
                           />
                         ) : (
                           <div className="w-7 h-5 bg-zinc-800 rounded-sm shrink-0" />
