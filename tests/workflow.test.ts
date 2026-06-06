@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it, vi, beforeEach } from "vitest";
+﻿import { afterEach, describe, expect, it, vi, beforeEach } from "vitest";
+import { isAccessTokenExpired, ACCESS_TOKEN_EXPIRY_MS } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import {
   createLeaderboardRows,
@@ -106,13 +107,13 @@ describe("leaderboard with competition center", () => {
       makeUser({
         id: "u1",
         displayName: "Fatima",
-        competitionCenter: { name: "GARRINCHA Liège" },
+        competitionCenter: { name: "GARRINCHA LiÃ¨ge" },
         predictions: [{ pointsAwarded: 3 }],
       }),
     ];
 
     const rows = createLeaderboardRows(users);
-    expect(rows[0].center).toBe("GARRINCHA Liège");
+    expect(rows[0].center).toBe("GARRINCHA LiÃ¨ge");
   });
 
   it("includes users with competition center set", () => {
@@ -144,7 +145,7 @@ describe("leaderboard with competition center", () => {
   it("competition center leaderboard does not group by activation center", () => {
     // A user whose activationCenter differs from competitionCenter should appear
     // under competitionCenter, not activationCenter. Since LeaderboardInputUser
-    // only carries competitionCenter, the row's center field must reflect that —
+    // only carries competitionCenter, the row's center field must reflect that â€”
     // regardless of any other center the user is associated with.
     const users: LeaderboardInputUser[] = [
       makeUser({
@@ -204,7 +205,7 @@ describe("display name priority", () => {
   });
 
   it("never uses email as display name", () => {
-    // leaderboardDisplayName does not receive email at all — the type only
+    // leaderboardDisplayName does not receive email at all â€” the type only
     // exposes id, displayName, nickname, fullName. Verify the fallback is
     // an anonymised player tag, not anything resembling an email address.
     const result = leaderboardDisplayName({
@@ -240,7 +241,7 @@ describe("prediction scoring", () => {
   });
 
   it("awards 3 pts for correct outcome and correct goal difference", () => {
-    // Prediction 3-1 (diff +2), final 4-2 (diff +2) — same outcome, same diff, different score
+    // Prediction 3-1 (diff +2), final 4-2 (diff +2) â€” same outcome, same diff, different score
     expect(
       calculatePredictionPoints(
         { homeScore: 3, awayScore: 1 },
@@ -248,7 +249,7 @@ describe("prediction scoring", () => {
       ),
     ).toBe(3);
 
-    // Draw 1-1 predicted, final 2-2 — same outcome (DRAW), diff is always 0
+    // Draw 1-1 predicted, final 2-2 â€” same outcome (DRAW), diff is always 0
     expect(
       calculatePredictionPoints(
         { homeScore: 1, awayScore: 1 },
@@ -258,7 +259,7 @@ describe("prediction scoring", () => {
   });
 
   it("awards 2 pts for correct outcome but wrong goal difference", () => {
-    // Prediction 2-0 (diff +2), final 1-0 (diff +1) — both HOME wins, different diff
+    // Prediction 2-0 (diff +2), final 1-0 (diff +1) â€” both HOME wins, different diff
     expect(
       calculatePredictionPoints(
         { homeScore: 2, awayScore: 0 },
@@ -266,7 +267,7 @@ describe("prediction scoring", () => {
       ),
     ).toBe(2);
 
-    // Prediction 0-1 (AWAY), final 0-3 (AWAY) — different diff
+    // Prediction 0-1 (AWAY), final 0-3 (AWAY) â€” different diff
     expect(
       calculatePredictionPoints(
         { homeScore: 0, awayScore: 1 },
@@ -291,7 +292,7 @@ describe("prediction scoring", () => {
     ).toBe(0);
   });
 
-  it("recalculation is idempotent — calling it twice yields identical output", () => {
+  it("recalculation is idempotent â€” calling it twice yields identical output", () => {
     const calculatedAt = new Date("2026-06-14T20:00:00.000Z");
     const predictions: PredictionRecord[] = [
       { id: "p1", userId: "user-1", homeScore: 2, awayScore: 1 },
@@ -312,7 +313,7 @@ describe("prediction scoring", () => {
     const firstCalculatedAt = new Date("2026-06-14T20:00:00.000Z");
     const secondCalculatedAt = new Date("2026-06-14T21:00:00.000Z");
 
-    // First calculation: final score 1-0 → exact match → 5 pts
+    // First calculation: final score 1-0 â†’ exact match â†’ 5 pts
     const first = recalculatePredictionPoints({
       predictions,
       finalScore: { homeScore: 1, awayScore: 0 },
@@ -320,7 +321,7 @@ describe("prediction scoring", () => {
     });
     expect(first).toEqual([{ id: "p1", pointsAwarded: 5, calculatedAt: firstCalculatedAt }]);
 
-    // Score corrected to 3-1: prediction 1-0 (diff +1) vs final 3-1 (diff +2) — same HOME outcome, different diff → 2 pts
+    // Score corrected to 3-1: prediction 1-0 (diff +1) vs final 3-1 (diff +2) â€” same HOME outcome, different diff â†’ 2 pts
     const corrected = recalculatePredictionPoints({
       predictions,
       finalScore: { homeScore: 3, awayScore: 1 },
@@ -328,7 +329,7 @@ describe("prediction scoring", () => {
     });
     expect(corrected).toEqual([{ id: "p1", pointsAwarded: 2, calculatedAt: secondCalculatedAt }]);
 
-    // Result array length stays at 1 — no duplication
+    // Result array length stays at 1 â€” no duplication
     expect(corrected).toHaveLength(1);
   });
 });
@@ -359,11 +360,11 @@ describe("access link URL format", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Fix 2: competition center locking — idempotency logic
+// Fix 2: competition center locking â€” idempotency logic
 // ---------------------------------------------------------------------------
 
 describe("competition center lock rule", () => {
-  it("lock update fires on first prediction (competitionCenterLockedAt is null)", () => {
+  it("lock update fires on first self-service center change (competitionCenterLockedAt is null)", () => {
     // The Prisma where clause { competitionCenterLockedAt: null } means the update
     // only matches rows where the field has not been set yet.
     const lockedAt: Date | null = null;
@@ -377,18 +378,18 @@ describe("competition center lock rule", () => {
     expect(shouldFire).toBe(false);
   });
 
-  it("two calls with the same userId are idempotent — second is a no-op", () => {
+  it("two calls with the same userId are idempotent â€” second is a no-op", () => {
     // Simulate the first and second call. After the first call sets lockedAt,
     // the second call's where clause { competitionCenterLockedAt: null } won't match.
     let lockedAt: Date | null = null;
 
-    // First prediction: fires lock
+    // First self-service change: fires lock
     if (lockedAt === null) lockedAt = new Date("2026-06-11T17:05:00.000Z");
     const firstLock = lockedAt;
     expect(firstLock).not.toBeNull();
 
-    // Second prediction: where clause does not match → no update
-    const updatedBySecond = lockedAt === null; // false — already set
+    // Second prediction: where clause does not match â†’ no update
+    const updatedBySecond = lockedAt === null; // false â€” already set
     expect(updatedBySecond).toBe(false);
 
     // lockedAt value is unchanged
@@ -397,7 +398,7 @@ describe("competition center lock rule", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Fix 3: prediction validation message — schema rejects bad input
+// Fix 3: prediction validation message â€” schema rejects bad input
 // ---------------------------------------------------------------------------
 
 describe("prediction score validation", () => {
@@ -407,7 +408,7 @@ describe("prediction score validation", () => {
     expect(predictionSchema.safeParse({ matchId: "m1", homeScore: 30, awayScore: 30 }).success).toBe(true);
   });
 
-  it("rejects invalid scores — route returns 'Please enter valid scores.'", () => {
+  it("rejects invalid scores â€” route returns 'Please enter valid scores.'", () => {
     // Negative score
     expect(predictionSchema.safeParse({ matchId: "m1", homeScore: -1, awayScore: 0 }).success).toBe(false);
     // Score above 30
@@ -420,7 +421,7 @@ describe("prediction score validation", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Fix 4: permanent access link — email copy must not say "single-use" or "expires"
+// Fix 4: permanent access link â€” email copy must not say "single-use" or "expires"
 // ---------------------------------------------------------------------------
 
 describe("access link email copy", () => {
@@ -431,9 +432,9 @@ describe("access link email copy", () => {
     accessUrl: "https://worldcup.example.com/auth/access?token=abc123",
   };
 
-  it("plain text states the link never expires", () => {
+  it("plain text states link validity is 30 days", () => {
     const { text } = buildEmailContent(payload);
-    expect(text).toContain("never expires");
+    expect(text).toContain("30 days");
   });
 
   it("plain text does not contain 'single-use' or 'expire shortly'", () => {
@@ -442,9 +443,9 @@ describe("access link email copy", () => {
     expect(text.toLowerCase()).not.toContain("expire shortly");
   });
 
-  it("HTML states the link never expires", () => {
+  it("HTML states link validity is 30 days", () => {
     const { html } = buildEmailContent(payload);
-    expect(html).toContain("never expires");
+    expect(html).toContain("30 days");
   });
 
   it("HTML does not contain 'single-use' or 'expire shortly'", () => {
@@ -484,7 +485,41 @@ describe("access link email copy", () => {
   });
 });
 
+
+
 // ---------------------------------------------------------------------------
+// Magic link 30-day expiry -- OD-001
+// ---------------------------------------------------------------------------
+
+describe("magic link 30-day expiry -- OD-001", () => {
+  it("token created just now is not expired", () => {
+    const now = new Date();
+    expect(isAccessTokenExpired(now, now)).toBe(false);
+  });
+
+  it("token created 29 days ago is not expired", () => {
+    const created = new Date(Date.now() - 29 * 24 * 60 * 60 * 1000);
+    expect(isAccessTokenExpired(created)).toBe(false);
+  });
+
+  it("token created exactly 30 days + 1 ms ago is expired", () => {
+    const created = new Date(Date.now() - ACCESS_TOKEN_EXPIRY_MS - 1);
+    expect(isAccessTokenExpired(created)).toBe(true);
+  });
+
+  it("token created 31 days ago is expired", () => {
+    const created = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
+    expect(isAccessTokenExpired(created)).toBe(true);
+  });
+
+  it("null createdAt is treated as expired", () => {
+    expect(isAccessTokenExpired(null)).toBe(true);
+  });
+
+  it("ACCESS_TOKEN_EXPIRY_MS equals exactly 30 days in milliseconds", () => {
+    expect(ACCESS_TOKEN_EXPIRY_MS).toBe(30 * 24 * 60 * 60 * 1000);
+  });
+});// ---------------------------------------------------------------------------
 // Email provider mode (Resend)
 // ---------------------------------------------------------------------------
 
@@ -549,7 +584,7 @@ describe("email provider mode", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Rate limiter (in-memory fallback — Upstash not configured in test env)
+// Rate limiter (in-memory fallback â€” Upstash not configured in test env)
 // ---------------------------------------------------------------------------
 
 describe("rate limiter (in-memory fallback)", () => {

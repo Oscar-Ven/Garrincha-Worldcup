@@ -1,36 +1,53 @@
-﻿import { Role } from "@prisma/client";
-import { redirect } from "next/navigation";
-import { requireAdmin } from "@/lib/auth";
-import { getLocale } from "@/lib/i18n";
+﻿import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { demoBonusEvents, demoBonusUsers, hasDatabaseConfig } from "@/lib/ui-demo-data";
+import BonusFormClient from "./BonusFormClient";
 
-export default async function BonusPage() {
-  const locale = await getLocale();
-  let admin: Awaited<ReturnType<typeof requireAdmin>> | null = null;
-  if (hasDatabaseConfig()) {
-    try { admin = await requireAdmin(); }
-    catch { redirect("/admin/login?next=/admin/bonus"); }
+export const dynamic = "force-dynamic";
+
+export default async function BonusPointsPage() {
+  const admin = await getCurrentUser();
+  if (!admin) {
+    redirect("/admin/login");
   }
 
-  const [users, events] = hasDatabaseConfig()
-    ? await Promise.all([
-        prisma.user.findMany({
-          where: { role: Role.USER },
-          orderBy: { email: "asc" },
-          select: { id: true, email: true, displayName: true },
-        }),
-        prisma.pointEvent.findMany({
-          orderBy: { createdAt: "desc" },
-          take: 25,
-          include: { user: { select: { email: true, displayName: true } } },
-        }),
-      ])
-    : [demoBonusUsers, demoBonusEvents];
+  const isOwner = admin.role === "SUPER_ADMIN" || admin.role === "ADMIN";
+  const isManager = admin.role === "CENTER_ADMIN";
+
+  if (!isOwner && !isManager) {
+    redirect("/");
+  }
+
+  const centerId = admin.center?.id;
+
+  // Retrieve players scoped to permissions
+  const players = await prisma.user.findMany({
+    where: isOwner
+      ? { role: "USER" }
+      : { role: "USER", competitionCenterId: centerId },
+    select: {
+      id: true,
+      email: true,
+      fullName: true,
+      nickname: true,
+      competitionCenter: { select: { name: true } },
+    },
+    orderBy: { fullName: "asc" },
+  });
+
+  const serializedPlayers = players.map((p) => ({
+    id: p.id,
+    fullName: p.fullName,
+    nickname: p.nickname,
+    email: p.email,
+    centerName: p.competitionCenter?.name ?? "No Competition Center",
+  }));
 
   return (
-    <main data-locale={locale}>
-      <p>TODO: bonus page — {users.length} users, {events.length} events (admin: {admin?.email ?? "demo"})</p>
-    </main>
+    <BonusFormClient
+      currentUserRole={admin.role}
+      centerName={admin.center?.name ?? ""}
+      players={serializedPlayers}
+    />
   );
 }

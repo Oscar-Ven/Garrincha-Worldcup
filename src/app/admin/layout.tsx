@@ -1,13 +1,35 @@
-import type { Metadata } from "next";
+﻿import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
+import AdminLayoutClientShell from "@/components/admin/AdminLayoutClientShell";
 
-export const metadata: Metadata = {
-  title: {
-    default: "GARRINCHA Manager Portal",
-    template: "%s — GARRINCHA Manager",
-  },
-  robots: { index: false, follow: false },
-};
+export default async function Layout({ children }: { children: React.ReactNode }) {
+  const user = await getCurrentUser();
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <div data-portal="admin">{children}</div>;
+  // If no user is logged in, redirect to login
+  if (!user) {
+    redirect("/admin/login");
+  }
+
+  // Ensure role is appropriate (Owner: SUPER_ADMIN/ADMIN, Manager: CENTER_ADMIN)
+  const isOwner = user.role === "SUPER_ADMIN" || user.role === "ADMIN";
+  const isManager = user.role === "CENTER_ADMIN";
+
+  if (!isOwner && !isManager) {
+    redirect("/"); // Player accounts have no business here
+  }
+
+  const serializedUser = {
+    email: user.email,
+    fullName: user.fullName,
+    nickname: user.nickname,
+    role: user.role,
+    centerName: user.center?.name ?? "No Assigned Center",
+    centerId: user.center?.id ?? "",
+  };
+
+  return (
+    <AdminLayoutClientShell user={serializedUser}>
+      {children}
+    </AdminLayoutClientShell>
+  );
 }

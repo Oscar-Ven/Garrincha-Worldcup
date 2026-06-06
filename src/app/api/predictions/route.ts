@@ -82,14 +82,5 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  // Lock the competition center on the player's first prediction.
-  // updateMany with competitionCenterLockedAt: null means it only fires once and is a no-op on all subsequent predictions.
-  if (!isPreviewMode()) {
-    await prisma.user.updateMany({
-      where: { id: session.userId, competitionCenterLockedAt: null },
-      data: { competitionCenterLockedAt: new Date() },
-    });
-  }
-
   return NextResponse.json({ ok: true });
 }

@@ -80,7 +80,8 @@ The leaderboard uses an aggregated SQL query (one round-trip) instead of loading
 | POST /api/auth/request-link | 5 | 15 min | IP |
 | POST /api/auth/login (admin) | 5 | 15 min | IP |
 | POST /api/predictions | 60 | 1 min | IP |
-| POST /api/competition-center | 10 | 15 min | IP |
+| PUT /api/user/center | 5 | 1 hour | User ID |
+| PUT /api/admin/users/:id/center | 30 | 1 min | IP |
 | POST /api/checkin | 5 | 1 min | IP |
 | POST /api/admin/matches/*/score | 120 | 1 min | IP |
 | POST /api/admin/bonus | 120 | 1 min | IP |

@@ -153,3 +153,10 @@ export function generateAccessToken(): { raw: string; hash: string } {
 export function hashToken(raw: string): string {
   return crypto.createHash("sha256").update(raw).digest("hex");
 }
+
+export const ACCESS_TOKEN_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000;
+
+export function isAccessTokenExpired(createdAt: Date | null, now: Date = new Date()): boolean {
+  if (!createdAt) return true;
+  return now.getTime() - createdAt.getTime() > ACCESS_TOKEN_EXPIRY_MS;
+}

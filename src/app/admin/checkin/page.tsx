@@ -1,29 +1,92 @@
 ﻿import { redirect } from "next/navigation";
-import { requireCenterAdmin } from "@/lib/auth";
-import { getActiveSession } from "@/lib/checkin";
-import { getLocale } from "@/lib/i18n";
-import { hasDatabaseConfig } from "@/lib/ui-demo-data";
+import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import CheckinClient from "./CheckinClient";
 
-export default async function AdminCheckInPage() {
-  const locale = await getLocale();
+export const dynamic = "force-dynamic";
 
-  if (!hasDatabaseConfig()) {
-    return (
-      <main data-locale={locale}>
-        <p>TODO: check-in page (preview mode)</p>
-      </main>
-    );
+export default async function CheckinManagerPage() {
+  const admin = await getCurrentUser();
+  if (!admin) {
+    redirect("/admin/login");
   }
 
-  let admin;
-  try { admin = await requireCenterAdmin(); }
-  catch { redirect("/admin/login?next=/admin/checkin"); }
+  const isOwner = admin.role === "SUPER_ADMIN" || admin.role === "ADMIN";
+  const isManager = admin.role === "CENTER_ADMIN";
 
-  const session = await getActiveSession(admin.center.id);
+  if (!isOwner && !isManager) {
+    redirect("/");
+  }
+
+  const centerId = admin.center?.id;
+
+  // Retrieve centers list
+  const centers = await prisma.garrinchaCenter.findMany({
+    select: { id: true, name: true, city: true },
+    orderBy: { name: "asc" },
+  });
+
+  // Query recent physical check-ins with client relations
+  const checkins = await prisma.centerCheckIn.findMany({
+    where: isOwner
+      ? {}
+      : { centerId: centerId ?? undefined },
+    select: {
+      id: true,
+      createdAt: true,
+      user: {
+        select: {
+          fullName: true,
+          nickname: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 40,
+  });
+
+  // Convert checkins to clean standard format
+  const serializedCheckins = checkins.map((c) => ({
+    id: pId(c.id),
+    createdAt: c.createdAt.toISOString(),
+    fullName: c.user?.fullName ?? "Unknown Competitor",
+    nickname: c.user?.nickname ?? "anonymous",
+    email: c.user?.email ?? "",
+  }));
+
+  // Resolve current active/valid session for default center
+  const targetCenterId = isOwner ? centers[0]?.id : centerId;
+  let activeCode = "";
+  let codeExpiresAt = "";
+
+  if (targetCenterId) {
+    const activeSession = await prisma.centerSession.findFirst({
+      where: {
+        centerId: targetCenterId,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    if (activeSession) {
+      activeCode = activeSession.code;
+      codeExpiresAt = activeSession.expiresAt.toISOString();
+    }
+  }
 
   return (
-    <main data-locale={locale}>
-      <p>TODO: check-in — {admin.center.name} (active session: {session ? session.code : "none"})</p>
-    </main>
+    <CheckinClient
+      currentUserRole={admin.role}
+      adminCenterId={centerId ?? ""}
+      initialCenters={centers}
+      initialCheckins={serializedCheckins}
+      initialActiveCode={activeCode}
+      initialExpiresAt={codeExpiresAt}
+    />
   );
+}
+
+// Simple fallback helper for typings key stability
+function pId(val: string | undefined): string {
+  return val ?? Math.random().toString();
 }

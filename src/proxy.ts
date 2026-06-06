@@ -1,5 +1,5 @@
+import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify, SignJWT } from "jose";
-import { NextRequest, NextResponse } from "next/server";
 import { isPlaceholderValue, isPreviewMode } from "@/lib/app-mode";
 
 const SESSION_COOKIE = "garrincha_session";
@@ -12,10 +12,17 @@ function getSecret() {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const firstSegment = pathname.split("/")[1];
+
+  // Redirect any legacy /owner path to the protected /admin portal
+  if (pathname.startsWith("/owner")) {
+    return NextResponse.redirect(new URL("/admin", request.url));
+  }
+
   const secret = getSecret();
   const token = request.cookies.get(SESSION_COOKIE)?.value;
 
-  // Skip in preview/demo mode so the admin UI is previewable without credentials.
+  // Admin route guard — skip in preview mode so the UI is browsable without credentials
   if (pathname.startsWith("/admin") && pathname !== "/admin/login" && !isPreviewMode()) {
     if (!token || !secret) {
       const url = new URL("/admin/login", request.url);
@@ -37,6 +44,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // Sliding-window token refresh: renew when less than 7 days remain
   if (token && secret) {
     try {
       const { payload } = await jwtVerify(token, secret);
@@ -59,16 +67,38 @@ export async function proxy(request: NextRequest) {
           path: "/",
           maxAge: 60 * 60 * 24 * 30,
         });
+
+        if (firstSegment === "en" || firstSegment === "fr" || firstSegment === "nl") {
+          response.cookies.set("garrincha_locale", firstSegment, {
+            path: "/",
+            httpOnly: false,
+            sameSite: "lax",
+            maxAge: 60 * 60 * 24 * 365,
+          });
+        }
+
         return response;
       }
     } catch {
-      // Invalid token; page-level auth handles the resulting unauthenticated state.
+      // Invalid/expired token — page-level auth handles the resulting state
     }
+  }
+
+  // Persist locale preference when navigating to locale-prefixed routes
+  if (firstSegment === "en" || firstSegment === "fr" || firstSegment === "nl") {
+    const response = NextResponse.next();
+    response.cookies.set("garrincha_locale", firstSegment, {
+      path: "/",
+      httpOnly: false,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+    return response;
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*", "/leaderboards/:path*"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

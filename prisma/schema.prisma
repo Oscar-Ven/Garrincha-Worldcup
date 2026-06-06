@@ -47,7 +47,7 @@ model User {
   email                       String          @unique
   passwordHash                String?
   fullName                    String
-  nickname                    String
+  nickname                    String          @unique
   dateOfBirth                 DateTime?
   phoneNumber                 String
   displayName                 String?
@@ -67,6 +67,7 @@ model User {
   predictions                 Prediction[]
   pointEvents                 PointEvent[]
   checkIn                     CenterCheckIn?
+  centerChangeLogs            CenterChangeLog[]
   createdAt                   DateTime        @default(now())
   updatedAt                   DateTime        @updatedAt
 
@@ -170,4 +171,17 @@ model CenterCheckIn {
   createdAt DateTime @default(now())
 
   @@index([expiresAt])
+}
+
+model CenterChangeLog {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromCenterId String?
+  toCenterId   String
+  changedBy    String
+  changeType   String
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
 }

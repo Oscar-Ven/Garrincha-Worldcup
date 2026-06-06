@@ -1,10 +1,2 @@
-"use client";
-
-export default function GlobalError({ reset }: { error: Error; reset: () => void }) {
-  return (
-    <main>
-      <p>Something went wrong.</p>
-      <button onClick={reset}>Try again</button>
-    </main>
-  );
-}
+﻿"use client"
+export default function ErrorPage({ error, reset }: { error: Error; reset: () => void }) { return null; }

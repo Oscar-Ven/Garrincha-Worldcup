@@ -35,9 +35,13 @@ export async function PATCH(
     return NextResponse.json({ error: "The owner account must keep the super admin role." }, { status: 400 });
   }
 
-  const user = await prisma.user.findUnique({ where: { id }, select: { id: true } });
+  const user = await prisma.user.findUnique({ where: { id }, select: { id: true, role: true } });
   if (!user) {
     return NextResponse.json({ error: "User not found." }, { status: 404 });
+  }
+
+  if ((user.role === Role.SUPER_ADMIN || user.role === Role.ADMIN) && parsed.data.role !== user.role) {
+    return NextResponse.json({ error: "Downgrading Owner accounts is prohibited." }, { status: 403 });
   }
 
   try {

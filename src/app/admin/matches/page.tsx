@@ -1,27 +1,54 @@
 ﻿import { redirect } from "next/navigation";
-import { requireAdmin } from "@/lib/auth";
-import { getLocale } from "@/lib/i18n";
+import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { demoMatches, hasDatabaseConfig } from "@/lib/ui-demo-data";
+import MatchesClient from "./MatchesClient";
 
-export default async function AdminMatchesPage() {
-  const locale = await getLocale();
-  let admin: Awaited<ReturnType<typeof requireAdmin>> | null = null;
-  if (hasDatabaseConfig()) {
-    try { admin = await requireAdmin(); }
-    catch { redirect("/admin/login?next=/admin/matches"); }
+export const dynamic = "force-dynamic";
+
+export default async function MatchesPage() {
+  const admin = await getCurrentUser();
+  if (!admin) {
+    redirect("/admin/login");
   }
 
-  const matches = hasDatabaseConfig()
-    ? await prisma.match.findMany({
-        orderBy: [{ kickoffAt: "asc" }, { fifaMatchNo: "asc" }],
-        include: { homeTeam: true, awayTeam: true },
-      })
-    : demoMatches;
+  const isOwner = admin.role === "SUPER_ADMIN" || admin.role === "ADMIN";
+  const isManager = admin.role === "CENTER_ADMIN";
+
+  if (!isOwner && !isManager) {
+    redirect("/");
+  }
+
+  // Load matches
+  const matches = await prisma.match.findMany({
+    include: {
+      homeTeam: { select: { name: true, flagUrl: true, fifaCode: true } },
+      awayTeam: { select: { name: true, flagUrl: true, fifaCode: true } },
+    },
+    orderBy: [{ kickoffAt: "asc" }, { fifaMatchNo: "asc" }],
+  });
+
+  const serializedMatches = matches.map((m) => ({
+    id: m.id,
+    fifaMatchNo: m.fifaMatchNo ?? 0,
+    stage: m.stage,
+    venue: m.venue,
+    kickoffAt: m.kickoffAt.toISOString(),
+    status: m.status,
+    homeTeamName: m.homeTeam.name,
+    homeTeamFifa: m.homeTeam.fifaCode,
+    homeTeamFlag: m.homeTeam.flagUrl,
+    awayTeamName: m.awayTeam.name,
+    awayTeamFifa: m.awayTeam.fifaCode,
+    awayTeamFlag: m.awayTeam.flagUrl,
+    homeScore: m.homeScore ?? null,
+    awayScore: m.awayScore ?? null,
+    finalizedAt: m.finalizedAt ? m.finalizedAt.toISOString() : null,
+  }));
 
   return (
-    <main data-locale={locale}>
-      <p>TODO: admin matches — {matches.length} matches (admin: {admin?.email ?? "demo"})</p>
-    </main>
+    <MatchesClient
+      currentUserRole={admin.role}
+      initialMatches={serializedMatches}
+    />
   );
 }

@@ -27,17 +27,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Please enter a valid bonus award." }, { status: 400 });
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id: parsed.data.userId },
+    select: { id: true, competitionCenterId: true },
+  });
+  if (!user) {
+    return NextResponse.json({ error: "User not found." }, { status: 404 });
+  }
+
   const bonusPermission = canAwardBonus({
-    session: { userId: admin.id, role: admin.role },
+    session: { userId: admin.id, role: admin.role, centerId: admin.center?.id ?? null },
     reason: parsed.data.reason,
+    targetCompetitionCenterId: user.competitionCenterId,
   });
   if (!bonusPermission.allowed) {
     return NextResponse.json({ error: bonusPermission.reason }, { status: bonusPermission.status });
-  }
-
-  const user = await prisma.user.findUnique({ where: { id: parsed.data.userId } });
-  if (!user) {
-    return NextResponse.json({ error: "User not found." }, { status: 404 });
   }
 
   const recentDuplicate = await prisma.pointEvent.findFirst({

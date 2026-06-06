@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { getLocale } from "@/lib/i18n";
 import "./globals.css";
+
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -37,8 +40,8 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
   return (
-    <html lang={locale}>
-      <body>{children}</body>
+    <html lang={locale} className={inter.variable}>
+      <body className="bg-zinc-950 text-white antialiased">{children}</body>
     </html>
   );
 }

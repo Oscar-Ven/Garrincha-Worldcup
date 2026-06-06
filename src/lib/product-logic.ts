@@ -5,6 +5,7 @@ export type AppRole = "USER" | "ADMIN" | "CENTER_ADMIN" | "SUPER_ADMIN";
 export type SessionLike = {
   userId: string;
   role: AppRole;
+  centerId?: string | null;
 } | null;
 
 export type RuleResult =
@@ -116,9 +117,11 @@ export function recalculatePredictionPoints({
 export function canAwardBonus({
   session,
   reason,
+  targetCompetitionCenterId,
 }: {
   session: SessionLike;
   reason: string;
+  targetCompetitionCenterId?: string | null;
 }): RuleResult {
   const admin = canAccessAdmin(session);
   if (!admin.allowed) return admin;
@@ -127,6 +130,35 @@ export function canAwardBonus({
     return { allowed: false, status: 400, reason: "Bonus points require a reason." };
   }
 
+  if (session && session.role === "CENTER_ADMIN") {
+    if (!session.centerId) {
+      return { allowed: false, status: 403, reason: "Your admin account is not linked to a center." };
+    }
+    if (!targetCompetitionCenterId || targetCompetitionCenterId !== session.centerId) {
+      return { allowed: false, status: 403, reason: "You can only award bonus points to players at your own center." };
+    }
+  }
+
+  return { allowed: true };
+}
+
+export function canChangeSelfServiceCenter({
+  user,
+  newCenterId,
+}: {
+  user: { competitionCenterId: string | null; competitionCenterLockedAt: Date | null };
+  newCenterId: string;
+}): RuleResult {
+  if (user.competitionCenterId === newCenterId) {
+    return { allowed: false, status: 400, reason: "This is already your competition center." };
+  }
+  if (user.competitionCenterLockedAt !== null) {
+    return {
+      allowed: false,
+      status: 403,
+      reason: "You have already used your one center change. Please contact an admin to change your competition center.",
+    };
+  }
   return { allowed: true };
 }
 

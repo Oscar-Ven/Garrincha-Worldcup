@@ -81,6 +81,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const nicknameExists = await prisma.user.findUnique({ where: { nickname } });
+    if (nicknameExists) {
+      return NextResponse.json(
+        { error: "This nickname is already taken. Please choose a different one." },
+        { status: 400 }
+      );
+    }
+
     const user = await prisma.user.create({
       data: {
         email,
@@ -90,6 +98,7 @@ export async function POST(request: NextRequest) {
         phoneNumber,
         nationality: nationality ?? null,
         centerId: resolvedCenterId,
+        competitionCenterId: resolvedCenterId,
         firstActivatedAt: new Date(),
         passwordHash: null,
         role: Role.USER,
