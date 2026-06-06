@@ -44,7 +44,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Sliding-window token refresh: renew when less than 7 days remain
+  // Sliding-window token refresh: renew when less than 7 days remain on a 30-day session
   if (token && secret) {
     try {
       const { payload } = await jwtVerify(token, secret);

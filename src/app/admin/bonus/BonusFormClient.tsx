@@ -154,7 +154,7 @@ export default function BonusFormClient({ currentUserRole, centerName, players }
 
           {/* Messages info */}
           {error && (
-            <div className="flex items-start gap-3 p-3 border border-red-900/50 bg-red-900/10 text-red-400 text-xs">
+            <div role="alert" className="flex items-start gap-3 p-3 border border-red-900/50 bg-red-900/10 text-red-400 text-xs">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
