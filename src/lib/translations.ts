@@ -12,6 +12,9 @@ export const translations: Record<Locale, Record<string, string>> = {
   en: {
     "nav.matches": "Matches",
     "nav.leaderboards": "Leaderboards",
+    "nav.profile": "Profile",
+    "nav.points": "My points",
+    "nav.center": "Center",
     "nav.admin": "Admin",
     "nav.logout": "Log out",
     "nav.login": "Log in",
@@ -329,6 +332,9 @@ export const translations: Record<Locale, Record<string, string>> = {
   nl: {
     "nav.matches": "Wedstrijden",
     "nav.leaderboards": "Ranglijsten",
+    "nav.profile": "Profiel",
+    "nav.points": "Mijn punten",
+    "nav.center": "Center",
     "nav.admin": "Admin",
     "nav.logout": "Uitloggen",
     "nav.login": "Inloggen",
@@ -646,6 +652,9 @@ export const translations: Record<Locale, Record<string, string>> = {
   fr: {
     "nav.matches": "Matchs",
     "nav.leaderboards": "Classements",
+    "nav.profile": "Profil",
+    "nav.points": "Mes points",
+    "nav.center": "Center",
     "nav.admin": "Admin",
     "nav.logout": "Se déconnecter",
     "nav.login": "Se connecter",
