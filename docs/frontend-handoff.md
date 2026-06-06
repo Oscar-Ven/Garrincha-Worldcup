@@ -1,7 +1,7 @@
 # Frontend Designer Handoff — GARRINCHA World Cup 2026
 
 **Date:** June 2026  
-**Branch:** `main`  
+**Branch:** main  
 **Build status:** ✅ typecheck clean · ✅ lint 0 errors · ✅ production build passes
 
 ---
