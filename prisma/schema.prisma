@@ -43,21 +43,21 @@ model GarrinchaCenter {
 }
 
 model User {
-  id                          String          @id @default(cuid())
-  email                       String          @unique
+  id                          String            @id @default(cuid())
+  email                       String            @unique
   passwordHash                String?
   fullName                    String
-  nickname                    String          @unique
+  nickname                    String            @unique
   dateOfBirth                 DateTime?
   phoneNumber                 String
   displayName                 String?
   nationality                 String?
-  role                        Role            @default(USER)
+  role                        Role              @default(USER)
   centerId                    String
-  center                      GarrinchaCenter @relation("ActivationCenter", fields: [centerId], references: [id])
+  center                      GarrinchaCenter   @relation("ActivationCenter", fields: [centerId], references: [id])
   firstActivatedAt            DateTime?
   competitionCenterId         String?
-  competitionCenter           GarrinchaCenter? @relation("CompetitionCenter", fields: [competitionCenterId], references: [id])
+  competitionCenter           GarrinchaCenter?  @relation("CompetitionCenter", fields: [competitionCenterId], references: [id])
   competitionCenterLockedAt   DateTime?
   avatarUrl                   String?
   accessTokenHash             String?
@@ -68,8 +68,8 @@ model User {
   pointEvents                 PointEvent[]
   checkIn                     CenterCheckIn?
   centerChangeLogs            CenterChangeLog[]
-  createdAt                   DateTime        @default(now())
-  updatedAt                   DateTime        @updatedAt
+  createdAt                   DateTime          @default(now())
+  updatedAt                   DateTime          @updatedAt
 
   @@index([accessTokenHash])
   @@index([centerId])
@@ -90,27 +90,27 @@ model Team {
 }
 
 model Match {
-  id                 String       @id @default(cuid())
-  fifaMatchNo        Int?         @unique
-  stage              Stage
-  venue              String
-  kickoffAt          DateTime
-  status             MatchStatus  @default(SCHEDULED)
-  homeTeamId         String
-  homeTeam           Team         @relation("HomeTeam", fields: [homeTeamId], references: [id])
-  awayTeamId         String
-  awayTeam           Team         @relation("AwayTeam", fields: [awayTeamId], references: [id])
-  homeScore          Int?
-  awayScore          Int?
-  finalizedAt        DateTime?
-  scoreSource        String?
-  externalMatchId    String?
-  externalUpdatedAt  DateTime?
-  scoreSyncStatus    String?
-  lastScoreSyncAt    DateTime?
-  predictions        Prediction[]
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id                String       @id @default(cuid())
+  fifaMatchNo       Int?         @unique
+  stage             Stage
+  venue             String
+  kickoffAt         DateTime
+  status            MatchStatus  @default(SCHEDULED)
+  homeTeamId        String
+  homeTeam          Team         @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeamId        String
+  awayTeam          Team         @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  homeScore         Int?
+  awayScore         Int?
+  finalizedAt       DateTime?
+  scoreSource       String?
+  externalMatchId   String?
+  externalUpdatedAt DateTime?
+  scoreSyncStatus   String?
+  lastScoreSyncAt   DateTime?
+  predictions       Prediction[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   @@index([kickoffAt])
   @@index([stage])
