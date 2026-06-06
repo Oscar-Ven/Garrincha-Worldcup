@@ -6,10 +6,13 @@ import Image from "next/image";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { t, type Locale } from "@/lib/translations";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { usePathname } from "next/navigation";
 
 export default function Navbar({ locale }: { locale: Locale }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === `/${locale}` || pathname === "/";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -17,11 +20,11 @@ export default function Navbar({ locale }: { locale: Locale }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navLinks = [
-    { label: t(locale, "how_title_label"), href: "#how-it-works" },
-    { label: t(locale, "nav_scoring"), href: "#scoring" },
-    { label: t(locale, "nav_centers"), href: "#centers" },
-    { label: t(locale, "nav_prize"), href: "#prizes" },
+  const anchorLinks = [
+    { label: t(locale, "how_title_label"), href: isHome ? "#how-it-works" : `/${locale}#how-it-works` },
+    { label: t(locale, "nav_scoring"), href: isHome ? "#scoring" : `/${locale}#scoring` },
+    { label: t(locale, "nav_centers"), href: isHome ? "#centers" : `/${locale}#centers` },
+    { label: t(locale, "nav_prize"), href: isHome ? "#prizes" : `/${locale}#prizes` },
   ];
 
   return (
@@ -47,7 +50,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
 
         {/* Desktop nav links */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
+          {anchorLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
@@ -56,6 +59,22 @@ export default function Navbar({ locale }: { locale: Locale }) {
               {link.label}
             </a>
           ))}
+          <Link
+            href={`/${locale}/matches`}
+            className={`text-sm font-bold tracking-wide uppercase transition-colors ${
+              pathname?.includes("/matches") ? "text-lime-400" : "text-zinc-300 hover:text-lime-400"
+            }`}
+          >
+            {t(locale, "nav.matches")}
+          </Link>
+          <Link
+            href={`/${locale}/leaderboards`}
+            className={`text-sm font-bold tracking-wide uppercase transition-colors ${
+              pathname?.includes("/leaderboards") ? "text-lime-400" : "text-zinc-300 hover:text-lime-400"
+            }`}
+          >
+            {t(locale, "nav.leaderboards")}
+          </Link>
         </div>
 
         {/* Desktop right: language + CTA */}
@@ -83,7 +102,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
       {/* Mobile menu */}
       {open && (
         <div className="md:hidden absolute top-full left-0 w-full bg-zinc-950 border-b border-zinc-800 p-6 flex flex-col gap-5 shadow-2xl">
-          {navLinks.map((link) => (
+          {anchorLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
@@ -93,6 +112,20 @@ export default function Navbar({ locale }: { locale: Locale }) {
               {link.label}
             </a>
           ))}
+          <Link
+            href={`/${locale}/matches`}
+            onClick={() => setOpen(false)}
+            className="text-base font-bold tracking-wide text-zinc-300 hover:text-lime-400 transition-colors uppercase"
+          >
+            {t(locale, "nav.matches")}
+          </Link>
+          <Link
+            href={`/${locale}/leaderboards`}
+            onClick={() => setOpen(false)}
+            className="text-base font-bold tracking-wide text-zinc-300 hover:text-lime-400 transition-colors uppercase"
+          >
+            {t(locale, "nav.leaderboards")}
+          </Link>
           <div className="h-px bg-zinc-800 w-full" />
           <LanguageSwitcher locale={locale} />
           <Link
