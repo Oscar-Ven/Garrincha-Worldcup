@@ -1,182 +1,9 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["partialIndexes"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model CenterChangeLog {
-  id           String          @id @default(cuid())
-  userId       String
-  fromCenterId String?
-  toCenterId   String
-  changedBy    String
-  changeType   String
-  createdAt    DateTime        @default(now())
-  User         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model CenterCheckIn {
-  id        String   @id
-  userId    String   @unique
-  centerId  String
-  sessionId String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([expiresAt])
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model CenterSession {
-  id              String          @id
-  centerId        String
-  code            String          @unique
-  expiresAt       DateTime
-  createdBy       String
-  createdAt       DateTime        @default(now())
-  GarrinchaCenter GarrinchaCenter @relation(fields: [centerId], references: [id])
-
-  @@index([centerId])
-  @@index([expiresAt])
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model GarrinchaCenter {
-  id                                             String          @id
-  name                                           String          @unique
-  country                                        String
-  city                                           String
-  bannerUrl                                      String?
-  createdAt                                      DateTime        @default(now())
-  updatedAt                                      DateTime
-  CenterSession                                  CenterSession[]
-  User_User_centerIdToGarrinchaCenter            User[]          @relation("User_centerIdToGarrinchaCenter")
-  User_User_competitionCenterIdToGarrinchaCenter User[]          @relation("User_competitionCenterIdToGarrinchaCenter")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model Match {
-  id                          String       @id
-  fifaMatchNo                 Int?         @unique
-  stage                       Stage
-  venue                       String
-  kickoffAt                   DateTime
-  status                      MatchStatus  @default(SCHEDULED)
-  homeTeamId                  String
-  awayTeamId                  String
-  homeScore                   Int?
-  awayScore                   Int?
-  finalizedAt                 DateTime?
-  createdAt                   DateTime     @default(now())
-  updatedAt                   DateTime
-  scoreSource                 String?
-  externalMatchId             String?
-  externalUpdatedAt           DateTime?
-  scoreSyncStatus             String?
-  lastScoreSyncAt             DateTime?
-  Team_Match_awayTeamIdToTeam Team         @relation("Match_awayTeamIdToTeam", fields: [awayTeamId], references: [id])
-  Team_Match_homeTeamIdToTeam Team         @relation("Match_homeTeamIdToTeam", fields: [homeTeamId], references: [id])
-  Prediction                  Prediction[]
-
-  @@index([kickoffAt])
-  @@index([stage])
-  @@index([status])
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model PointEvent {
-  id        String   @id
-  userId    String
-  points    Int
-  reason    String
-  awardedBy String?
-  matchId   String?
-  createdAt DateTime @default(now())
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model Prediction {
-  id            String    @id
-  userId        String
-  matchId       String
-  pointsAwarded Int       @default(0)
-  calculatedAt  DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime
-  homeScore     Int
-  awayScore     Int
-  Match         Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  User          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, matchId])
-  @@index([matchId])
-  @@index([userId])
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model Team {
-  id                           String   @id
-  name                         String   @unique
-  fifaCode                     String   @unique
-  flagUrl                      String
-  groupName                    String?
-  createdAt                    DateTime @default(now())
-  updatedAt                    DateTime
-  Match_Match_awayTeamIdToTeam Match[]  @relation("Match_awayTeamIdToTeam")
-  Match_Match_homeTeamIdToTeam Match[]  @relation("Match_homeTeamIdToTeam")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model User {
-  id                                                        String           @id
-  email                                                     String           @unique
-  passwordHash                                              String?
-  dateOfBirth                                               DateTime?
-  phoneNumber                                               String
-  displayName                                               String?
-  nationality                                               String?
-  role                                                      Role             @default(USER)
-  centerId                                                  String
-  createdAt                                                 DateTime         @default(now())
-  updatedAt                                                 DateTime
-  fullName                                                  String           @default("Player")
-  nickname                                                  String           @default("Player")
-  firstActivatedAt                                          DateTime?
-  competitionCenterId                                       String?
-  competitionCenterLockedAt                                 DateTime?
-  accessTokenHash                                           String?
-  accessTokenCreatedAt                                      DateTime?
-  accessTokenRevokedAt                                      DateTime?
-  lastAccessLinkSentAt                                      DateTime?
-  avatarUrl                                                 String?
-  CenterChangeLog                                           CenterChangeLog[]
-  CenterCheckIn                                             CenterCheckIn?
-  PointEvent                                                PointEvent[]
-  Prediction                                                Prediction[]
-  GarrinchaCenter_User_centerIdToGarrinchaCenter            GarrinchaCenter  @relation("User_centerIdToGarrinchaCenter", fields: [centerId], references: [id])
-  GarrinchaCenter_User_competitionCenterIdToGarrinchaCenter GarrinchaCenter? @relation("User_competitionCenterIdToGarrinchaCenter", fields: [competitionCenterId], references: [id])
-
-  @@index([accessTokenHash], where: raw("(\"accessTokenHash\" IS NOT NULL)"))
-  @@index([centerId])
-  @@index([competitionCenterId])
-  @@index([nationality])
-}
-
-enum MatchStatus {
-  SCHEDULED
-  LIVE
-  FINAL
 }
 
 enum Role {
@@ -184,6 +11,12 @@ enum Role {
   ADMIN
   CENTER_ADMIN
   SUPER_ADMIN
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  FINAL
 }
 
 enum Stage {
@@ -194,4 +27,161 @@ enum Stage {
   SEMI_FINAL
   THIRD_PLACE
   FINAL
+}
+
+model GarrinchaCenter {
+  id              String          @id @default(cuid())
+  name            String          @unique
+  country         String
+  city            String
+  bannerUrl       String?
+  activatedUsers  User[]          @relation("ActivationCenter")
+  competingUsers  User[]          @relation("CompetitionCenter")
+  sessions        CenterSession[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model User {
+  id                          String            @id @default(cuid())
+  email                       String            @unique
+  passwordHash                String?
+  fullName                    String
+  nickname                    String            @unique
+  dateOfBirth                 DateTime?
+  phoneNumber                 String
+  displayName                 String?
+  nationality                 String?
+  role                        Role              @default(USER)
+  centerId                    String
+  center                      GarrinchaCenter   @relation("ActivationCenter", fields: [centerId], references: [id])
+  firstActivatedAt            DateTime?
+  competitionCenterId         String?
+  competitionCenter           GarrinchaCenter?  @relation("CompetitionCenter", fields: [competitionCenterId], references: [id])
+  competitionCenterLockedAt   DateTime?
+  avatarUrl                   String?
+  accessTokenHash             String?
+  accessTokenCreatedAt        DateTime?
+  accessTokenRevokedAt        DateTime?
+  lastAccessLinkSentAt        DateTime?
+  predictions                 Prediction[]
+  pointEvents                 PointEvent[]
+  checkIn                     CenterCheckIn?
+  centerChangeLogs            CenterChangeLog[]
+  createdAt                   DateTime          @default(now())
+  updatedAt                   DateTime          @updatedAt
+
+  @@index([accessTokenHash])
+  @@index([centerId])
+  @@index([competitionCenterId])
+  @@index([nationality])
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  fifaCode  String   @unique
+  flagUrl   String
+  groupName String?
+  homeGames Match[]  @relation("HomeTeam")
+  awayGames Match[]  @relation("AwayTeam")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Match {
+  id                String       @id @default(cuid())
+  fifaMatchNo       Int?         @unique
+  stage             Stage
+  venue             String
+  kickoffAt         DateTime
+  status            MatchStatus  @default(SCHEDULED)
+  homeTeamId        String
+  homeTeam          Team         @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeamId        String
+  awayTeam          Team         @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  homeScore         Int?
+  awayScore         Int?
+  finalizedAt       DateTime?
+  scoreSource       String?
+  externalMatchId   String?
+  externalUpdatedAt DateTime?
+  scoreSyncStatus   String?
+  lastScoreSyncAt   DateTime?
+  predictions       Prediction[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([kickoffAt])
+  @@index([stage])
+  @@index([status])
+}
+
+model Prediction {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchId       String
+  match         Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  homeScore     Int
+  awayScore     Int
+  pointsAwarded Int       @default(0)
+  calculatedAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([userId, matchId])
+  @@index([userId])
+  @@index([matchId])
+}
+
+model PointEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points    Int
+  reason    String
+  awardedBy String?
+  matchId   String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model CenterSession {
+  id        String          @id @default(cuid())
+  centerId  String
+  center    GarrinchaCenter @relation(fields: [centerId], references: [id])
+  code      String          @unique
+  expiresAt DateTime
+  createdBy String
+  createdAt DateTime        @default(now())
+
+  @@index([centerId])
+  @@index([expiresAt])
+}
+
+model CenterCheckIn {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  centerId  String
+  sessionId String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+model CenterChangeLog {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromCenterId String?
+  toCenterId   String
+  changedBy    String
+  changeType   String
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
 }
