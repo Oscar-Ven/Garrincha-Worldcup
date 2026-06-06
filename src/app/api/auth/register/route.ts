@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
         phoneNumber,
         nationality: nationality ?? null,
         centerId: resolvedCenterId,
+        competitionCenterId: resolvedCenterId,
         firstActivatedAt: new Date(),
         passwordHash: null,
         role: Role.USER,

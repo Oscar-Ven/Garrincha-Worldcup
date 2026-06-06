@@ -3,6 +3,7 @@ import {
   canAccessAdmin,
   canAccessSuperAdmin,
   canAwardBonus,
+  canChangeSelfServiceCenter,
   canSavePrediction,
   createLeaderboardRows,
   filterLeaderboardByCenter,
@@ -143,6 +144,123 @@ describe("admin rules", () => {
     expect(canAwardBonus({ session: { userId: "admin-1", role: "ADMIN" }, reason: "Correction" })).toEqual({
       allowed: true,
     });
+  });
+});
+
+describe("bonus award scope — OD-004", () => {
+  it("ADMIN can award bonus to a player at any center", () => {
+    expect(
+      canAwardBonus({
+        session: { userId: "admin-1", role: "ADMIN", centerId: "center-brussels" },
+        reason: "Fair play",
+        targetCompetitionCenterId: "center-ghent",
+      }),
+    ).toEqual({ allowed: true });
+  });
+
+  it("SUPER_ADMIN can award bonus to a player at any center", () => {
+    expect(
+      canAwardBonus({
+        session: { userId: "owner-1", role: "SUPER_ADMIN", centerId: "center-brussels" },
+        reason: "Top performer",
+        targetCompetitionCenterId: "center-antwerp",
+      }),
+    ).toEqual({ allowed: true });
+  });
+
+  it("CENTER_ADMIN can award bonus to a player at their own center", () => {
+    expect(
+      canAwardBonus({
+        session: { userId: "cadmin-1", role: "CENTER_ADMIN", centerId: "center-brussels" },
+        reason: "Best prediction",
+        targetCompetitionCenterId: "center-brussels",
+      }),
+    ).toEqual({ allowed: true });
+  });
+
+  it("CENTER_ADMIN cannot award bonus to a player at a different center", () => {
+    expect(
+      canAwardBonus({
+        session: { userId: "cadmin-1", role: "CENTER_ADMIN", centerId: "center-brussels" },
+        reason: "Best prediction",
+        targetCompetitionCenterId: "center-ghent",
+      }),
+    ).toMatchObject({ allowed: false, status: 403 });
+  });
+
+  it("CENTER_ADMIN with no linked center cannot award any bonus", () => {
+    expect(
+      canAwardBonus({
+        session: { userId: "cadmin-1", role: "CENTER_ADMIN", centerId: null },
+        reason: "Best prediction",
+        targetCompetitionCenterId: "center-brussels",
+      }),
+    ).toMatchObject({ allowed: false, status: 403 });
+  });
+
+  it("USER cannot award bonus points", () => {
+    expect(
+      canAwardBonus({
+        session: { userId: "user-1", role: "USER" },
+        reason: "I want to",
+        targetCompetitionCenterId: "center-brussels",
+      }),
+    ).toMatchObject({ allowed: false, status: 403 });
+  });
+
+  it("bonus audit fields are preserved: reason is still validated regardless of center scope", () => {
+    expect(
+      canAwardBonus({
+        session: { userId: "cadmin-1", role: "CENTER_ADMIN", centerId: "center-brussels" },
+        reason: "  ",
+        targetCompetitionCenterId: "center-brussels",
+      }),
+    ).toMatchObject({ allowed: false, status: 400 });
+  });
+});
+
+describe("competition center self-service change — OD-003", () => {
+  it("allows a player to change center when the lock has not been used", () => {
+    expect(
+      canChangeSelfServiceCenter({
+        user: { competitionCenterId: "center-brussels", competitionCenterLockedAt: null },
+        newCenterId: "center-ghent",
+      }),
+    ).toEqual({ allowed: true });
+  });
+
+  it("allows a newly registered player with no competition center set to choose one", () => {
+    expect(
+      canChangeSelfServiceCenter({
+        user: { competitionCenterId: null, competitionCenterLockedAt: null },
+        newCenterId: "center-ghent",
+      }),
+    ).toEqual({ allowed: true });
+  });
+
+  it("blocks a second self-service change after the lock is set", () => {
+    expect(
+      canChangeSelfServiceCenter({
+        user: { competitionCenterId: "center-brussels", competitionCenterLockedAt: new Date("2026-06-05") },
+        newCenterId: "center-ghent",
+      }),
+    ).toMatchObject({ allowed: false, status: 403 });
+  });
+
+  it("blocks changing to the same center the player is already in", () => {
+    expect(
+      canChangeSelfServiceCenter({
+        user: { competitionCenterId: "center-brussels", competitionCenterLockedAt: null },
+        newCenterId: "center-brussels",
+      }),
+    ).toMatchObject({ allowed: false, status: 400 });
+  });
+
+  it("changing center does not affect the original activation center logic (independent fields)", () => {
+    const user = { competitionCenterId: "center-brussels", competitionCenterLockedAt: null };
+    const result = canChangeSelfServiceCenter({ user, newCenterId: "center-ghent" });
+    expect(result).toEqual({ allowed: true });
+    // centerId (activation) is a separate field — this function only checks competitionCenterId
   });
 });
 
