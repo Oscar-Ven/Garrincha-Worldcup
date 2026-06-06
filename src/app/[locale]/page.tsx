@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import {
   ArrowRight,
@@ -112,7 +113,7 @@ export default async function LandingPage({
           {/* Belgium vs Morocco featured matchup */}
           <div className="flex items-center gap-4 mb-8 px-5 py-3 border border-zinc-800 bg-zinc-900/60 backdrop-blur-sm">
             <div className="flex items-center gap-2.5">
-              <span className="text-3xl leading-none">🇧🇪</span>
+              <Image src="https://flagcdn.com/w40/be.png" alt="Belgium" width={28} height={20} className="rounded-sm shrink-0" />
               <span className="text-white font-black uppercase tracking-tight text-sm hidden sm:block">Belgium</span>
             </div>
             <div className="flex flex-col items-center gap-0.5">
@@ -122,7 +123,7 @@ export default async function LandingPage({
             </div>
             <div className="flex items-center gap-2.5">
               <span className="text-white font-black uppercase tracking-tight text-sm hidden sm:block">Morocco</span>
-              <span className="text-3xl leading-none">🇲🇦</span>
+              <Image src="https://flagcdn.com/w40/ma.png" alt="Morocco" width={28} height={20} className="rounded-sm shrink-0" />
             </div>
           </div>
 
@@ -260,8 +261,8 @@ export default async function LandingPage({
               </div>
               <div className="flex items-center justify-between gap-4 mb-10">
                 <div className="flex-1 flex flex-col items-center">
-                  <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mb-3 text-2xl border-2 border-zinc-700">
-                    🇧🇪
+                  <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mb-3 border-2 border-zinc-700 overflow-hidden">
+                    <Image src="https://flagcdn.com/w80/be.png" alt="Belgium" width={64} height={64} className="object-cover w-full h-full" />
                   </div>
                   <span className="text-white font-bold uppercase tracking-wide text-sm">
                     Belgium
@@ -277,8 +278,8 @@ export default async function LandingPage({
                   </div>
                 </div>
                 <div className="flex-1 flex flex-col items-center">
-                  <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mb-3 text-2xl border-2 border-zinc-700">
-                    🇲🇦
+                  <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mb-3 border-2 border-zinc-700 overflow-hidden">
+                    <Image src="https://flagcdn.com/w80/ma.png" alt="Morocco" width={64} height={64} className="object-cover w-full h-full" />
                   </div>
                   <span className="text-white font-bold uppercase tracking-wide text-sm">
                     Morocco
