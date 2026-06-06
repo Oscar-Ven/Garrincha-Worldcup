@@ -5,9 +5,9 @@ import AdminLayoutClientShell from "@/components/admin/AdminLayoutClientShell";
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
 
-  // If no user is logged in, redirect to login
+  // No user — proxy already redirected protected routes; this only fires for /admin/login itself
   if (!user) {
-    redirect("/admin/login");
+    return <>{children}</>;
   }
 
   // Ensure role is appropriate (Owner: SUPER_ADMIN/ADMIN, Manager: CENTER_ADMIN)
