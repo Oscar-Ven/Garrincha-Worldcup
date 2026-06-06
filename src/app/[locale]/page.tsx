@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { t, isLocale, type Locale } from "@/lib/translations";
 import FAQAccordion from "@/components/public/FAQAccordion";
+import CountdownTimer from "@/components/public/CountdownTimer";
 import { prisma } from "@/lib/prisma";
 
 async function getTopPlayers() {
@@ -153,11 +154,8 @@ export default async function LandingPage({
         >
           Season 2026 // Belgium
         </div>
-        <div
-          className="absolute right-6 bottom-12 hidden lg:block text-zinc-600 font-mono text-xs uppercase tracking-widest"
-          style={{ writingMode: "vertical-rl" }}
-        >
-          001 — Campaign Activation
+        <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:block">
+          <CountdownTimer />
         </div>
       </section>
 
