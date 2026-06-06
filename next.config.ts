@@ -32,6 +32,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   experimental: {},
   allowedDevOrigins: ["192.168.129.30"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "media.api-sports.io" },
+    ],
+  },
   async headers() {
     return [
       {
