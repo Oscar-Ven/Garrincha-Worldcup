@@ -1,3 +1,1 @@
-﻿export default function DashboardLoading() {
-  return <div>Loading dashboard…</div>;
-}
+﻿export default function Loading() { return null; }

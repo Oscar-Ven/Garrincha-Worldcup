@@ -1,3 +1,1 @@
-﻿export default function LeaderboardsLoading() {
-  return <div>Loading leaderboard…</div>;
-}
+﻿export default function Loading() { return null; }

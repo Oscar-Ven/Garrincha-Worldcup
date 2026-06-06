@@ -1,3 +1,1 @@
-﻿export default function MatchesLoading() {
-  return <div>Loading matches…</div>;
-}
+﻿export default function Loading() { return null; }
