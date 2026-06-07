@@ -81,6 +81,7 @@ export default function PlayerShell({ user, labels, children }: PlayerShellProps
                   <Link
                     key={link.href}
                     href={link.href}
+                    aria-current={active ? "page" : undefined}
                     className={`flex min-w-0 items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
                       active
                         ? "bg-lime-400 text-zinc-950"
@@ -143,6 +144,7 @@ export default function PlayerShell({ user, labels, children }: PlayerShellProps
                       key={link.href}
                       href={link.href}
                       onClick={() => setMobileOpen(false)}
+                      aria-current={active ? "page" : undefined}
                       className={`flex min-w-0 items-center gap-2 rounded-2xl px-3 py-3 text-sm font-medium ${
                         active ? "bg-lime-400 text-zinc-950" : "bg-white/5 text-zinc-300"
                       }`}
@@ -174,6 +176,7 @@ export default function PlayerShell({ user, labels, children }: PlayerShellProps
                   <Link
                     key={link.href}
                     href={link.href}
+                    aria-current={active ? "page" : undefined}
                     className={`flex min-w-0 flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-medium ${
                       active ? "bg-lime-400/15 text-lime-300" : "text-zinc-500"
                     }`}

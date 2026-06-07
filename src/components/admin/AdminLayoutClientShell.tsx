@@ -206,7 +206,7 @@ export default function AdminLayoutClientShell({ user, children }: Props) {
 
         {/* Mobile Navigation Drawer */}
         {mobileOpen && (
-          <div className="lg:hidden absolute top-16 left-0 w-full bg-zinc-900 border-b border-zinc-840 shadow-2xl z-30 flex flex-col p-6 animate-in slide-in-from-top-1 select-none">
+          <div className="lg:hidden absolute top-16 left-0 w-full bg-zinc-900 border-b border-zinc-800 shadow-2xl z-30 flex flex-col p-6 animate-in slide-in-from-top-1 select-none">
             <div className="flex items-center gap-2 mb-4 px-2">
               <span className="text-[10px] font-black uppercase tracking-wider text-lime-400 bg-lime-400/10 px-2 py-1 border border-lime-400/25">
                 {isOwner ? "Owner Mode" : `Manager: ${user.centerName}`}
@@ -233,7 +233,7 @@ export default function AdminLayoutClientShell({ user, children }: Props) {
                 );
               })}
             </nav>
-            <div className="border-t border-zinc-805 pt-4 flex items-center justify-between">
+            <div className="border-t border-zinc-800 pt-4 flex items-center justify-between">
               <div className="min-w-0">
                 <div className="text-xs font-black text-white truncate uppercase">
                   {user.fullName}
@@ -244,7 +244,7 @@ export default function AdminLayoutClientShell({ user, children }: Props) {
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-2 border border-zinc-750 bg-zinc-950 text-zinc-400 hover:text-white text-[11px] font-bold uppercase tracking-wider"
+                className="flex items-center gap-1.5 px-3 py-2 border border-zinc-700 bg-zinc-950 text-zinc-400 hover:text-white text-[11px] font-bold uppercase tracking-wider"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Logout</span>

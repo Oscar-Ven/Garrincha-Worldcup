@@ -260,7 +260,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
               <div
                 key={match.id}
                 className={`border bg-zinc-900/10 p-5 flex flex-col justify-between hover:border-zinc-700/80 transition-all ${
-                  isCompleted ? "border-zinc-850" : "border-zinc-800"
+                  isCompleted ? "border-zinc-800" : "border-zinc-800"
                 }`}
               >
                 {/* Upper context */}
@@ -293,7 +293,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                     {isCompleted ? (
                       <>
                         <span className="text-white font-black">{match.homeScore}</span>
-                        <span className="text-zinc-650">:</span>
+                        <span className="text-zinc-600">:</span>
                         <span className="text-white font-black">{match.awayScore}</span>
                       </>
                     ) : (
@@ -313,11 +313,11 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                 <div className="mt-4 flex items-center justify-between gap-4 pt-1">
                   <div className="text-[10px] text-zinc-500 flex flex-col gap-0.5">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-zinc-650" />
+                      <Clock className="w-3 h-3 text-zinc-600" />
                       {kickoffDate.toLocaleString([], { dateStyle: "short", timeStyle: "short" })}
                     </span>
                     <span className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-zinc-650" />
+                      <MapPin className="w-3 h-3 text-zinc-600" />
                       {match.venue}
                     </span>
                   </div>
@@ -325,7 +325,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                   {isOwner && (
                     <button
                       onClick={() => openScoreDialog(match)}
-                      className="px-3 py-1.5 border border-zinc-755 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white font-bold uppercase tracking-wider text-[10px] inline-flex items-center gap-1.5"
+                      className="px-3 py-1.5 border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white font-bold uppercase tracking-wider text-[10px] inline-flex items-center gap-1.5"
                     >
                       <Trophy className="w-3 h-3 text-lime-400" />
                       <span>{isCompleted ? "Amend Score" : "Key Score"}</span>
@@ -354,7 +354,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
               Key Score Detail // Match #{selectedMatch.fifaMatchNo}
             </h2>
 
-            <div className="p-3 bg-zinc-950 text-center text-xs border border-zinc-805 uppercase font-bold text-zinc-400">
+            <div className="p-3 bg-zinc-950 text-center text-xs border border-zinc-800 uppercase font-bold text-zinc-400">
               {selectedMatch.stage}
             </div>
 
@@ -373,7 +373,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                     placeholder="0"
                     value={scores.home}
                     onChange={(e) => setScores({ ...scores, home: e.target.value })}
-                    className="w-16 h-16 bg-zinc-950 border-2 border-zinc-805 hover:border-zinc-700 focus:outline-none focus:border-lime-400 text-center text-3xl font-black text-white"
+                    className="w-16 h-16 bg-zinc-950 border-2 border-zinc-800 hover:border-zinc-700 focus:outline-none focus:border-lime-400 text-center text-3xl font-black text-white"
                   />
                 </div>
 
@@ -392,7 +392,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                     placeholder="0"
                     value={scores.away}
                     onChange={(e) => setScores({ ...scores, away: e.target.value })}
-                    className="w-16 h-16 bg-zinc-950 border-2 border-zinc-850 hover:border-zinc-700 focus:outline-none focus:border-lime-400 text-center text-3xl font-black text-white"
+                    className="w-16 h-16 bg-zinc-950 border-2 border-zinc-800 hover:border-zinc-700 focus:outline-none focus:border-lime-400 text-center text-3xl font-black text-white"
                   />
                 </div>
               </div>
@@ -404,7 +404,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                 </div>
               )}
 
-              <span className="text-[10px] text-zinc-550 leading-relaxed block border-t border-zinc-840 pt-4">
+              <span className="text-[10px] text-zinc-500 leading-relaxed block border-t border-zinc-800 pt-4">
                 Submitting this form immediately updates match coordinates, commits score values, locks edits, and runs point adjustments for all locked predictions.
               </span>
 

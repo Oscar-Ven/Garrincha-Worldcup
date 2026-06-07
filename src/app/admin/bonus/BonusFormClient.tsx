@@ -167,7 +167,7 @@ export default function BonusFormClient({ currentUserRole, centerName, players }
             </div>
           )}
 
-          <div className="border-t border-zinc-805 pt-5">
+          <div className="border-t border-zinc-800 pt-5">
             <button
               type="submit"
               disabled={loading}

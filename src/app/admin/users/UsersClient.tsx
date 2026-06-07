@@ -362,7 +362,7 @@ export default function UsersClient({
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-zinc-805 text-zinc-500 font-bold uppercase tracking-wider bg-zinc-950/25">
+                  <tr className="border-b border-zinc-800 text-zinc-500 font-bold uppercase tracking-wider bg-zinc-950/25">
                     <th className="px-6 py-3">Timestamp</th>
                     <th className="px-6 py-3">Player Account</th>
                     <th className="px-6 py-3">Transition</th>
@@ -431,11 +431,11 @@ export default function UsersClient({
                       {/* Competition site */}
                       <td className="px-6 py-4">
                         {user.role === "USER" ? (
-                          <span className="text-lime-450 uppercase font-black">
+                          <span className="text-lime-400 uppercase font-black">
                             {user.competitionCenterName.replace("GARRINCHA ", "")}
                           </span>
                         ) : (
-                          <span className="text-zinc-650">—</span>
+                          <span className="text-zinc-600">—</span>
                         )}
                       </td>
 
@@ -453,7 +453,7 @@ export default function UsersClient({
                               ? "bg-red-400/10 border border-red-400/20 text-red-400"
                               : user.role === "CENTER_ADMIN"
                                 ? "bg-blue-400/10 border border-blue-400/20 text-blue-400"
-                                : "bg-zinc-400/10 border border-zinc-450 text-zinc-400"
+                                : "bg-zinc-400/10 border border-zinc-500 text-zinc-400"
                           }`}
                         >
                           {user.role === "SUPER_ADMIN" || user.role === "ADMIN"
@@ -663,7 +663,7 @@ export default function UsersClient({
                         type="text"
                         disabled
                         value={selectedUser.competitionCenterName}
-                        className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-850 text-zinc-500 text-xs uppercase"
+                        className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 text-zinc-500 text-xs uppercase"
                       />
                     )}
                     <span className="text-[10px] text-zinc-500 leading-snug mt-1.5 block">
@@ -731,7 +731,7 @@ export default function UsersClient({
                     </select>
                   </div>
 
-                  <div className="border-t border-zinc-805 pt-3">
+                  <div className="border-t border-zinc-800 pt-3">
                     <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-1">
                       Technical Security Role (Internal Mapping)
                     </label>

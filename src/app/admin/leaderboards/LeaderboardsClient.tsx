@@ -91,7 +91,7 @@ export default function LeaderboardsClient({
         {/* Filters dropdown (Only Owner can toggle centers) */}
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="flex flex-col">
-            <span className="text-[9px] font-black uppercase text-zinc-550 mb-1 tracking-wider">
+            <span className="text-[9px] font-black uppercase text-zinc-500 mb-1 tracking-wider">
               Sports Center filter
             </span>
             {isOwner ? (
@@ -108,7 +108,7 @@ export default function LeaderboardsClient({
                 ))}
               </select>
             ) : (
-              <div className="px-3 py-2 bg-zinc-900/60 border border-zinc-805 text-zinc-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 leading-none">
+              <div className="px-3 py-2 bg-zinc-900/60 border border-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 leading-none">
                 <Building className="w-3.5 h-3.5 text-lime-400" />
                 <span>{centers.find((c) => c.id === managerCenterId)?.name.replace("GARRINCHA ", "") ?? "Your Center"}</span>
               </div>
@@ -116,7 +116,7 @@ export default function LeaderboardsClient({
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[9px] font-black uppercase text-zinc-550 mb-1 tracking-wider">
+            <span className="text-[9px] font-black uppercase text-zinc-500 mb-1 tracking-wider">
               Competitor Nationality
             </span>
             <select
@@ -137,7 +137,7 @@ export default function LeaderboardsClient({
 
       {/* Main search and content area */}
       <div className="bg-zinc-900/40 border border-zinc-800 p-6 space-y-4">
-        <div className="flex items-center justify-between gap-4 border-b border-zinc-850 pb-4">
+        <div className="flex items-center justify-between gap-4 border-b border-zinc-800 pb-4">
           <div className="relative w-full max-w-xs">
             <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-zinc-500">
               <Search className="w-4 h-4" />
@@ -147,7 +147,7 @@ export default function LeaderboardsClient({
               placeholder="Search scoreboard..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-805 text-white text-xs placeholder-zinc-650 focus:outline-none focus:border-lime-400 transition-colors"
+              className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 text-white text-xs placeholder-zinc-600 focus:outline-none focus:border-lime-400 transition-colors"
             />
           </div>
           <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider select-none hidden sm:block">
@@ -157,7 +157,7 @@ export default function LeaderboardsClient({
 
         {/* Data box */}
         {filteredRows.length === 0 ? (
-          <div className="text-center py-16 text-zinc-500 border border-dashed border-zinc-850">
+          <div className="text-center py-16 text-zinc-500 border border-dashed border-zinc-800">
             <ShieldAlert className="w-10 h-10 mx-auto mb-2 opacity-30 text-lime-400" />
             <p className="text-xs uppercase font-bold tracking-wider">No matching competitors on the board.</p>
           </div>
@@ -184,18 +184,18 @@ export default function LeaderboardsClient({
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-bold text-white uppercase flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-zinc-650 shrink-0" />
+                        <User className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
                         <span>{row.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center text-zinc-405 font-semibold uppercase">
+                    <td className="px-6 py-4 text-center text-zinc-400 font-semibold uppercase">
                       {row.center.replace("GARRINCHA ", "")}
                     </td>
                     <td className="px-6 py-4 text-center text-zinc-400 font-bold uppercase tracking-wide flex items-center justify-center gap-1">
-                      <Flag className="w-3 h-3 text-zinc-650 shrink-0" />
+                      <Flag className="w-3 h-3 text-zinc-600 shrink-0" />
                       <span>{row.nationality}</span>
                     </td>
-                    <td className="px-6 py-4 text-center font-bold text-zinc-350">
+                    <td className="px-6 py-4 text-center font-bold text-zinc-400">
                       {row.predictionCount}
                     </td>
                     <td className="px-6 py-4 text-right font-black text-lime-400 font-mono text-sm tracking-wider">

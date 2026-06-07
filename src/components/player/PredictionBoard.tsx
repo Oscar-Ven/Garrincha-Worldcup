@@ -146,11 +146,13 @@ export default function PredictionBoard({ locale, matches, mode }: PredictionBoa
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="tablist">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             type="button"
+            role="tab"
+            aria-selected={activeTab === tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`rounded-full px-4 py-2 text-xs font-medium transition-colors ${
               activeTab === tab.key ? "bg-lime-400 text-zinc-950" : "bg-white/5 text-zinc-300"
