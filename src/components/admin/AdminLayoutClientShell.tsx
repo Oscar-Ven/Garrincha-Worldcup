@@ -41,7 +41,6 @@ export default function AdminLayoutClientShell({ user, children }: Props) {
 
   const isOwner = user.role === "SUPER_ADMIN" || user.role === "ADMIN";
 
-  // Build role-aware navigation
   const links = [
     {
       label: "Dashboard",
@@ -114,12 +113,12 @@ export default function AdminLayoutClientShell({ user, children }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex font-sans antialiased">
-      {/* ── Desktop Sidebar ────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex flex-col w-64 bg-zinc-900 border-r border-zinc-800 shrink-0 select-none">
-        {/* Header */}
-        <div className="p-6 border-b border-zinc-800 flex flex-col gap-3">
-          <div className="relative h-7 w-auto">
+    <div className="min-h-screen bg-gray-50 flex font-sans antialiased">
+      {/* ── Desktop Sidebar ──────────────────────────────────────────── */}
+      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200 shrink-0 select-none shadow-sm">
+        {/* Brand strip — dark bg keeps white logo visible */}
+        <div className="bg-gray-900 px-5 py-4 flex items-center gap-3">
+          <div className="relative h-7 w-32 shrink-0">
             <Image
               src="/branding/garrincha-white.png"
               alt="GARRINCHA"
@@ -128,16 +127,21 @@ export default function AdminLayoutClientShell({ user, children }: Props) {
               priority
             />
           </div>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 border border-lime-400/20 bg-lime-400/10 w-fit">
-            <Shield className="w-3 h-3 text-lime-400" />
-            <span className="text-lime-400 font-black uppercase tracking-wider text-[9px]">
-              {isOwner ? "Owner Portal" : "Manager Portal"}
-            </span>
-          </div>
+          <span className="ml-auto text-[10px] font-bold uppercase tracking-widest text-green-400 border border-green-700/60 bg-green-900/40 px-2 py-0.5 whitespace-nowrap shrink-0">
+            Admin
+          </span>
+        </div>
+
+        {/* Role label */}
+        <div className="px-5 py-2.5 border-b border-gray-100 flex items-center gap-2">
+          <Shield className="w-3.5 h-3.5 text-green-600 shrink-0" />
+          <span className="text-xs text-gray-500 font-medium">
+            {isOwner ? "Owner Portal" : "Manager Portal"}
+          </span>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-1">
+        <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
           {visibleLinks.map((link) => {
             const Icon = link.icon;
             const active = pathname === link.href;
@@ -145,74 +149,77 @@ export default function AdminLayoutClientShell({ user, children }: Props) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-sm transition-colors ${
                   active
-                    ? "bg-lime-400 text-zinc-950 shadow-[0_0_15px_rgba(163,230,53,0.15)]"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+                    ? "bg-green-50 text-green-700 font-semibold border-l-2 border-green-600 pl-2.5"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium"
                 }`}
               >
-                <Icon className="w-4 h-4 shrink-0" />
+                <Icon
+                  className={`w-4 h-4 shrink-0 ${active ? "text-green-600" : "text-gray-400"}`}
+                />
                 <span>{link.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Footer/Profile info */}
-        <div className="p-4 border-t border-zinc-800 bg-zinc-950/40">
-          <div className="flex items-start gap-3 mb-4">
-            <div className="w-9 h-9 bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-black text-lime-400 uppercase">
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-200">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold uppercase shrink-0">
               {user.nickname.slice(0, 2)}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-xs font-black text-white truncate uppercase tracking-tight">
-                {user.fullName}
-              </div>
-              <div className="text-[10px] text-zinc-500 truncate mt-0.5 leading-none">
+              <div className="text-sm font-semibold text-gray-900 truncate">{user.fullName}</div>
+              <div className="text-xs text-gray-500 truncate">
                 {isOwner ? "Global Owner" : user.centerName}
               </div>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all text-[11px] font-bold uppercase tracking-widest"
+            className="w-full flex items-center justify-center gap-2 py-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors text-xs font-medium rounded-sm"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out</span>
+            Sign Out
           </button>
         </div>
       </aside>
 
-      {/* ── Mobile Layout Frame ────────────────────────────────────────── */}
+      {/* ── Mobile Layout ─────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="lg:hidden h-16 bg-zinc-900 border-b border-zinc-800 px-6 flex items-center justify-between z-40 select-none">
-          <div className="relative h-6 w-32">
-            <Image
-              src="/branding/garrincha-white.png"
-              alt="GARRINCHA"
-              fill
-              className="object-contain object-left"
-              priority
-            />
+        <header className="lg:hidden h-14 bg-white border-b border-gray-200 px-4 flex items-center justify-between shadow-sm">
+          <div className="bg-gray-900 px-3 py-1.5 flex items-center gap-2">
+            <div className="relative h-5 w-24">
+              <Image
+                src="/branding/garrincha-white.png"
+                alt="GARRINCHA"
+                fill
+                className="object-contain object-left"
+                priority
+              />
+            </div>
           </div>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="p-1.5 border border-zinc-700 bg-zinc-800 text-zinc-200 hover:text-white"
+            className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-sm transition-colors"
             aria-label="Toggle navigation menu"
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </header>
 
-        {/* Mobile Navigation Drawer */}
+        {/* Mobile Drawer */}
         {mobileOpen && (
-          <div className="lg:hidden absolute top-16 left-0 w-full bg-zinc-900 border-b border-zinc-800 shadow-2xl z-30 flex flex-col p-6 animate-in slide-in-from-top-1 select-none">
-            <div className="flex items-center gap-2 mb-4 px-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-lime-400 bg-lime-400/10 px-2 py-1 border border-lime-400/25">
+          <div className="lg:hidden absolute top-14 left-0 w-full bg-white border-b border-gray-200 shadow-lg z-30 flex flex-col p-4 animate-in slide-in-from-top-1 select-none">
+            <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100">
+              <Shield className="w-3.5 h-3.5 text-green-600" />
+              <span className="text-xs font-semibold text-gray-700">
                 {isOwner ? "Owner Mode" : `Manager: ${user.centerName}`}
               </span>
             </div>
-            <nav className="space-y-1 mb-6">
+            <nav className="space-y-0.5 mb-4">
               {visibleLinks.map((link) => {
                 const Icon = link.icon;
                 const active = pathname === link.href;
@@ -221,40 +228,38 @@ export default function AdminLayoutClientShell({ user, children }: Props) {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+                    className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-sm transition-colors ${
                       active
-                        ? "bg-lime-400 text-zinc-950"
-                        : "text-zinc-400 hover:text-white"
+                        ? "bg-green-50 text-green-700 font-semibold"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium"
                     }`}
                   >
-                    <Icon className="w-4 h-4 shrink-0" />
+                    <Icon
+                      className={`w-4 h-4 shrink-0 ${active ? "text-green-600" : "text-gray-400"}`}
+                    />
                     <span>{link.label}</span>
                   </Link>
                 );
               })}
             </nav>
-            <div className="border-t border-zinc-800 pt-4 flex items-center justify-between">
+            <div className="border-t border-gray-100 pt-3 flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <div className="text-xs font-black text-white truncate uppercase">
-                  {user.fullName}
-                </div>
-                <div className="text-[10px] text-zinc-500 truncate mt-0.5">
-                  {user.email}
-                </div>
+                <div className="text-sm font-semibold text-gray-900 truncate">{user.fullName}</div>
+                <div className="text-xs text-gray-500 truncate">{user.email}</div>
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-2 border border-zinc-700 bg-zinc-950 text-zinc-400 hover:text-white text-[11px] font-bold uppercase tracking-wider"
+                className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-xs font-medium rounded-sm whitespace-nowrap"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span>Logout</span>
+                Logout
               </button>
             </div>
           </div>
         )}
 
-        {/* Main Content Pane */}
-        <main className="flex-1 p-6 md:p-10 relative overflow-y-auto max-w-full">
+        {/* Main Content */}
+        <main className="flex-1 p-6 md:p-8 overflow-y-auto max-w-full">
           {children}
         </main>
       </div>

@@ -50,23 +50,19 @@ export default function CheckinClient({
   const router = useRouter();
   const isOwner = currentUserRole === "SUPER_ADMIN" || currentUserRole === "ADMIN";
 
-  // Selected center state
   const [selectedCenterId, setSelectedCenterId] = useState(
     isOwner ? initialCenters[0]?.id ?? "" : adminCenterId
   );
 
   const [activeCode, setActiveCode] = useState(initialActiveCode);
   const [expiresAt, setExpiresAt] = useState(initialExpiresAt);
-
-  // General controls
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [codeLoading, setCodeLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [copyText, setCopyText] = useState("Copy Code");
+  const [copyText, setCopyText] = useState("Copy");
 
-  // Filter checkins lists
   const filteredCheckins = initialCheckins.filter((c) => {
     const term = searchQuery.toLowerCase();
     return (
@@ -76,7 +72,6 @@ export default function CheckinClient({
     );
   });
 
-  // Fetch active code for selected center (especially useful when Owner toggles centers)
   async function fetchActiveCode(centerId: string) {
     if (!centerId) return;
     setCodeLoading(true);
@@ -84,9 +79,7 @@ export default function CheckinClient({
     try {
       const res = await fetch(`/api/admin/checkin-code?centerId=${centerId}`);
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error ?? "Failed to retrieve check-in code.");
-      }
+      if (!res.ok) throw new Error(data.error ?? "Failed to retrieve check-in code.");
       setActiveCode(data.code ?? "");
       setExpiresAt(data.expiresAt ?? "");
     } catch (err) {
@@ -98,17 +91,13 @@ export default function CheckinClient({
     }
   }
 
-  // Effect to load code when owner switches centers
   useEffect(() => {
-    if (isOwner) {
-      fetchActiveCode(selectedCenterId);
-    }
+    if (isOwner) fetchActiveCode(selectedCenterId);
   }, [selectedCenterId]);
 
-  // Handle Code Generation
   async function handleGenerateCode() {
     if (!selectedCenterId) {
-      setError("Please select a physical center first.");
+      setError("Please select a center first.");
       return;
     }
 
@@ -124,13 +113,11 @@ export default function CheckinClient({
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error ?? "Failed to generate security code.");
-      }
+      if (!res.ok) throw new Error(data.error ?? "Failed to generate code.");
 
       setActiveCode(data.code);
       setExpiresAt(data.expiresAt);
-      setSuccess("New 6-digit session check-in code generated!");
+      setSuccess("New check-in code generated.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate code.");
@@ -139,28 +126,23 @@ export default function CheckinClient({
     }
   }
 
-  // Clipboard copy
   function handleCopy() {
     if (!activeCode) return;
     navigator.clipboard.writeText(activeCode);
     setCopyText("Copied!");
-    setTimeout(() => setCopyText("Copy Code"), 2000);
+    setTimeout(() => setCopyText("Copy"), 2000);
   }
 
-  // Quick helper to display countdown or expired notices
   const [timeLeft, setTimeLeft] = useState("");
 
   useEffect(() => {
-    if (!expiresAt) {
-      setTimeLeft("");
-      return;
-    }
+    if (!expiresAt) { setTimeLeft(""); return; }
 
     function updateTimer() {
       const diff = new Date(expiresAt).getTime() - Date.now();
       if (diff <= 0) {
         setTimeLeft("EXPIRED");
-        setActiveCode(""); // Clear code locally if expired
+        setActiveCode("");
         return;
       }
       const minutes = Math.floor(diff / 60000);
@@ -174,36 +156,36 @@ export default function CheckinClient({
   }, [expiresAt]);
 
   return (
-    <div className="space-y-6 select-none font-sans">
-      {/* Page Header */}
+    <div className="space-y-6 font-sans">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-black text-white uppercase tracking-tight flex items-center gap-2">
-          <QrCode className="w-8 h-8 text-lime-400" />
-          Attendance & Check-in Desk
-        </h1>
-        <p className="text-xs text-zinc-400 mt-1">
-          Validate and logs physical attendance, generate dynamic session keys, and monitor Checked-In users.
+        <div className="flex items-center gap-2.5 mb-1">
+          <QrCode className="w-6 h-6 text-green-600" />
+          <h1 className="text-2xl font-bold text-gray-900">Attendance & Check-in</h1>
+        </div>
+        <p className="text-sm text-gray-500">
+          Generate session codes and monitor checked-in players.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Code Console block */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-zinc-900 border border-zinc-800 p-6 space-y-5">
-            <h2 className="text-sm font-black text-white uppercase tracking-wider border-b border-zinc-800 pb-3">
+        {/* Code console */}
+        <div className="lg:col-span-1">
+          <div className="bg-white border border-gray-200 shadow-sm p-6 space-y-5">
+            <h2 className="text-sm font-semibold text-gray-900 border-b border-gray-100 pb-3">
               Session Code Generator
             </h2>
 
-            {/* Center Selection (Only enabled for Owner) */}
+            {/* Center select */}
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-2">
-                Physical Center Assignment
+              <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1.5">
+                Center
               </label>
               <select
                 disabled={!isOwner}
                 value={selectedCenterId}
                 onChange={(e) => setSelectedCenterId(e.target.value)}
-                className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-lime-400 transition-colors disabled:opacity-70 disabled:text-zinc-400"
+                className="w-full px-3 py-2.5 bg-white border border-gray-300 text-gray-900 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors disabled:bg-gray-50 disabled:text-gray-500"
               >
                 {!isOwner && (
                   <option value={adminCenterId}>
@@ -219,146 +201,131 @@ export default function CheckinClient({
               </select>
             </div>
 
-            {/* Big chunky display code */}
-            <div className="bg-zinc-950 border border-zinc-800 p-6 flex flex-col items-center justify-center relative min-h-44">
+            {/* Code display */}
+            <div className="border border-gray-200 bg-gray-50 flex flex-col items-center justify-center py-8 px-4 min-h-36">
               {codeLoading ? (
-                <Loader2 className="w-8 h-8 text-lime-400 animate-spin" />
+                <Loader2 className="w-7 h-7 text-green-600 animate-spin" />
               ) : activeCode && timeLeft !== "EXPIRED" ? (
-                <div className="text-center space-y-3">
-                  <span className="font-mono text-4xl sm:text-5xl font-black text-white tracking-widest block uppercase">
+                <div className="text-center space-y-2">
+                  <span className="font-mono text-4xl font-black text-gray-900 tracking-widest block">
                     {activeCode}
                   </span>
-                  <span className="text-[10px] font-semibold text-lime-400 uppercase tracking-wider block bg-lime-400/5 px-2 py-0.5 border border-lime-400/20">
+                  <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 block">
                     {timeLeft}
                   </span>
                 </div>
               ) : (
-                <div className="text-center text-zinc-600 py-4 max-w-40">
-                  <AlertCircle className="w-8 h-8 mx-auto mb-2 text-zinc-700" />
-                  <p className="text-[10px] font-bold uppercase">No active check-in code.</p>
+                <div className="text-center text-gray-400 py-2">
+                  <AlertCircle className="w-7 h-7 mx-auto mb-2 text-gray-300" />
+                  <p className="text-xs font-medium">No active code</p>
                 </div>
               )}
             </div>
 
-            {/* Error notifications */}
+            {/* Alerts */}
             {error && (
-              <div role="alert" className="flex items-start gap-2.5 p-2 bg-red-900/10 border border-red-900/30 text-red-400 text-xs">
+              <div role="alert" className="flex items-start gap-2.5 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-sm">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
-
-            {/* Success notifications */}
             {success && (
-              <div className="flex items-center gap-2.5 p-2 bg-lime-400/10 border border-lime-400/30 text-lime-400 text-xs">
+              <div className="flex items-center gap-2.5 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-sm">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>{success}</span>
               </div>
             )}
 
-            {/* Trigger buttons */}
-            <div className="flex flex-col gap-2 pt-2">
+            {/* Buttons */}
+            <div className="flex flex-col gap-2">
               <button
                 onClick={handleGenerateCode}
                 disabled={loading}
-                className="w-full py-3 bg-lime-400 hover:bg-lime-300 disabled:bg-zinc-800 disabled:text-zinc-500 font-bold uppercase tracking-wider text-xs text-zinc-950 transition-colors flex items-center justify-center gap-1.5"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm transition-colors"
               >
                 {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <RefreshCw className="w-4 h-4 shrink-0" />
+                  <RefreshCw className="w-4 h-4" />
                 )}
-                <span>Generate New Code</span>
+                Generate New Code
               </button>
 
               {activeCode && timeLeft !== "EXPIRED" && (
                 <button
                   onClick={handleCopy}
-                  className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-800 border border-zinc-700 font-bold uppercase tracking-wider text-[11px] text-white transition-colors flex items-center justify-center gap-1.5"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium text-sm transition-colors"
                 >
                   <Copy className="w-3.5 h-3.5" />
-                  <span>{copyText}</span>
+                  {copyText}
                 </button>
               )}
             </div>
           </div>
         </div>
 
-        {/* Checked-In Users Listing block */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="bg-zinc-900/40 border border-zinc-800 p-6 flex flex-col justify-between h-full min-h-120">
-            <div className="space-y-4">
-              {/* Internal header filtering */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
-                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-lime-400" />
-                  Checked-In Competing Players ({initialCheckins.length})
-                </h3>
+        {/* Checked-in users */}
+        <div className="lg:col-span-2">
+          <div className="bg-white border border-gray-200 shadow-sm p-6 flex flex-col h-full min-h-96">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-4 mb-4">
+              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-green-600" />
+                Checked-In Players ({initialCheckins.length})
+              </h3>
 
-                <div className="relative w-full max-w-xs">
-                  <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-zinc-500">
-                    <Search className="w-4.5 h-4.5" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search checked-in..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 text-white text-xs placeholder-zinc-600 focus:outline-none focus:border-lime-400 transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* Data list view */}
-              <div className="overflow-y-auto max-h-80 divide-y divide-zinc-900 pr-1">
-                {filteredCheckins.length === 0 ? (
-                  <div className="text-center py-16 text-zinc-500">
-                    <UserCheck className="w-8 h-8 mx-auto mb-2 opacity-20 text-lime-400" />
-                    <p className="text-[10px] uppercase font-bold">No physical check-ins registered.</p>
-                  </div>
-                ) : (
-                  filteredCheckins.map((item) => {
-                    const checkinTime = new Date(item.createdAt);
-
-                    return (
-                      <div
-                        key={item.id}
-                        className="py-3 flex items-center justify-between gap-4"
-                      >
-                        <div>
-                          <div className="font-bold text-white text-xs flex items-center gap-2">
-                            <span>{item.fullName}</span>
-                            <span className="text-[10px] text-zinc-500 font-normal">
-                              (@{item.nickname})
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-zinc-500 block">{item.email}</span>
-                        </div>
-
-                        <div className="text-right text-[10px] text-zinc-400 flex flex-col items-end gap-0.5">
-                          <span className="flex items-center gap-1 font-semibold text-lime-400/90">
-                            <Clock className="w-3 h-3 text-lime-400" />
-                            {checkinTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </span>
-                          <span className="text-zinc-500 text-[9px]">
-                            {checkinTime.toLocaleDateString([], { dateStyle: "short" })}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+              <div className="relative w-full max-w-xs">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search checked-in…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-gray-300 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
+                />
               </div>
             </div>
 
-            <div className="border-t border-zinc-800 pt-4 flex justify-between items-center text-[10px] text-zinc-500">
-              <span>* Valid check-ins automatically credit competitors with +5 verification attendance bonus points.</span>
+            <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
+              {filteredCheckins.length === 0 ? (
+                <div className="text-center py-16 text-gray-400">
+                  <UserCheck className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm font-medium">No physical check-ins registered.</p>
+                </div>
+              ) : (
+                filteredCheckins.map((item) => {
+                  const checkinTime = new Date(item.createdAt);
+                  return (
+                    <div key={item.id} className="py-3 flex items-center justify-between gap-4">
+                      <div>
+                        <div className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                          <span>{item.fullName}</span>
+                          <span className="text-xs text-gray-400">@{item.nickname}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">{item.email}</span>
+                      </div>
+                      <div className="text-right text-xs text-gray-500 flex flex-col items-end gap-0.5 shrink-0">
+                        <span className="flex items-center gap-1 font-medium text-green-700">
+                          <Clock className="w-3 h-3" />
+                          {checkinTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                        <span className="text-gray-400">
+                          {checkinTime.toLocaleDateString([], { dateStyle: "short" })}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="border-t border-gray-100 pt-4 mt-4 flex justify-between items-center text-xs text-gray-500">
+              <span>Check-ins credit players +5 attendance bonus points.</span>
               <button
                 onClick={() => window.print()}
-                className="flex items-center gap-1 hover:text-white px-2 py-1 border border-zinc-800 hover:bg-zinc-800"
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
               >
-                <Printer className="w-3 h-3 text-lime-400" />
-                <span>Print Log</span>
+                <Printer className="w-3.5 h-3.5" />
+                Print log
               </button>
             </div>
           </div>

@@ -7,21 +7,21 @@ export default function AdminErrorPage({
   reset: () => void;
 }) {
   return (
-    <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-8 text-center">
-      <div className="text-red-400 text-xs font-bold uppercase tracking-[0.2em] mb-3">
+    <div className="border border-red-200 bg-red-50 p-8 text-center max-w-lg mx-auto">
+      <div className="text-red-600 text-xs font-bold uppercase tracking-widest mb-3">
         Error
       </div>
-      <h2 className="text-lg font-black text-white uppercase tracking-tight mb-2">
-        Admin page error
+      <h2 className="text-lg font-bold text-gray-900 mb-2">
+        This page failed to load
       </h2>
-      <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-        This section failed to load. Please try again.
+      <p className="text-gray-600 text-sm leading-relaxed mb-6">
+        Something went wrong. Please try again or refresh the page.
       </p>
       <button
         onClick={reset}
-        className="px-5 py-2.5 bg-red-500 text-white font-bold uppercase tracking-wider text-xs hover:bg-red-400 transition-colors"
+        className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition-colors"
       >
-        Retry
+        Try again
       </button>
     </div>
   );
