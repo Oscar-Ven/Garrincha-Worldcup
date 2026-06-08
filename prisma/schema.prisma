@@ -108,6 +108,8 @@ model Match {
   externalUpdatedAt DateTime?
   scoreSyncStatus   String?
   lastScoreSyncAt   DateTime?
+  pendingHomeScore  Int?
+  pendingAwayScore  Int?
   predictions       Prediction[]
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt

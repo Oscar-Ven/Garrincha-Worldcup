@@ -35,6 +35,8 @@ interface SerializedMatch {
   scoreSource: string | null;
   scoreSyncStatus: string | null;
   lastScoreSyncAt: string | null;
+  pendingHomeScore: number | null;
+  pendingAwayScore: number | null;
 }
 
 interface Props {
@@ -148,6 +150,33 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
       setError(err instanceof Error ? err.message : "Sync failure.");
     } finally {
       setSyncLoading(false);
+    }
+  }
+
+  async function handleApproveScore(match: SerializedMatch) {
+    if (
+      !confirm(
+        `Approve ${match.pendingHomeScore}–${match.pendingAwayScore} for ${match.homeTeamName} vs ${match.awayTeamName}? This will finalize the match and award points.`,
+      )
+    )
+      return;
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const res = await fetch(`/api/admin/matches/${match.id}/approve-score`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ?? "Failed to approve score.");
+      }
+      setSuccess(`Match #${match.fifaMatchNo} approved (${match.pendingHomeScore}–${match.pendingAwayScore}). Points awarded.`);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to approve score.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -338,13 +367,27 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                   </div>
 
                   {isOwner && (
-                    <button
-                      onClick={() => openScoreDialog(match)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium text-xs transition-colors whitespace-nowrap shrink-0"
-                    >
-                      <Trophy className="w-3.5 h-3.5 text-green-600" />
-                      {isCompleted ? "Edit score" : "Enter score"}
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {match.scoreSyncStatus === "pending_review" &&
+                        match.pendingHomeScore !== null &&
+                        match.pendingAwayScore !== null && (
+                          <button
+                            onClick={() => handleApproveScore(match)}
+                            disabled={loading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-300 hover:bg-amber-100 text-amber-800 font-semibold text-xs transition-colors whitespace-nowrap disabled:opacity-50"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            Approve {match.pendingHomeScore}–{match.pendingAwayScore}
+                          </button>
+                        )}
+                      <button
+                        onClick={() => openScoreDialog(match)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium text-xs transition-colors whitespace-nowrap"
+                      >
+                        <Trophy className="w-3.5 h-3.5 text-green-600" />
+                        {isCompleted ? "Edit score" : "Enter score"}
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

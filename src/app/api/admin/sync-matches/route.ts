@@ -158,7 +158,13 @@ async function runSync(): Promise<NextResponse> {
     if (plan.requiresAdminConfirmation) {
       await prisma.match.update({
         where: { id: dbMatch.id },
-        data: { scoreSyncStatus: "pending_review", externalUpdatedAt: now, lastScoreSyncAt: now },
+        data: {
+            scoreSyncStatus: "pending_review",
+            pendingHomeScore: fixture.finalScore.homeScore,
+            pendingAwayScore: fixture.finalScore.awayScore,
+            externalUpdatedAt: now,
+            lastScoreSyncAt: now,
+          },
       });
       report.pending_review++;
       report.warnings.push(

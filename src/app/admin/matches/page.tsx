@@ -46,6 +46,8 @@ export default async function MatchesPage() {
     scoreSource: m.scoreSource ?? null,
     scoreSyncStatus: m.scoreSyncStatus ?? null,
     lastScoreSyncAt: m.lastScoreSyncAt ? m.lastScoreSyncAt.toISOString() : null,
+    pendingHomeScore: m.pendingHomeScore ?? null,
+    pendingAwayScore: m.pendingAwayScore ?? null,
   }));
 
   return (
