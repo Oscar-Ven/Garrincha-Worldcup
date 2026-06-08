@@ -110,7 +110,7 @@ export async function getLeaderboard(
       COALESCE(p.exact_cnt, 0) DESC,
       COALESCE(p.correct_cnt, 0) DESC,
       u."createdAt" ASC
-    LIMIT ${limit}
+    LIMIT ${Math.min(1000, Math.max(1, limit))}
   `;
 
   return rows.map((r) => ({

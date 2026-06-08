@@ -26,10 +26,12 @@ export function calculatePredictionPoints(prediction: Score, finalScore: Score):
   return 0;
 }
 
+const PREDICTION_LOCK_WINDOW_MS = 5 * 60 * 1000;
+
 export function getPredictionLockAt(kickoffAt: Date): Date {
-  return new Date(kickoffAt.getTime() - 5 * 60 * 1000);
+  return new Date(kickoffAt.getTime() - PREDICTION_LOCK_WINDOW_MS);
 }
 
 export function isPredictionLocked(kickoffAt: Date, now = new Date()) {
-  return now >= new Date(kickoffAt.getTime() - 5 * 60 * 1000);
+  return now >= new Date(kickoffAt.getTime() - PREDICTION_LOCK_WINDOW_MS);
 }
