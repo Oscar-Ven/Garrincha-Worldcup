@@ -46,21 +46,45 @@ describe("match data workflow", () => {
     });
   });
 
-  it("requires admin confirmation before final scores recalculate points", () => {
+  it("auto-applies a clean final score without requiring admin confirmation", () => {
     const plan = createMatchDataWorkflowPlan({
       current,
       incoming: {
         fifaMatchNo: 1,
         status: "FINISHED",
         finalScore: { homeScore: 2, awayScore: 1 },
-        provider: "football-data.org",
+        provider: "api-football",
       },
       now: new Date("2026-06-11T22:00:00.000Z"),
     });
 
     expect(plan.canStoreFinalScoreDraft).toBe(true);
-    expect(plan.requiresAdminConfirmation).toBe(true);
+    expect(plan.requiresAdminConfirmation).toBe(false);
     expect(plan.shouldRecalculatePoints).toBe(false);
+  });
+
+  it("requires admin confirmation when the stored match is already FINAL with a different score", () => {
+    const alreadyFinal: StoredMatchSnapshot = {
+      ...current,
+      status: "FINAL",
+      homeScore: 1,
+      awayScore: 0,
+    };
+    const plan = createMatchDataWorkflowPlan({
+      current: alreadyFinal,
+      incoming: {
+        fifaMatchNo: 1,
+        status: "FINISHED",
+        finalScore: { homeScore: 2, awayScore: 1 },
+        provider: "api-football",
+      },
+      now: new Date("2026-06-11T22:00:00.000Z"),
+    });
+
+    expect(plan.requiresAdminConfirmation).toBe(true);
+    expect(plan.warnings).toContain(
+      "Stored match is already final; provider score changes need admin review before recalculation.",
+    );
   });
 
   it("flags kickoff changes after predictions are locked", () => {

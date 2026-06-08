@@ -43,6 +43,7 @@ export async function POST(
           status: MatchStatus.FINAL,
           finalizedAt: now,
           scoreSource: "manual",
+          scoreSyncStatus: null,
         },
       });
 

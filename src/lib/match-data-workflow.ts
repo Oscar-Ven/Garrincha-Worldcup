@@ -126,10 +126,9 @@ export function createMatchDataWorkflowPlan({
     canMarkLive: incoming.status === "LIVE" && !finalized,
     canStoreFinalScoreDraft: incomingHasFinalScore,
     requiresAdminConfirmation:
-      incomingHasFinalScore ||
+      warnings.length > 0 ||
       incoming.status === "POSTPONED" ||
-      incoming.status === "CANCELLED" ||
-      warnings.length > 0,
+      incoming.status === "CANCELLED",
     shouldRecalculatePoints: false,
     warnings,
   };
