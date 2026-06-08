@@ -16,28 +16,20 @@ export default async function AuditViewPage() {
     redirect("/admin");
   }
 
-  // Fetch Centers to map logs names correctly
   const centers = await prisma.garrinchaCenter.findMany({
     select: { id: true, name: true },
   });
 
-  // Query center transition change logs
   const [changeLogs, pointLogs] = await Promise.all([
     prisma.centerChangeLog.findMany({
       take: 50,
       orderBy: { createdAt: "desc" },
       include: {
-        user: {
-          select: {
-            fullName: true,
-            nickname: true,
-            email: true,
-          },
-        },
+        user: { select: { fullName: true, nickname: true, email: true } },
       },
     }),
     prisma.pointEvent.findMany({
-      where: { matchId: null }, // matchId == null implies manual bonus awards!
+      where: { matchId: null },
       take: 50,
       orderBy: { createdAt: "desc" },
       include: {
@@ -53,7 +45,6 @@ export default async function AuditViewPage() {
     }),
   ]);
 
-  // Map to unified display rows
   const serializedChangeLogs = changeLogs.map((log) => ({
     id: log.id,
     timestamp: log.createdAt.toISOString(),
@@ -73,61 +64,66 @@ export default async function AuditViewPage() {
     playerEmail: log.user?.email ?? "",
     points: log.points,
     reason: log.reason,
-    actor: log.awardedBy ?? "System calculations",
-    centerName: log.user?.competitionCenter?.name.replace("GARRINCHA ", "") ?? "No registered center",
+    actor: log.awardedBy ?? "System",
+    centerName: log.user?.competitionCenter?.name.replace("GARRINCHA ", "") ?? "—",
   }));
 
+  const thCls = "px-6 py-3 text-gray-500 text-xs font-semibold uppercase tracking-wider";
+  const trCls = "border-b border-gray-100 hover:bg-gray-50 transition-colors";
+
   return (
-    <div className="space-y-8 select-none font-sans">
-      {/* Page Title */}
+    <div className="space-y-8 font-sans">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-black text-white uppercase tracking-tight flex items-center gap-2">
-          <History className="w-8 h-8 text-lime-400" />
-          Audit Ledger Trails
-        </h1>
-        <p className="text-xs text-zinc-400 mt-1">
-          Immutable registers tracking manual corrections, sports center relocations, and manual point creations inside the World Cup console.
+        <div className="flex items-center gap-2.5 mb-1">
+          <History className="w-6 h-6 text-green-600" />
+          <h1 className="text-2xl font-bold text-gray-900">Audit Ledger</h1>
+        </div>
+        <p className="text-sm text-gray-500">
+          Immutable records of center relocations and manual bonus point awards.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
-        {/* Row 1: Registry Corrections Log */}
-        <div className="border border-zinc-800 bg-zinc-900/10">
-          <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-900/30 flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white">
-            <ArrowLeftRight className="w-4 h-4 text-lime-400" />
-            <span>Center Relocation Corrections Ledger ({serializedChangeLogs.length})</span>
+      <div className="space-y-8">
+        {/* Center relocation log */}
+        <div className="bg-white border border-gray-200 shadow-sm">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+            <ArrowLeftRight className="w-4 h-4 text-green-600" />
+            <h2 className="text-sm font-semibold text-gray-900">
+              Center Relocation Log ({serializedChangeLogs.length})
+            </h2>
           </div>
 
           {serializedChangeLogs.length === 0 ? (
-            <p className="text-zinc-500 text-center py-12 text-xs">No logged registry changes recorded.</p>
+            <p className="text-gray-400 text-center py-12 text-sm">No logged registry changes recorded.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-800 text-zinc-500 font-bold uppercase tracking-wider bg-zinc-950/20">
-                    <th className="px-6 py-3">Timestamp</th>
-                    <th className="px-6 py-3">Player Account</th>
-                    <th className="px-6 py-3 text-center">Center Shift Transition</th>
-                    <th className="px-6 py-3 text-right">Authorized Executor</th>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className={thCls}>Timestamp</th>
+                    <th className={thCls}>Player</th>
+                    <th className={`${thCls} text-center`}>Center Transition</th>
+                    <th className={`${thCls} text-right`}>Authorized By</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-900">
+                <tbody>
                   {serializedChangeLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-zinc-900/10 transition-colors">
-                      <td className="px-6 py-4 text-zinc-500 font-mono text-[10px] whitespace-nowrap">
-                        <Clock className="w-3 h-3 inline mr-1 text-zinc-600" />
+                    <tr key={log.id} className={trCls}>
+                      <td className="px-6 py-4 text-gray-500 font-mono text-xs whitespace-nowrap">
+                        <Clock className="w-3 h-3 inline mr-1 text-gray-400" />
                         {new Date(log.timestamp).toLocaleString()}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-bold text-white uppercase">{log.playerName}</div>
-                        <div className="text-[10px] text-zinc-500 font-mono">@{log.playerNick} · {log.playerEmail}</div>
+                        <div className="font-semibold text-gray-900">{log.playerName}</div>
+                        <div className="text-xs text-gray-500 font-mono">@{log.playerNick} · {log.playerEmail}</div>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="text-zinc-400 uppercase font-semibold">{log.fromCenter}</span>
-                        <span className="mx-2 text-lime-400 font-black">→</span>
-                        <span className="text-lime-400 uppercase font-extrabold">{log.toCenter}</span>
+                        <span className="text-gray-600 font-medium">{log.fromCenter}</span>
+                        <span className="mx-2 text-green-600 font-bold">→</span>
+                        <span className="text-green-700 font-semibold">{log.toCenter}</span>
                       </td>
-                      <td className="px-6 py-4 text-right font-mono text-zinc-400 text-[11px] whitespace-nowrap">
+                      <td className="px-6 py-4 text-right font-mono text-gray-500 text-xs whitespace-nowrap">
                         {log.actor}
                       </td>
                     </tr>
@@ -138,49 +134,51 @@ export default async function AuditViewPage() {
           )}
         </div>
 
-        {/* Row 2: PointEvent Manual Ledger */}
-        <div className="border border-zinc-800 bg-zinc-900/10">
-          <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-900/30 flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white">
-            <Coins className="w-4 h-4 text-lime-400" />
-            <span>Manual Bonus Point Logs Ledger ({serializedPointLogs.length})</span>
+        {/* Bonus points log */}
+        <div className="bg-white border border-gray-200 shadow-sm">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+            <Coins className="w-4 h-4 text-green-600" />
+            <h2 className="text-sm font-semibold text-gray-900">
+              Manual Bonus Point Log ({serializedPointLogs.length})
+            </h2>
           </div>
 
           {serializedPointLogs.length === 0 ? (
-            <p className="text-zinc-500 text-center py-12 text-xs">No manual bonus points logged.</p>
+            <p className="text-gray-400 text-center py-12 text-sm">No manual bonus points logged.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-800 text-zinc-500 font-bold uppercase tracking-wider bg-zinc-950/20">
-                    <th className="px-6 py-3">Timestamp</th>
-                    <th className="px-6 py-3">Recipient Player</th>
-                    <th className="px-6 py-3 text-center">Assigned Sports Center</th>
-                    <th className="px-6 py-3 text-center w-28">Score Added</th>
-                    <th className="px-6 py-3">Reason For allocation</th>
-                    <th className="px-6 py-3 text-right">Authorized Executor</th>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className={thCls}>Timestamp</th>
+                    <th className={thCls}>Recipient</th>
+                    <th className={`${thCls} text-center`}>Center</th>
+                    <th className={`${thCls} text-center`}>Points</th>
+                    <th className={thCls}>Reason</th>
+                    <th className={`${thCls} text-right`}>Authorized By</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-900">
+                <tbody>
                   {serializedPointLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-zinc-900/10 transition-colors">
-                      <td className="px-6 py-4 text-zinc-500 font-mono text-[10px] whitespace-nowrap">
-                        <Clock className="w-3 h-3 inline mr-1 text-zinc-600" />
+                    <tr key={log.id} className={trCls}>
+                      <td className="px-6 py-4 text-gray-500 font-mono text-xs whitespace-nowrap">
+                        <Clock className="w-3 h-3 inline mr-1 text-gray-400" />
                         {new Date(log.timestamp).toLocaleString()}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-bold text-white uppercase">{log.playerName}</div>
-                        <div className="text-[10px] text-zinc-500 font-mono">@{log.playerNick}</div>
+                        <div className="font-semibold text-gray-900">{log.playerName}</div>
+                        <div className="text-xs text-gray-500 font-mono">@{log.playerNick}</div>
                       </td>
-                      <td className="px-6 py-4 text-center text-zinc-400 uppercase font-semibold">
+                      <td className="px-6 py-4 text-center text-gray-600 font-medium">
                         {log.centerName}
                       </td>
-                      <td className="px-6 py-4 text-center font-mono font-black text-lime-400 text-sm whitespace-nowrap">
+                      <td className="px-6 py-4 text-center font-mono font-bold text-green-700 whitespace-nowrap">
                         {log.points > 0 ? `+${log.points}` : log.points} pts
                       </td>
-                      <td className="px-6 py-4 text-zinc-300 font-medium">
+                      <td className="px-6 py-4 text-gray-700 max-w-xs">
                         {log.reason}
                       </td>
-                      <td className="px-6 py-4 text-right font-mono text-zinc-400 text-[11px] whitespace-nowrap">
+                      <td className="px-6 py-4 text-right font-mono text-gray-500 text-xs whitespace-nowrap">
                         {log.actor}
                       </td>
                     </tr>

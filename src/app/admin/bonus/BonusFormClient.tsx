@@ -62,7 +62,6 @@ export default function BonusFormClient({ currentUserRole, centerName, players }
       }
 
       setSuccess(`Successfully credited ${ptsNum} points to the competitor.`);
-      // Reset form fields
       setUserId("");
       setPoints("");
       setReason("");
@@ -75,35 +74,35 @@ export default function BonusFormClient({ currentUserRole, centerName, players }
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 select-none font-sans">
-      {/* Header Panel */}
+    <div className="max-w-2xl space-y-6 font-sans">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-black text-white uppercase tracking-tight flex items-center gap-2">
-          <Coins className="w-8 h-8 text-lime-400" />
-          Award Bonus Points
-        </h1>
-        <p className="text-xs text-zinc-400 mt-1">
+        <div className="flex items-center gap-2.5 mb-1">
+          <Coins className="w-6 h-6 text-green-600" />
+          <h1 className="text-2xl font-bold text-gray-900">Award Bonus Points</h1>
+        </div>
+        <p className="text-sm text-gray-500">
           {isOwner
             ? "Credit manual bonus points to any global campaign competitor."
             : `Credit attendance bonus points strictly to players at ${centerName}.`}
         </p>
       </div>
 
-      {/* Main card */}
-      <div className="bg-zinc-900/40 border border-zinc-800 p-8 shadow-2xl backdrop-blur-md">
-        <form onSubmit={handleAwardBonus} className="space-y-5">
-          {/* Competitor list selection */}
+      {/* Form card */}
+      <div className="bg-white border border-gray-200 shadow-sm p-8">
+        <form onSubmit={handleAwardBonus} className="space-y-6">
+          {/* Player select */}
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-zinc-400 mb-2">
-              Select Competitor
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Select player
             </label>
             <select
               required
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 text-white text-sm focus:outline-none focus:border-lime-400 transition-colors"
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 text-gray-900 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
             >
-              <option value="">Choose a player account...</option>
+              <option value="">Choose a player account…</option>
               {players.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.fullName} (@{p.nickname}) — {p.centerName.replace("GARRINCHA ", "")}
@@ -112,10 +111,10 @@ export default function BonusFormClient({ currentUserRole, centerName, players }
             </select>
           </div>
 
-          {/* Points Award Score */}
+          {/* Points amount */}
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-zinc-400 mb-2">
-              Bonus Points Amount
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Bonus points amount
             </label>
             <input
               type="number"
@@ -125,17 +124,17 @@ export default function BonusFormClient({ currentUserRole, centerName, players }
               placeholder="e.g. 5"
               value={points}
               onChange={(e) => setPoints(e.target.value)}
-              className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 text-white text-sm focus:outline-none focus:border-lime-400 transition-colors placeholder-zinc-700"
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
             />
-            <p className="text-[10px] text-zinc-500 mt-1 leading-snug">
-              Accepts values from -100 to +100. Positive values award points; negative corrections remove points.
+            <p className="text-xs text-gray-500 mt-1.5">
+              Accepts values from −100 to +100. Positive awards points; negative corrections remove points.
             </p>
           </div>
 
           {/* Reason */}
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-zinc-400 mb-2">
-              Mandatory Reason
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Reason <span className="text-gray-400 font-normal">(required)</span>
             </label>
             <textarea
               required
@@ -145,53 +144,51 @@ export default function BonusFormClient({ currentUserRole, centerName, players }
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
-              className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 text-white text-sm focus:outline-none focus:border-lime-400 transition-colors placeholder-zinc-700 resize-none font-sans"
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors resize-none font-sans"
             />
-            <p className="text-[10px] text-zinc-500 mt-1">
-              Minimum 3 characters, maximum 240 characters. Every award is permanently logged for audit trails.
+            <p className="text-xs text-gray-500 mt-1.5">
+              Minimum 3 characters, max 240. Every award is permanently logged for audit.
             </p>
           </div>
 
-          {/* Messages info */}
+          {/* Alerts */}
           {error && (
-            <div role="alert" className="flex items-start gap-3 p-3 border border-red-900/50 bg-red-900/10 text-red-400 text-xs">
+            <div role="alert" className="flex items-start gap-3 p-3 border border-red-200 bg-red-50 text-red-700 text-sm rounded-sm">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="flex items-center gap-3 p-3 border border-lime-400/30 bg-lime-400/10 text-lime-400 text-xs">
+            <div className="flex items-center gap-3 p-3 border border-green-200 bg-green-50 text-green-700 text-sm rounded-sm">
               <CheckCircle className="w-4 h-4 shrink-0" />
               <span>{success}</span>
             </div>
           )}
 
-          <div className="border-t border-zinc-800 pt-5">
+          <div className="pt-2">
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3.5 bg-lime-400 hover:bg-lime-300 disabled:bg-zinc-800 disabled:text-zinc-500 text-zinc-950 font-black uppercase tracking-wider text-xs shadow-lg transition-all"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm transition-colors"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Recording Award...</span>
+                  <span>Recording…</span>
                 </>
               ) : (
-                <>
-                  <span>Commit Bonus Award</span>
-                </>
+                <span>Commit Bonus Award</span>
               )}
             </button>
           </div>
         </form>
       </div>
 
-      {/* Guide Note card */}
-      <div className="p-4 border border-zinc-800 bg-zinc-950/40 text-xs text-zinc-500 leading-relaxed">
-        <span className="text-zinc-400 font-bold uppercase block mb-1">Corporate Audit Disclaimer:</span>
-        Manual point awards create an immutable record inside the database PointEvent table including your administrative secure email, points allocation, timestamp, and clear reason, preserving campaign transparency.
+      {/* Audit note */}
+      <div className="p-4 border border-gray-200 bg-white text-sm text-gray-500 leading-relaxed">
+        <span className="text-gray-700 font-semibold block mb-1">Audit note</span>
+        Every manual award creates an immutable record in the PointEvent table — including your admin email, points, timestamp, and reason — preserving full campaign transparency.
       </div>
     </div>
   );
