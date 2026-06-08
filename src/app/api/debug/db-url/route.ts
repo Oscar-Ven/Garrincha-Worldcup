@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { hasDatabaseConfig, hasUsableDatabaseUrl, isPreviewMode } from "@/lib/app-mode";
-import { requireAdmin } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -10,9 +10,9 @@ export async function GET() {
   }
 
   try {
-    await requireAdmin();
+    await requireSuperAdmin();
   } catch {
-    return NextResponse.json({ error: "Admin access required." }, { status: 403 });
+    return NextResponse.json({ error: "Super admin access required." }, { status: 403 });
   }
 
   const raw = process.env.DATABASE_URL ?? "";

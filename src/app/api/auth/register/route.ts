@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { createSession } from "@/lib/auth";
 import { getLocaleFromRequest, rotateAndSendAccessLink } from "@/lib/access-link";
@@ -117,6 +117,21 @@ export async function POST(request: NextRequest) {
     await createSession({ userId: user.id, role: user.role });
     return NextResponse.json({ ok: true });
   } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      if (err.code === "P2002") {
+        const field = Array.isArray(err.meta?.target) ? (err.meta.target as string[])[0] : "field";
+        if (field === "email") {
+          return NextResponse.json(
+            { error: "An account with this email already exists. Request your access link to continue." },
+            { status: 409 },
+          );
+        }
+        return NextResponse.json(
+          { error: "This nickname is already taken. Please choose a different one." },
+          { status: 409 },
+        );
+      }
+    }
     const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
     console.error("[auth/register] Fatal:", msg);
     return NextResponse.json(
