@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { getLocale } from "@/lib/i18n";
+import ServiceWorkerRegistration from "@/components/pwa/ServiceWorkerRegistration";
+import AddToHomeScreenPrompt from "@/components/pwa/AddToHomeScreenPrompt";
 import "./globals.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -56,7 +58,11 @@ export default async function RootLayout({
   const locale = await getLocale();
   return (
     <html lang={locale} className={inter.variable}>
-      <body className="bg-zinc-950 text-white antialiased">{children}</body>
+      <body className="bg-zinc-950 text-white antialiased">
+        {children}
+        <ServiceWorkerRegistration />
+        <AddToHomeScreenPrompt />
+      </body>
     </html>
   );
 }
