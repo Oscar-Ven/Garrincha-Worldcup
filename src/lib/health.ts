@@ -114,8 +114,8 @@ async function checkCentersSeeded(): Promise<HealthCheck> {
     );
     return {
       label: "Centers seeded",
-      status: count >= 1 ? "healthy" : "warning",
-      detail: `${count} center${count !== 1 ? "s" : ""} found`,
+      status: count >= 11 ? "healthy" : "warning",
+      detail: `${count} center${count !== 1 ? "s" : ""} found (expected 11)`,
     };
   } catch (err) {
     const isTimeout = err instanceof Error && err.message === "timeout";

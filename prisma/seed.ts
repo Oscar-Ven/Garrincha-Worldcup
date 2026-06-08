@@ -67,12 +67,28 @@ async function main() {
     throw new Error("OWNER_PASSWORD must be set in .env (minimum 8 characters).");
   }
 
-  // Ensure Head Quarter center exists
-  await prisma.garrinchaCenter.upsert({
-    where: { name: "Head Quarter" },
-    create: { name: "Head Quarter", country: "Belgium", city: "Brussels", bannerUrl: null },
-    update: { country: "Belgium", city: "Brussels" },
-  });
+  // Ensure all GARRINCHA centers exist (players will register to these)
+  const allCenters = [
+    { name: "Head Quarter",                    country: "Belgium", city: "Brussels"  },
+    { name: "GARRINCHA Antwerpen Noord",       country: "Belgium", city: "Antwerpen" },
+    { name: "GARRINCHA Antwerpen Zuid",        country: "Belgium", city: "Antwerpen" },
+    { name: "GARRINCHA Charleroi Dampremy",    country: "Belgium", city: "Charleroi" },
+    { name: "GARRINCHA Charleroi Montignies",  country: "Belgium", city: "Charleroi" },
+    { name: "GARRINCHA Diegem",                country: "Belgium", city: "Diegem"    },
+    { name: "GARRINCHA Gent Arsenaal",         country: "Belgium", city: "Gent"      },
+    { name: "GARRINCHA Gent The Loop",         country: "Belgium", city: "Gent"      },
+    { name: "GARRINCHA Kortrijk",              country: "Belgium", city: "Kortrijk"  },
+    { name: "GARRINCHA Luik",                  country: "Belgium", city: "Luik"      },
+    { name: "GARRINCHA Westgate Dilbeek",      country: "Belgium", city: "Dilbeek"   },
+  ];
+
+  for (const center of allCenters) {
+    await prisma.garrinchaCenter.upsert({
+      where: { name: center.name },
+      create: { ...center, bannerUrl: null },
+      update: { country: center.country, city: center.city },
+    });
+  }
 
   const hq = await prisma.garrinchaCenter.findFirstOrThrow({
     where: { name: "Head Quarter" },
