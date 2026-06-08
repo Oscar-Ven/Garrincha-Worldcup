@@ -48,9 +48,6 @@ export default async function SystemHealthPage() {
   const isSentryConfigured = !!(
     process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN
   );
-  const isSupabaseConfigured = !!(
-    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-  );
   const nodeEnv = process.env.NODE_ENV ?? "development";
 
   return (
@@ -93,7 +90,7 @@ export default async function SystemHealthPage() {
           </div>
           <span className="text-xs text-gray-500 flex items-center gap-1">
             <Database className="w-3.5 h-3.5 text-gray-400" />
-            Supabase / Prisma
+            Prisma → Supabase PostgreSQL
           </span>
         </div>
 
@@ -135,12 +132,6 @@ export default async function SystemHealthPage() {
                 failLabel: "Failed",
               },
               {
-                label: "Supabase Client",
-                ok: isSupabaseConfigured,
-                okLabel: "Connected",
-                failLabel: "Not Set",
-              },
-              {
                 label: "Sentry Monitoring",
                 ok: isSentryConfigured,
                 okLabel: "Active",
@@ -154,6 +145,12 @@ export default async function SystemHealthPage() {
                 </span>
               </div>
             ))}
+            <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
+              <span className="text-gray-600 font-medium">Database Layer</span>
+              <span className="px-2 py-0.5 text-xs font-semibold bg-blue-50 border border-blue-200 text-blue-700">
+                Prisma ORM
+              </span>
+            </div>
             <div className="flex items-center justify-between py-1.5 border-b border-gray-100">
               <span className="text-gray-600 font-medium">Next.js Router</span>
               <span className="px-2 py-0.5 text-xs font-semibold bg-blue-50 border border-blue-200 text-blue-700">
