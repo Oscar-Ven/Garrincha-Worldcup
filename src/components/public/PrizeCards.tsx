@@ -7,30 +7,24 @@ const JUSTPADEL_URL = "https://justpadel.com/en";
 const CENTRE_PRIZES = [
   {
     rank: "1st Place",
-    prize: "€60 JustPadel gift card",
-    perPerson: true,
+    prize: "Premium JustPadel gift card",
     sponsored: true,
     accent: "border-lime-400/60 bg-lime-400/5",
     rankStyle: "bg-lime-400 text-zinc-950",
-    num: "01",
   },
   {
     rank: "2nd Place",
-    prize: "€40 JustPadel gift card",
-    perPerson: true,
+    prize: "JustPadel gift card",
     sponsored: true,
     accent: "border-zinc-700 bg-white/[0.02]",
     rankStyle: "bg-zinc-700 text-zinc-200",
-    num: "02",
   },
   {
     rank: "3rd Place",
     prize: "GARRINCHA Padel T-shirt",
-    perPerson: true,
     sponsored: false,
     accent: "border-zinc-700 bg-white/[0.02]",
     rankStyle: "bg-zinc-800 text-zinc-300",
-    num: "03",
   },
 ];
 
@@ -144,11 +138,11 @@ export default function PrizeCards({ preview = false, prizesHref = "/en/prizes" 
             {/* Racket image — right */}
             <div className="shrink-0 md:w-[38%] flex items-center justify-center max-h-55 md:max-h-65 overflow-hidden">
               <Image
-                src="/images/prizes/belgium-team-adidas-racket.jpeg"
+                src="/images/prizes/belgium-team-adidas-racket-nobg.webp"
                 alt="Belgium Team Adidas padel racket — Overall Winner prize"
                 width={600}
-                height={800}
-                className="w-auto max-w-full max-h-55 md:max-h-65 object-contain mix-blend-screen"
+                height={900}
+                className="w-auto max-w-full max-h-55 md:max-h-65 object-contain"
                 priority
               />
             </div>
