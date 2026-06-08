@@ -32,6 +32,9 @@ interface SerializedMatch {
   homeScore: number | null;
   awayScore: number | null;
   finalizedAt: string | null;
+  scoreSource: string | null;
+  scoreSyncStatus: string | null;
+  lastScoreSyncAt: string | null;
 }
 
 interface Props {
@@ -131,13 +134,15 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
     setSuccess(null);
 
     try {
-      const res = await fetch("/api/admin/sync-matches");
+      const res = await fetch("/api/admin/sync-matches", { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error ?? "Match sync process failed.");
       }
 
-      setSuccess(`Sync complete. ${data.synced ?? 0} matches updated.`);
+      const parts = [`${data.synced ?? 0} auto-applied`];
+      if ((data.pending_review ?? 0) > 0) parts.push(`${data.pending_review} pending review`);
+      setSuccess(`Sync complete. ${parts.join(", ")}.`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sync failure.");
@@ -263,20 +268,37 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                     {" · "}
                     {stageLabel}
                   </span>
-                  {isLive ? (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-semibold bg-red-50 text-red-600 border border-red-200">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                      Live
-                    </span>
-                  ) : isCompleted ? (
-                    <span className="px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
-                      Final
-                    </span>
-                  ) : (
-                    <span className="px-2 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                      Upcoming
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1">
+                    {isLive ? (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-semibold bg-red-50 text-red-600 border border-red-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                        Live
+                      </span>
+                    ) : isCompleted ? (
+                      <span className="px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                        Final
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                        Upcoming
+                      </span>
+                    )}
+                    {match.scoreSyncStatus === "pending_review" && (
+                      <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                        Review
+                      </span>
+                    )}
+                    {isCompleted && match.scoreSource === "api-football" && (
+                      <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-teal-50 text-teal-700 border border-teal-200">
+                        API
+                      </span>
+                    )}
+                    {isCompleted && match.scoreSource === "manual" && (
+                      <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-gray-50 text-gray-500 border border-gray-200">
+                        Manual
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Teams + score */}
