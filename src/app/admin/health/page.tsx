@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/purity, @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/purity */
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
