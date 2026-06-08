@@ -7,6 +7,7 @@ import {
   CalendarDays,
   CircleUserRound,
   Coins,
+  Gift,
   House,
   Landmark,
   LogOut,
@@ -51,6 +52,7 @@ export default function PlayerShell({ user, labels, children }: PlayerShellProps
     { href: "/leaderboards", label: labels.leaderboard, icon: Trophy },
     { href: "/my-points", label: labels.points, icon: Coins },
     { href: "/center", label: labels.center, icon: Landmark },
+    { href: "/prizes", label: "Prizes", icon: Gift },
     { href: "/profile", label: labels.profile, icon: CircleUserRound },
   ];
 

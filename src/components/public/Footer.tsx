@@ -8,7 +8,7 @@ export default function Footer({ locale }: { locale: Locale }) {
     { label: t(locale, "how_title_label"), href: "#how-it-works" },
     { label: t(locale, "nav_scoring"), href: "#scoring" },
     { label: t(locale, "nav_centers"), href: "#centers" },
-    { label: t(locale, "nav_prize"), href: "#prizes" },
+    { label: t(locale, "nav_prize"), href: `/${locale}/prizes` },
   ];
 
   return (
@@ -42,12 +42,12 @@ export default function Footer({ locale }: { locale: Locale }) {
             <ul className="space-y-4">
               {navLinks.map((link) => (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-zinc-400 hover:text-lime-400 transition-colors text-sm uppercase tracking-wide"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
               <li>

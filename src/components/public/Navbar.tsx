@@ -73,6 +73,14 @@ export default function Navbar({ locale }: { locale: Locale }) {
           >
             {t(locale, "nav.leaderboards")}
           </Link>
+          <Link
+            href={`/${locale}/prizes`}
+            className={`text-sm font-bold tracking-wide uppercase transition-colors ${
+              pathname?.includes("/prizes") ? "text-lime-400" : "text-zinc-300 hover:text-lime-400"
+            }`}
+          >
+            Prizes
+          </Link>
         </div>
 
         {/* Desktop right: language + CTA */}
@@ -123,6 +131,13 @@ export default function Navbar({ locale }: { locale: Locale }) {
             className="text-base font-bold tracking-wide text-zinc-300 hover:text-lime-400 transition-colors uppercase"
           >
             {t(locale, "nav.leaderboards")}
+          </Link>
+          <Link
+            href={`/${locale}/prizes`}
+            onClick={() => setOpen(false)}
+            className="text-base font-bold tracking-wide text-zinc-300 hover:text-lime-400 transition-colors uppercase"
+          >
+            Prizes
           </Link>
           <div className="h-px bg-zinc-800 w-full" />
           <LanguageSwitcher locale={locale} />

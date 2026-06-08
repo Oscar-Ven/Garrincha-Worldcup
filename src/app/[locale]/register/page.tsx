@@ -3,6 +3,7 @@ import { isLocale, type Locale, t } from "@/lib/translations";
 import { isPreviewMode } from "@/lib/app-mode";
 import { demoCenters } from "@/lib/ui-demo-data";
 import RegisterForm from "./RegisterForm";
+import PrizeCards from "@/components/public/PrizeCards";
 
 async function getCenters() {
   if (isPreviewMode()) {
@@ -71,6 +72,10 @@ export default async function RegisterPage({
               {t(locale, "auth.step3")}
             </span>
           </div>
+        </div>
+
+        <div className="mb-10">
+          <PrizeCards preview prizesHref={`/${locale}/prizes`} />
         </div>
 
         <RegisterForm

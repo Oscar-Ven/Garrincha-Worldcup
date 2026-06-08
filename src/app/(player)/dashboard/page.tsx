@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, CalendarDays, Coins, Landmark, Target, Trophy } from "lucide-react";
+import PrizeCards from "@/components/public/PrizeCards";
 import { prisma } from "@/lib/prisma";
 import { createLeaderboardRows } from "@/lib/product-logic";
 import { isPredictionLocked } from "@/lib/scoring";
@@ -237,6 +238,8 @@ export default async function DashboardPage() {
           </div>
         </div>
       </section>
+
+      <PrizeCards preview prizesHref="/prizes" />
     </div>
   );
 }
