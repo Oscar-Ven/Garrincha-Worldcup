@@ -32,7 +32,9 @@ async function safeEval(page, fn, arg) {
   catch (e) { return { error: e.message.slice(0, 80) }; }
 }
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({
+  chromiumSandbox: process.env.CI !== 'true',
+});
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 const p = await ctx.newPage();
 

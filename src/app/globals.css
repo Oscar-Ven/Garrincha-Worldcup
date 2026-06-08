@@ -3,4 +3,10 @@
 @theme {
   --font-sans: var(--font-inter, ui-sans-serif, system-ui, sans-serif);
   --font-display: var(--font-inter, ui-sans-serif, system-ui, sans-serif);
+
+  /* Brand palette — GARRINCHA World Cup */
+  --color-lime-400: #0aee96;
+  --color-lime-300: #2df5a8;
+  --color-lime-500: #07cc7a;
+  --color-zinc-950: #161616;
 }

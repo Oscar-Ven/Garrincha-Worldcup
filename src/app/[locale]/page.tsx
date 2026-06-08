@@ -226,7 +226,7 @@ export default async function LandingPage({
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
             <Link
               href={`/${locale}/register`}
-              className="w-full sm:w-auto group flex items-center justify-center gap-3 px-8 py-4 bg-lime-400 text-zinc-950 font-black uppercase tracking-widest text-base hover:bg-lime-300 transition-all shadow-[0_0_30px_rgba(163,230,53,0.3)] hover:shadow-[0_0_40px_rgba(163,230,53,0.5)]"
+              className="w-full sm:w-auto group flex items-center justify-center gap-3 px-8 py-4 bg-lime-400 text-zinc-950 font-black uppercase tracking-widest text-base hover:bg-lime-300 transition-all shadow-[0_0_30px_rgba(10,238,150,0.3)] hover:shadow-[0_0_40px_rgba(10,238,150,0.5)]"
             >
               {t(locale, "cta_register")}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -366,7 +366,7 @@ export default async function LandingPage({
                   </span>
                 </div>
                 <div className="flex gap-3 items-center">
-                  <div className="w-14 h-16 bg-zinc-900 border-2 border-lime-400/50 rounded flex items-center justify-center text-3xl font-black text-white shadow-[0_0_15px_rgba(163,230,53,0.15)]">
+                  <div className="w-14 h-16 bg-zinc-900 border-2 border-lime-400/50 rounded flex items-center justify-center text-3xl font-black text-white shadow-[0_0_15px_rgba(10,238,150,0.15)]">
                     2
                   </div>
                   <span className="text-zinc-600 font-black text-xl">:</span>
@@ -546,7 +546,7 @@ export default async function LandingPage({
               </p>
               <Link
                 href={`/${locale}/register`}
-                className="inline-flex items-center gap-3 px-8 py-4 bg-lime-400 text-zinc-950 font-black uppercase tracking-widest text-sm hover:bg-lime-300 transition-all shadow-[0_0_20px_rgba(163,230,53,0.3)]"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-lime-400 text-zinc-950 font-black uppercase tracking-widest text-sm hover:bg-lime-300 transition-all shadow-[0_0_20px_rgba(10,238,150,0.3)]"
               >
                 {t(locale, "cta_register")}
                 <ArrowRight className="w-5 h-5" />
@@ -624,7 +624,7 @@ export default async function LandingPage({
           </p>
           <Link
             href={`/${locale}/register`}
-            className="inline-flex items-center gap-3 px-10 py-5 bg-lime-400 text-zinc-950 font-black uppercase tracking-widest text-lg hover:bg-lime-300 transition-all shadow-[0_0_40px_rgba(163,230,53,0.4)] hover:shadow-[0_0_60px_rgba(163,230,53,0.6)]"
+            className="inline-flex items-center gap-3 px-10 py-5 bg-lime-400 text-zinc-950 font-black uppercase tracking-widest text-lg hover:bg-lime-300 transition-all shadow-[0_0_40px_rgba(10,238,150,0.4)] hover:shadow-[0_0_60px_rgba(10,238,150,0.6)]"
           >
             {t(locale, "cta_register")}
             <ArrowRight className="w-6 h-6" />

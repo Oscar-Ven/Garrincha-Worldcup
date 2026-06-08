@@ -4,7 +4,7 @@ import PrizeCards from "@/components/public/PrizeCards";
 
 export const metadata = {
   title: "Prizes — GARRINCHA World Cup",
-  description: "Win JustPadel gift cards, GARRINCHA T-shirts, and a limited-edition Belgium Team Adidas racket.",
+  description: "Win JustPadel gift cards, GARRINCHA Padel T-shirts, and a limited-edition Belgium Team Adidas racket.",
 };
 
 export default async function PrizesPage({
