@@ -94,7 +94,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
           </Link>
           <Link
             href={`/${locale}/register`}
-            className="flex items-center gap-2 px-5 py-2.5 bg-lime-400 text-zinc-950 font-black uppercase tracking-wider text-sm hover:bg-lime-300 transition-colors shadow-[0_0_15px_rgba(163,230,53,0.4)]"
+            className="flex items-center gap-2 px-5 py-2.5 bg-lime-400 text-zinc-950 font-black uppercase tracking-wider text-sm hover:bg-lime-300 transition-colors shadow-[0_0_15px_rgba(10,238,150,0.4)]"
           >
             {t(locale, "nav_register")}
             <ArrowRight className="w-4 h-4" />

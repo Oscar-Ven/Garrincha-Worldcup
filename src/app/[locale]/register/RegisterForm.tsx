@@ -246,7 +246,7 @@ export default function RegisterForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full flex items-center justify-center gap-3 py-4 bg-lime-400 text-zinc-950 font-black uppercase tracking-widest text-sm hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(163,230,53,0.3)]"
+        className="w-full flex items-center justify-center gap-3 py-4 bg-lime-400 text-zinc-950 font-black uppercase tracking-widest text-sm hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(10,238,150,0.3)]"
       >
         {loading ? (
           t(locale, "form.creating")

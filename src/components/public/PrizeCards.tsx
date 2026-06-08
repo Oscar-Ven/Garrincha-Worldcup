@@ -25,7 +25,7 @@ const CENTRE_PRIZES = [
   },
   {
     rank: "3rd Place",
-    prize: "GARRINCHA T-shirt",
+    prize: "GARRINCHA Padel T-shirt",
     perPerson: true,
     sponsored: false,
     accent: "border-zinc-700 bg-white/[0.02]",
@@ -145,16 +145,16 @@ export default function PrizeCards({ preview = false, prizesHref = "/en/prizes" 
       {/* Sponsor section */}
       <section className="border-t border-zinc-900 pt-10">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-6 text-center">
-          Prize Sponsor
+          Overall Sponsor
         </p>
         <a
           href={JUSTPADEL_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex flex-col items-center gap-6 border border-zinc-800 bg-zinc-900/60 p-8 md:p-10 hover:border-zinc-700 transition-colors"
+          className="group flex flex-col items-center gap-6 border border-zinc-800 bg-zinc-900/60 p-8 md:p-10 hover:border-lime-400/30 transition-colors"
         >
           <p className="text-sm text-zinc-400 font-medium text-center group-hover:text-white transition-colors">
-            Gift cards sponsored by <span className="text-white font-bold">JustPadel</span>
+            Overall Sponsor — <span className="text-white font-bold">JustPadel</span>
           </p>
           <div className="w-full flex items-center justify-center">
             <Image

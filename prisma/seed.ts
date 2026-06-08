@@ -120,6 +120,38 @@ async function main() {
   });
   console.log(`Owner account: ${ownerEmail} (${ownerDisplayName}) → Head Quarter`);
 
+  // Optional second SUPER_ADMIN — jef@garnicha.be
+  // Set JEF_PASSWORD in .env to seed this account (minimum 8 characters).
+  const jefPasswordPlain = process.env.JEF_PASSWORD;
+  if (jefPasswordPlain && jefPasswordPlain.length >= 8) {
+    const jefPasswordHash = await hash(jefPasswordPlain, 12);
+    await prisma.user.upsert({
+      where: { email: "jef@garnicha.be" },
+      create: {
+        email: "jef@garnicha.be",
+        passwordHash: jefPasswordHash,
+        fullName: "jef",
+        nickname: "jef",
+        dateOfBirth: new Date("1990-01-01T00:00:00.000Z"),
+        phoneNumber: "+32491486970",
+        displayName: "jef",
+        nationality: "Belgium",
+        role: Role.SUPER_ADMIN,
+        centerId: hq.id,
+      },
+      update: {
+        passwordHash: jefPasswordHash,
+        fullName: "jef",
+        nickname: "jef",
+        phoneNumber: "+32491486970",
+        displayName: "jef",
+        role: Role.SUPER_ADMIN,
+        centerId: hq.id,
+      },
+    });
+    console.log("Owner account: jef@garnicha.be (jef) → Head Quarter");
+  }
+
   const teams = new Map<string, Awaited<ReturnType<typeof upsertTeam>>>();
   for (const [groupName, names] of Object.entries(groups)) {
     for (const name of names) {
