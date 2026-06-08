@@ -127,17 +127,31 @@ export default function PrizeCards({ preview = false, prizesHref = "/en/prizes" 
         </div>
         <div className="border border-lime-400/40 bg-lime-400/5 p-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-lime-400/5 blur-[80px] pointer-events-none" />
-          <div className="relative">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-lime-400 text-zinc-950 text-xs font-black uppercase tracking-widest mb-6">
-              <Trophy className="w-3.5 h-3.5" />
-              Overall Winner
+          <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-10">
+            {/* Text — left */}
+            <div className="flex-1 min-w-0">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-lime-400 text-zinc-950 text-xs font-black uppercase tracking-widest mb-6">
+                <Trophy className="w-3.5 h-3.5" />
+                Overall Winner
+              </div>
+              <p className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight mb-3">
+                Limited-edition branded<br />Belgium Team Adidas racket
+              </p>
+              <p className="text-zinc-400 text-sm max-w-md">
+                Awarded to the highest-scoring player across all GARRINCHA centres at the end of the World Cup.
+              </p>
             </div>
-            <p className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight mb-3">
-              Limited-edition branded<br />Belgium Team Adidas racket
-            </p>
-            <p className="text-zinc-400 text-sm max-w-md">
-              Awarded to the highest-scoring player across all GARRINCHA centres at the end of the World Cup.
-            </p>
+            {/* Racket image — right */}
+            <div className="shrink-0 md:w-[38%] flex items-center justify-center max-h-55 md:max-h-65 overflow-hidden">
+              <Image
+                src="/images/prizes/belgium-team-adidas-racket.png"
+                alt="Belgium Team Adidas padel racket — Overall Winner prize"
+                width={400}
+                height={530}
+                className="w-auto max-w-full max-h-55 md:max-h-65 object-contain drop-shadow-[0_0_24px_rgba(10,238,150,0.15)]"
+                priority
+              />
+            </div>
           </div>
         </div>
       </section>
