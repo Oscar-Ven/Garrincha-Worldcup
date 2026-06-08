@@ -35,31 +35,6 @@ function codeFor(name: string) {
     .slice(0, 8);
 }
 
-const centerAdminData: Array<{ email: string; centerName: string }> = [
-  { email: "antwerpen.noord@garrincha.be", centerName: "GARRINCHA Antwerpen Noord" },
-  { email: "antwerpen.zuid@garrincha.be", centerName: "GARRINCHA Antwerpen Zuid" },
-  { email: "charleroi.dampremy@garrincha.be", centerName: "GARRINCHA Charleroi Dampremy" },
-  { email: "charleroi.montignies@garrincha.be", centerName: "GARRINCHA Charleroi Montignies" },
-  { email: "diegem@garrincha.be", centerName: "GARRINCHA Diegem" },
-  { email: "gent.arsenaal@garrincha.be", centerName: "GARRINCHA Gent Arsenaal" },
-  { email: "gent.theloop@garrincha.be", centerName: "GARRINCHA Gent The Loop" },
-  { email: "kortrijk@garrincha.be", centerName: "GARRINCHA Kortrijk" },
-  { email: "luik@garrincha.be", centerName: "GARRINCHA Luik" },
-  { email: "westgate.dilbeek@garrincha.be", centerName: "GARRINCHA Westgate Dilbeek" },
-];
-
-function deriveNickname(centerName: string): string {
-  // Strip "GARRINCHA " prefix
-  return centerName.replace(/^GARRINCHA\s+/, "");
-}
-
-function deriveFullName(email: string): string {
-  // Take the local part before @, split on ".", capitalise each word, append "Admin"
-  const local = email.split("@")[0];
-  const words = local.split(".").map((w) => w.charAt(0).toUpperCase() + w.slice(1));
-  return `${words.join(" ")} Admin`;
-}
-
 async function upsertTeam(name: string, groupName?: string) {
   const fifaCode = codeFor(name);
   const flagCode = fifaCode.length === 3 ? fifaCode : "TBD";
@@ -87,41 +62,22 @@ async function main() {
   const ownerEmail = process.env.OWNER_EMAIL ?? "wc.garrincha@gmail.com";
   const ownerDisplayName = process.env.OWNER_DISPLAY_NAME ?? "GARRINCHA";
   const ownerPasswordPlain = process.env.OWNER_PASSWORD;
-  const adminPasswordPlain = process.env.ADMIN_PASSWORD;
-  const centerAdminPasswordPlain = process.env.CENTER_ADMIN_PASSWORD;
 
   if (!ownerPasswordPlain || ownerPasswordPlain.length < 8) {
     throw new Error("OWNER_PASSWORD must be set in .env (minimum 8 characters).");
   }
-  if (!adminPasswordPlain || adminPasswordPlain.length < 8) {
-    throw new Error("ADMIN_PASSWORD must be set in .env (minimum 8 characters).");
-  }
-  if (!centerAdminPasswordPlain || centerAdminPasswordPlain.length < 8) {
-    throw new Error("CENTER_ADMIN_PASSWORD must be set in .env (minimum 8 characters).");
-  }
 
-  const centers = [
-    { name: "GARRINCHA Antwerpen Noord", country: "Belgium", city: "Antwerpen" },
-    { name: "GARRINCHA Antwerpen Zuid", country: "Belgium", city: "Antwerpen" },
-    { name: "GARRINCHA Charleroi Dampremy", country: "Belgium", city: "Charleroi" },
-    { name: "GARRINCHA Charleroi Montignies", country: "Belgium", city: "Charleroi" },
-    { name: "GARRINCHA Diegem", country: "Belgium", city: "Diegem" },
-    { name: "GARRINCHA Gent Arsenaal", country: "Belgium", city: "Gent" },
-    { name: "GARRINCHA Gent The Loop", country: "Belgium", city: "Gent" },
-    { name: "GARRINCHA Kortrijk", country: "Belgium", city: "Kortrijk" },
-    { name: "GARRINCHA Luik", country: "Belgium", city: "Luik" },
-    { name: "GARRINCHA Westgate Dilbeek", country: "Belgium", city: "Dilbeek" },
-  ];
+  // Ensure Head Quarter center exists
+  await prisma.garrinchaCenter.upsert({
+    where: { name: "Head Quarter" },
+    create: { name: "Head Quarter", country: "Belgium", city: "Brussels", bannerUrl: null },
+    update: { country: "Belgium", city: "Brussels" },
+  });
 
-  for (const center of centers) {
-    await prisma.garrinchaCenter.upsert({
-      where: { name: center.name },
-      create: { ...center, bannerUrl: null },
-      update: { ...center, bannerUrl: null },
-    });
-  }
+  const hq = await prisma.garrinchaCenter.findFirstOrThrow({
+    where: { name: "Head Quarter" },
+  });
 
-  const center = await prisma.garrinchaCenter.findFirstOrThrow();
   const ownerPassword = await hash(ownerPasswordPlain, 12);
   await prisma.user.upsert({
     where: { email: ownerEmail },
@@ -131,76 +87,22 @@ async function main() {
       fullName: ownerDisplayName,
       nickname: ownerDisplayName,
       dateOfBirth: new Date("1990-01-01T00:00:00.000Z"),
-      phoneNumber: "+32000000001",
+      phoneNumber: process.env.OWNER_PHONE ?? "",
       displayName: ownerDisplayName,
       nationality: "Belgium",
       role: Role.SUPER_ADMIN,
-      centerId: center.id,
+      centerId: hq.id,
     },
     update: {
       passwordHash: ownerPassword,
       displayName: ownerDisplayName,
+      fullName: ownerDisplayName,
+      nickname: ownerDisplayName,
       role: Role.SUPER_ADMIN,
-      centerId: center.id,
+      centerId: hq.id,
     },
   });
-  console.log(`Owner account: ${ownerEmail} (${ownerDisplayName})`);
-
-
-  const adminPassword = await hash(adminPasswordPlain, 12);
-  await prisma.user.upsert({
-    where: { email: "admin@garrincha.local" },
-    create: {
-      email: "admin@garrincha.local",
-      passwordHash: adminPassword,
-      fullName: "GARRINCHA Admin",
-      nickname: "Admin",
-      dateOfBirth: new Date("1990-01-01T00:00:00.000Z"),
-      phoneNumber: "+32000000000",
-      displayName: "GARRINCHA Admin",
-      nationality: "Belgium",
-      role: Role.ADMIN,
-      centerId: center.id,
-    },
-    update: {
-      passwordHash: adminPassword,
-      role: Role.ADMIN,
-      centerId: center.id,
-    },
-  });
-
-  const centerAdminPassword = await hash(centerAdminPasswordPlain, 12);
-  for (let i = 0; i < centerAdminData.length; i++) {
-    const { email, centerName } = centerAdminData[i];
-    const adminCenter = await prisma.garrinchaCenter.findFirstOrThrow({
-      where: { name: centerName },
-    });
-    const nickname = deriveNickname(centerName);
-    const fullName = deriveFullName(email);
-    const phoneNumber = `+3200000000${(i + 2).toString().padStart(1, "0")}`;
-    await prisma.user.upsert({
-      where: { email },
-      create: {
-        email,
-        passwordHash: centerAdminPassword,
-        fullName,
-        nickname,
-        dateOfBirth: new Date("1990-01-01T00:00:00.000Z"),
-        phoneNumber,
-        displayName: nickname,
-        nationality: "Belgium",
-        role: Role.CENTER_ADMIN,
-        centerId: adminCenter.id,
-      },
-      update: {
-        passwordHash: centerAdminPassword,
-        role: Role.CENTER_ADMIN,
-        centerId: adminCenter.id,
-        displayName: nickname,
-      },
-    });
-  }
-  console.log("Seeded 10 center admin accounts.");
+  console.log(`Owner account: ${ownerEmail} (${ownerDisplayName}) → Head Quarter`);
 
   const teams = new Map<string, Awaited<ReturnType<typeof upsertTeam>>>();
   for (const [groupName, names] of Object.entries(groups)) {
@@ -268,7 +170,7 @@ async function main() {
     placeholder += 2;
   }
 
-  console.log("Seed complete: 104 World Cup match slots, centers, teams, owner account, and admin account.");
+  console.log("Seed complete: 104 World Cup match slots, Head Quarter center, teams, and owner account.");
 }
 
 main()

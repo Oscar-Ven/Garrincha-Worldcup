@@ -114,8 +114,8 @@ async function checkCentersSeeded(): Promise<HealthCheck> {
     );
     return {
       label: "Centers seeded",
-      status: count === 10 ? "healthy" : "warning",
-      detail: `${count} center${count !== 1 ? "s" : ""} found (expected 10)`,
+      status: count >= 1 ? "healthy" : "warning",
+      detail: `${count} center${count !== 1 ? "s" : ""} found`,
     };
   } catch (err) {
     const isTimeout = err instanceof Error && err.message === "timeout";
@@ -174,8 +174,8 @@ async function checkCenterAdmins(): Promise<HealthCheck> {
     );
     return {
       label: "Center admins",
-      status: count >= 10 ? "healthy" : "warning",
-      detail: `${count} center admin(s) found (expected 10)`,
+      status: "healthy",
+      detail: `${count} center admin(s) configured`,
     };
   } catch (err) {
     const isTimeout = err instanceof Error && err.message === "timeout";
@@ -555,66 +555,6 @@ function checkOwnerPassword(): HealthCheck {
   };
 }
 
-function checkAdminPassword(): HealthCheck {
-  const value = process.env.ADMIN_PASSWORD?.trim();
-  if (!value) {
-    return {
-      label: "Admin password",
-      status: "unconfigured",
-      detail: "Not configured",
-    };
-  }
-  if (isPlaceholderValue(value)) {
-    return {
-      label: "Admin password",
-      status: "error",
-      detail: "Placeholder value detected",
-    };
-  }
-  if (value.length < 8) {
-    return {
-      label: "Admin password",
-      status: "error",
-      detail: "Too short (minimum 8 characters required)",
-    };
-  }
-  return {
-    label: "Admin password",
-    status: "healthy",
-    detail: "Configured",
-  };
-}
-
-function checkCenterAdminPassword(): HealthCheck {
-  const value = process.env.CENTER_ADMIN_PASSWORD?.trim();
-  if (!value) {
-    return {
-      label: "Center admin password",
-      status: "unconfigured",
-      detail: "Not configured",
-    };
-  }
-  if (isPlaceholderValue(value)) {
-    return {
-      label: "Center admin password",
-      status: "error",
-      detail: "Placeholder value detected",
-    };
-  }
-  if (value.length < 8) {
-    return {
-      label: "Center admin password",
-      status: "error",
-      detail: "Too short (minimum 8 characters required)",
-    };
-  }
-  return {
-    label: "Center admin password",
-    status: "warning",
-    detail: "Configured (shared password in use — review for production)",
-  };
-}
-
 function checkSecurityHeaders(): HealthCheck {
   return {
     label: "Security headers",
@@ -695,8 +635,6 @@ export async function getHealthReport(): Promise<HealthReport> {
     // Security
     checkJwtSecret(),
     checkOwnerPassword(),
-    checkAdminPassword(),
-    checkCenterAdminPassword(),
     checkSecurityHeaders(),
     checkCsrfProtection(),
   ];
