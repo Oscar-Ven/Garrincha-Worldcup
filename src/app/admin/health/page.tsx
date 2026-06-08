@@ -1,4 +1,4 @@
-﻿/* eslint-disable react-hooks/purity, @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/purity, @typescript-eslint/no-unused-vars */
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -99,7 +99,7 @@ export default async function SystemHealthPage() {
             {dbHealthy && <span className="text-[10px] font-bold text-lime-400 uppercase">OK</span>}
           </div>
           <span className="text-[10px] text-zinc-400 flex items-center gap-1">
-            <Database className="w-3.5 h-3.5 text-zinc-550" />
+            <Database className="w-3.5 h-3.5 text-zinc-500" />
             Supabase server status
           </span>
         </div>
@@ -140,7 +140,7 @@ export default async function SystemHealthPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Environment configuration validations */}
         <div className="lg:col-span-1 bg-zinc-900/40 border border-zinc-800 p-6 space-y-4">
-          <h2 className="text-sm font-black text-white uppercase tracking-wider border-b border-zinc-805 pb-3 flex items-center gap-2">
+          <h2 className="text-sm font-black text-white uppercase tracking-wider border-b border-zinc-800 pb-3 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-lime-400" />
             Environment Check-Desk
           </h2>
@@ -178,13 +178,13 @@ export default async function SystemHealthPage() {
 
         {/* Database volume indices */}
         <div className="lg:col-span-2 bg-zinc-900/40 border border-zinc-800 p-6 space-y-4">
-          <h2 className="text-sm font-black text-white uppercase tracking-wider border-b border-zinc-805 pb-3 flex items-center gap-2">
+          <h2 className="text-sm font-black text-white uppercase tracking-wider border-b border-zinc-800 pb-3 flex items-center gap-2">
             <HardDrive className="w-4 h-4 text-lime-400" />
             Storage Volumes Table Index
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-zinc-950 border border-zinc-805 p-4 flex items-center gap-4">
+            <div className="bg-zinc-950 border border-zinc-800 p-4 flex items-center gap-4">
               <Users className="w-8 h-8 text-lime-400 shrink-0" />
               <div>
                 <span className="text-[10px] font-bold text-zinc-500 uppercase block leading-none">
@@ -196,7 +196,7 @@ export default async function SystemHealthPage() {
               </div>
             </div>
 
-            <div className="bg-zinc-950 border border-zinc-805 p-4 flex items-center gap-4">
+            <div className="bg-zinc-950 border border-zinc-800 p-4 flex items-center gap-4">
               <Trophy className="w-8 h-8 text-lime-400 shrink-0" />
               <div>
                 <span className="text-[10px] font-bold text-zinc-500 uppercase block leading-none">
@@ -208,7 +208,7 @@ export default async function SystemHealthPage() {
               </div>
             </div>
 
-            <div className="bg-zinc-950 border border-zinc-805 p-4 flex items-center gap-4">
+            <div className="bg-zinc-950 border border-zinc-800 p-4 flex items-center gap-4">
               <Cpu className="w-8 h-8 text-lime-400 shrink-0" />
               <div>
                 <span className="text-[10px] font-bold text-zinc-500 uppercase block leading-none">
@@ -221,7 +221,7 @@ export default async function SystemHealthPage() {
             </div>
           </div>
 
-          <div className="p-3 border border-dashed border-zinc-805 bg-zinc-950/20 text-[11px] text-zinc-500 leading-relaxed font-sans mt-2">
+          <div className="p-3 border border-dashed border-zinc-800 bg-zinc-950/20 text-[11px] text-zinc-500 leading-relaxed font-sans mt-2">
             <strong>Diagnostic Instruction:</strong> Standard pipeline is healthy. PointEvent recalculations run securely on each official score submission or external syncer triggers.
           </div>
         </div>

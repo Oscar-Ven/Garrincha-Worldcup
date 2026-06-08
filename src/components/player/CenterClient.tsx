@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, MapPin, ShieldCheck } from "lucide-react";
+import { AlertCircle, CheckCircle2, MapPin, ShieldCheck } from "lucide-react";
 
 type CenterOption = {
   id: string;
@@ -21,11 +21,13 @@ export default function CenterClient({ currentCenterId, canChangeCenter, centers
   const [selectedCenterId, setSelectedCenterId] = useState(currentCenterId);
   const [checkInCode, setCheckInCode] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
   const [busy, setBusy] = useState<"center" | "checkin" | null>(null);
 
   async function handleCenterChange() {
     setBusy("center");
     setMessage(null);
+    setMessageType(null);
     try {
       const response = await fetch("/api/user/center", {
         method: "PUT",
@@ -34,9 +36,11 @@ export default function CenterClient({ currentCenterId, canChangeCenter, centers
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Center change failed.");
+      setMessageType("success");
       setMessage(`Competition center updated to ${payload.centerName}.`);
       router.refresh();
     } catch (error) {
+      setMessageType("error");
       setMessage(error instanceof Error ? error.message : "Center change failed.");
     } finally {
       setBusy(null);
@@ -46,6 +50,7 @@ export default function CenterClient({ currentCenterId, canChangeCenter, centers
   async function handleCheckin() {
     setBusy("checkin");
     setMessage(null);
+    setMessageType(null);
     try {
       const response = await fetch("/api/checkin", {
         method: "POST",
@@ -54,10 +59,12 @@ export default function CenterClient({ currentCenterId, canChangeCenter, centers
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Check-in failed.");
+      setMessageType("success");
       setMessage("Check-in confirmed.");
       setCheckInCode("");
       router.refresh();
     } catch (error) {
+      setMessageType("error");
       setMessage(error instanceof Error ? error.message : "Check-in failed.");
     } finally {
       setBusy(null);
@@ -124,8 +131,12 @@ export default function CenterClient({ currentCenterId, canChangeCenter, centers
         </div>
 
         {message && (
-          <div className="flex items-center gap-2 rounded-2xl bg-white/[0.04] px-4 py-3 text-sm text-zinc-200">
-            <CheckCircle2 className="h-4 w-4 text-lime-300" />
+          <div className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm ${messageType === "error" ? "bg-red-500/10 text-red-300" : "bg-white/4 text-zinc-200"}`}>
+            {messageType === "error" ? (
+              <AlertCircle className="h-4 w-4 shrink-0 text-red-300" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-lime-300" />
+            )}
             <span>{message}</span>
           </div>
         )}

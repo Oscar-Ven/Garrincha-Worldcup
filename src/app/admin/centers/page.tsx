@@ -103,13 +103,13 @@ export default async function CentersOverviewPage() {
           <div key={ctr.id} className="border border-zinc-800 bg-zinc-900/10 p-6 flex flex-col justify-between hover:border-zinc-700/60 transition-all">
             {/* Header info */}
             <div>
-              <div className="flex items-start justify-between gap-4 border-b border-zinc-850 pb-4 mb-4">
+              <div className="flex items-start justify-between gap-4 border-b border-zinc-800 pb-4 mb-4">
                 <div>
                   <h3 className="text-lg font-black text-white uppercase tracking-tight">
                     GARRINCHA {ctr.name}
                   </h3>
-                  <p className="text-xs text-zinc-550 flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3.5 h-3.5 text-zinc-650" />
+                  <p className="text-xs text-zinc-500 flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-zinc-600" />
                     {ctr.city}, {ctr.country}
                   </p>
                 </div>
@@ -124,11 +124,11 @@ export default async function CentersOverviewPage() {
                   Assigned Center Managers ({ctr.managers.length})
                 </span>
                 {ctr.managers.length === 0 ? (
-                  <span className="text-xs italic text-zinc-650 block">No managers assigned currently. Configure in Users page.</span>
+                  <span className="text-xs italic text-zinc-600 block">No managers assigned currently. Configure in Users page.</span>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {ctr.managers.map((m) => (
-                      <div key={m.id} className="px-2.5 py-1 bg-zinc-950 border border-zinc-805 text-xs text-zinc-300">
+                      <div key={m.id} className="px-2.5 py-1 bg-zinc-950 border border-zinc-800 text-xs text-zinc-300">
                         <strong className="text-white uppercase font-bold">{m.fullName}</strong> (@{m.nickname})
                       </div>
                     ))}
@@ -143,9 +143,9 @@ export default async function CentersOverviewPage() {
                   Top Center Competitors
                 </span>
                 {ctr.topPlayers.length === 0 ? (
-                  <span className="text-xs italic text-zinc-605 block py-1 border border-dashed border-zinc-850 text-center">No leaderboard entries available.</span>
+                  <span className="text-xs italic text-zinc-600 block py-1 border border-dashed border-zinc-800 text-center">No leaderboard entries available.</span>
                 ) : (
-                  <div className="divide-y divide-zinc-900 border border-zinc-805 bg-zinc-950/20">
+                  <div className="divide-y divide-zinc-900 border border-zinc-800 bg-zinc-950/20">
                     {ctr.topPlayers.map((row, i) => (
                       <div key={row.id} className="p-3 flex items-center justify-between text-xs hover:bg-zinc-900/10 transition-colors">
                         <div className="flex items-center gap-2">
@@ -164,7 +164,7 @@ export default async function CentersOverviewPage() {
               </div>
             </div>
 
-            <div className="text-[10px] text-zinc-550 border-t border-zinc-850 mt-6 pt-3 uppercase">
+            <div className="text-[10px] text-zinc-500 border-t border-zinc-800 mt-6 pt-3 uppercase">
               Location token identifier: <code className="text-zinc-400">{ctr.id}</code>
             </div>
           </div>

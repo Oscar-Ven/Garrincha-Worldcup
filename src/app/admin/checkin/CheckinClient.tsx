@@ -190,7 +190,7 @@ export default function CheckinClient({
         {/* Code Console block */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-zinc-900 border border-zinc-800 p-6 space-y-5">
-            <h2 className="text-sm font-black text-white uppercase tracking-wider border-b border-zinc-805 pb-3">
+            <h2 className="text-sm font-black text-white uppercase tracking-wider border-b border-zinc-800 pb-3">
               Session Code Generator
             </h2>
 
@@ -203,7 +203,7 @@ export default function CheckinClient({
                 disabled={!isOwner}
                 value={selectedCenterId}
                 onChange={(e) => setSelectedCenterId(e.target.value)}
-                className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-805 text-white text-xs focus:outline-none focus:border-lime-400 transition-colors disabled:opacity-70 disabled:text-zinc-400"
+                className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-lime-400 transition-colors disabled:opacity-70 disabled:text-zinc-400"
               >
                 {!isOwner && (
                   <option value={adminCenterId}>
@@ -220,7 +220,7 @@ export default function CheckinClient({
             </div>
 
             {/* Big chunky display code */}
-            <div className="bg-zinc-950 border border-zinc-805 p-6 flex flex-col items-center justify-center relative min-h-44">
+            <div className="bg-zinc-950 border border-zinc-800 p-6 flex flex-col items-center justify-center relative min-h-44">
               {codeLoading ? (
                 <Loader2 className="w-8 h-8 text-lime-400 animate-spin" />
               ) : activeCode && timeLeft !== "EXPIRED" ? (
@@ -235,14 +235,14 @@ export default function CheckinClient({
               ) : (
                 <div className="text-center text-zinc-600 py-4 max-w-40">
                   <AlertCircle className="w-8 h-8 mx-auto mb-2 text-zinc-700" />
-                  <p className="text-[10px] font-bold uppercase">No active security session currently key.</p>
+                  <p className="text-[10px] font-bold uppercase">No active check-in code.</p>
                 </div>
               )}
             </div>
 
             {/* Error notifications */}
             {error && (
-              <div role="alert" className="flex items-start gap-2.5 p-2 bg-red-900/10 border border-red-905/30 text-red-400 text-xs">
+              <div role="alert" className="flex items-start gap-2.5 p-2 bg-red-900/10 border border-red-900/30 text-red-400 text-xs">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
@@ -250,7 +250,7 @@ export default function CheckinClient({
 
             {/* Success notifications */}
             {success && (
-              <div className="flex items-center gap-2.5 p-2 bg-lime-400/10 border border-lime-405/30 text-lime-400 text-xs">
+              <div className="flex items-center gap-2.5 p-2 bg-lime-400/10 border border-lime-400/30 text-lime-400 text-xs">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>{success}</span>
               </div>
@@ -261,7 +261,7 @@ export default function CheckinClient({
               <button
                 onClick={handleGenerateCode}
                 disabled={loading}
-                className="w-full py-3 bg-lime-400 hover:bg-lime-300 disabled:bg-zinc-810 disabled:text-zinc-500 font-bold uppercase tracking-wider text-xs text-zinc-950 transition-colors flex items-center justify-center gap-1.5"
+                className="w-full py-3 bg-lime-400 hover:bg-lime-300 disabled:bg-zinc-800 disabled:text-zinc-500 font-bold uppercase tracking-wider text-xs text-zinc-950 transition-colors flex items-center justify-center gap-1.5"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin shrink-0" />
@@ -274,7 +274,7 @@ export default function CheckinClient({
               {activeCode && timeLeft !== "EXPIRED" && (
                 <button
                   onClick={handleCopy}
-                  className="w-full py-2.5 bg-zinc-850 hover:bg-zinc-800 border border-zinc-755 font-bold uppercase tracking-wider text-[11px] text-white transition-colors flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-800 border border-zinc-700 font-bold uppercase tracking-wider text-[11px] text-white transition-colors flex items-center justify-center gap-1.5"
                 >
                   <Copy className="w-3.5 h-3.5" />
                   <span>{copyText}</span>
@@ -289,7 +289,7 @@ export default function CheckinClient({
           <div className="bg-zinc-900/40 border border-zinc-800 p-6 flex flex-col justify-between h-full min-h-120">
             <div className="space-y-4">
               {/* Internal header filtering */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-850 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
                 <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
                   <UserCheck className="w-4 h-4 text-lime-400" />
                   Checked-In Competing Players ({initialCheckins.length})
@@ -304,7 +304,7 @@ export default function CheckinClient({
                     placeholder="Search checked-in..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-805 text-white text-xs placeholder-zinc-650 focus:outline-none focus:border-lime-400 transition-colors"
+                    className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 text-white text-xs placeholder-zinc-600 focus:outline-none focus:border-lime-400 transition-colors"
                   />
                 </div>
               </div>
@@ -312,7 +312,7 @@ export default function CheckinClient({
               {/* Data list view */}
               <div className="overflow-y-auto max-h-80 divide-y divide-zinc-900 pr-1">
                 {filteredCheckins.length === 0 ? (
-                  <div className="text-center py-16 text-zinc-550">
+                  <div className="text-center py-16 text-zinc-500">
                     <UserCheck className="w-8 h-8 mx-auto mb-2 opacity-20 text-lime-400" />
                     <p className="text-[10px] uppercase font-bold">No physical check-ins registered.</p>
                   </div>
@@ -340,7 +340,7 @@ export default function CheckinClient({
                             <Clock className="w-3 h-3 text-lime-400" />
                             {checkinTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </span>
-                          <span className="text-zinc-550 text-[9px]">
+                          <span className="text-zinc-500 text-[9px]">
                             {checkinTime.toLocaleDateString([], { dateStyle: "short" })}
                           </span>
                         </div>
@@ -351,11 +351,11 @@ export default function CheckinClient({
               </div>
             </div>
 
-            <div className="border-t border-zinc-850 pt-4 flex justify-between items-center text-[10px] text-zinc-500">
+            <div className="border-t border-zinc-800 pt-4 flex justify-between items-center text-[10px] text-zinc-500">
               <span>* Valid check-ins automatically credit competitors with +5 verification attendance bonus points.</span>
               <button
                 onClick={() => window.print()}
-                className="flex items-center gap-1 hover:text-white px-2 py-1 border border-zinc-805 hover:bg-zinc-850"
+                className="flex items-center gap-1 hover:text-white px-2 py-1 border border-zinc-800 hover:bg-zinc-800"
               >
                 <Printer className="w-3 h-3 text-lime-400" />
                 <span>Print Log</span>

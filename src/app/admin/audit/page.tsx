@@ -104,7 +104,7 @@ export default async function AuditViewPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-zinc-805 text-zinc-500 font-bold uppercase tracking-wider bg-zinc-950/20">
+                  <tr className="border-b border-zinc-800 text-zinc-500 font-bold uppercase tracking-wider bg-zinc-950/20">
                     <th className="px-6 py-3">Timestamp</th>
                     <th className="px-6 py-3">Player Account</th>
                     <th className="px-6 py-3 text-center">Center Shift Transition</th>
@@ -115,7 +115,7 @@ export default async function AuditViewPage() {
                   {serializedChangeLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-zinc-900/10 transition-colors">
                       <td className="px-6 py-4 text-zinc-500 font-mono text-[10px] whitespace-nowrap">
-                        <Clock className="w-3 h-3 inline mr-1 text-zinc-650" />
+                        <Clock className="w-3 h-3 inline mr-1 text-zinc-600" />
                         {new Date(log.timestamp).toLocaleString()}
                       </td>
                       <td className="px-6 py-4">
@@ -124,7 +124,7 @@ export default async function AuditViewPage() {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className="text-zinc-400 uppercase font-semibold">{log.fromCenter}</span>
-                        <span className="mx-2 text-lime-404 font-black">→</span>
+                        <span className="mx-2 text-lime-400 font-black">→</span>
                         <span className="text-lime-400 uppercase font-extrabold">{log.toCenter}</span>
                       </td>
                       <td className="px-6 py-4 text-right font-mono text-zinc-400 text-[11px] whitespace-nowrap">
@@ -151,7 +151,7 @@ export default async function AuditViewPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-zinc-805 text-zinc-500 font-bold uppercase tracking-wider bg-zinc-950/20">
+                  <tr className="border-b border-zinc-800 text-zinc-500 font-bold uppercase tracking-wider bg-zinc-950/20">
                     <th className="px-6 py-3">Timestamp</th>
                     <th className="px-6 py-3">Recipient Player</th>
                     <th className="px-6 py-3 text-center">Assigned Sports Center</th>
@@ -164,7 +164,7 @@ export default async function AuditViewPage() {
                   {serializedPointLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-zinc-900/10 transition-colors">
                       <td className="px-6 py-4 text-zinc-500 font-mono text-[10px] whitespace-nowrap">
-                        <Clock className="w-3 h-3 inline mr-1 text-zinc-650" />
+                        <Clock className="w-3 h-3 inline mr-1 text-zinc-600" />
                         {new Date(log.timestamp).toLocaleString()}
                       </td>
                       <td className="px-6 py-4">

@@ -1,4 +1,4 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -120,7 +120,7 @@ export default async function AdminPage() {
               Global system overview, analytical feeds, and management interfaces.
             </p>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1 border border-zinc-805 bg-zinc-900 text-xs font-mono text-zinc-400">
+          <div className="flex items-center gap-2 px-3 py-1 border border-zinc-800 bg-zinc-900 text-xs font-mono text-zinc-400">
             Node status: <span className="text-lime-400 font-bold">ONLINE</span>
           </div>
         </div>
@@ -261,7 +261,7 @@ export default async function AdminPage() {
                               {ctr.activeCode}
                             </span>
                           ) : (
-                            <span className="text-zinc-650">—</span>
+                            <span className="text-zinc-600">—</span>
                           )}
                         </td>
                       </tr>
@@ -316,7 +316,7 @@ export default async function AdminPage() {
             <div className="border border-zinc-800 bg-zinc-900/10">
               <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-900/30">
                 <h2 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-lime-405" />
+                  <Activity className="w-4 h-4 text-lime-400" />
                   Registry Audit Trail
                 </h2>
               </div>
@@ -453,7 +453,7 @@ export default async function AdminPage() {
               {activeSession ? (
                 <span className="text-lime-400 tracking-widest">{activeSession.code}</span>
               ) : (
-                <span className="text-zinc-505 text-sm">NO ACTIVE CODE</span>
+                <span className="text-zinc-500 text-sm">NO ACTIVE CODE</span>
               )}
             </div>
             <div className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold mt-1.5 flex items-center gap-1">
