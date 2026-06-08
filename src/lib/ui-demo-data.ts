@@ -6,16 +6,7 @@ export { hasDatabaseConfig, isPreviewMode } from "@/lib/app-mode";
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const demoCenters = [
-  { id: "demo-antwerpen-noord",      name: "GARRINCHA Antwerpen Noord",      city: "Antwerpen", country: "Belgium" },
-  { id: "demo-antwerpen-zuid",       name: "GARRINCHA Antwerpen Zuid",       city: "Antwerpen", country: "Belgium" },
-  { id: "demo-charleroi-dampremy",   name: "GARRINCHA Charleroi Dampremy",   city: "Charleroi", country: "Belgium" },
-  { id: "demo-charleroi-montignies", name: "GARRINCHA Charleroi Montignies", city: "Charleroi", country: "Belgium" },
-  { id: "demo-diegem",               name: "GARRINCHA Diegem",               city: "Diegem",    country: "Belgium" },
-  { id: "demo-gent-arsenaal",        name: "GARRINCHA Gent Arsenaal",        city: "Gent",      country: "Belgium" },
-  { id: "demo-gent-theloop",         name: "GARRINCHA Gent The Loop",        city: "Gent",      country: "Belgium" },
-  { id: "demo-kortrijk",             name: "GARRINCHA Kortrijk",             city: "Kortrijk",  country: "Belgium" },
-  { id: "demo-luik",                 name: "GARRINCHA Luik",                 city: "Luik",      country: "Belgium" },
-  { id: "demo-westgate-dilbeek",     name: "GARRINCHA Westgate Dilbeek",     city: "Dilbeek",   country: "Belgium" },
+  { id: "demo-head-quarter", name: "Head Quarter", city: "Brussels", country: "Belgium" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -260,9 +251,9 @@ export const demoMatches = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const demoLeaderboard = [
-  { id: "demo-user-1", name: "Ana Martins",   nationality: "Belgium", center: "GARRINCHA Gent Arsenaal",    points: 28, predictionCount: 3 },
-  { id: "demo-user-2", name: "Bilal Haddad",  nationality: "Morocco", center: "GARRINCHA Antwerpen Noord",  points: 24, predictionCount: 2 },
-  { id: "demo-user-3", name: "Clara Janssens",nationality: "Belgium", center: "GARRINCHA Kortrijk",         points: 19, predictionCount: 2 },
+  { id: "demo-user-1", name: "Ana Martins",    nationality: "Belgium", center: "Head Quarter", points: 28, predictionCount: 3 },
+  { id: "demo-user-2", name: "Bilal Haddad",   nationality: "Morocco", center: "Head Quarter", points: 24, predictionCount: 2 },
+  { id: "demo-user-3", name: "Clara Janssens", nationality: "Belgium", center: "Head Quarter", points: 19, predictionCount: 2 },
 ];
 
 export const demoUser = {
@@ -273,10 +264,10 @@ export const demoUser = {
   nickname: "Ana",
   nationality: "Belgium",
   role: "USER" as const,
-  competitionCenterId: "demo-gent-arsenaal",
+  competitionCenterId: "demo-head-quarter",
   competitionCenterLockedAt: null,
-  competitionCenter: { id: "demo-gent-arsenaal", name: "GARRINCHA Gent Arsenaal", country: "Belgium", city: "Gent" },
-  center: { id: "demo-gent-arsenaal", name: "GARRINCHA Gent Arsenaal", country: "Belgium", city: "Gent", bannerUrl: null },
+  competitionCenter: { id: "demo-head-quarter", name: "Head Quarter", country: "Belgium", city: "Brussels" },
+  center: { id: "demo-head-quarter", name: "Head Quarter", country: "Belgium", city: "Brussels", bannerUrl: null },
 };
 
 export const demoBonusUsers = [
