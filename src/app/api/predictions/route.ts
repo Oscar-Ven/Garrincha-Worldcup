@@ -5,14 +5,14 @@ import { isPreviewMode } from "@/lib/app-mode";
 import { prisma } from "@/lib/prisma";
 import { canSavePrediction } from "@/lib/product-logic";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { rejectCrossOriginRequest } from "@/lib/request-security";
+import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
 import { predictionSchema } from "@/lib/validators";
 
 export async function POST(request: NextRequest) {
   const originError = rejectCrossOriginRequest(request);
   if (originError) return originError;
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  const ip = getClientIp(request);
   if (!(await checkRateLimit(`predictions:${ip}`, 60, 60 * 1000))) {
     return NextResponse.json({ error: "Too many prediction requests. Please slow down." }, { status: 429 });
   }

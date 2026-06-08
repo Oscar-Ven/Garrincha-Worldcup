@@ -2,7 +2,8 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { createLeaderboardRows, leaderboardDisplayName, type LeaderboardInputUser } from "@/lib/product-logic";
+import { leaderboardDisplayName } from "@/lib/product-logic";
+import { getLeaderboard, getUserCenterRank, getUserRankAndPoints } from "@/lib/leaderboards";
 import { isPredictionLocked } from "@/lib/scoring";
 import { prisma } from "@/lib/prisma";
 
@@ -51,21 +52,17 @@ export const playerPredictionMatchOrderBy = [{ kickoffAt: "asc" as const }, { fi
 export async function getPlayerDashboardData(user: PlayerRouteUser) {
   const now = new Date();
 
-  const [leaderboardUsers, centerCheckin, predictionCount, matches] = await Promise.all([
-    prisma.user.findMany({
-      where: { role: "USER", competitionCenterId: { not: null } },
-      select: {
-        id: true,
-        displayName: true,
-        nickname: true,
-        fullName: true,
-        email: true,
-        nationality: true,
-        competitionCenter: { select: { name: true } },
-        predictions: { select: { pointsAwarded: true } },
-        pointEvents: { select: { points: true } },
-      },
-    }) as Promise<LeaderboardInputUser[]>,
+  const [
+    centerCheckin,
+    predictionCount,
+    matches,
+    predictionPointsAgg,
+    bonusPointsAgg,
+    rankData,
+    centerRankResult,
+    leaderboardTop,
+    centerLeaderboardTop,
+  ] = await Promise.all([
     prisma.centerCheckIn.findUnique({
       where: { userId: user.id },
       select: { createdAt: true, expiresAt: true, centerId: true },
@@ -88,20 +85,29 @@ export async function getPlayerDashboardData(user: PlayerRouteUser) {
       },
       orderBy: playerPredictionMatchOrderBy,
     }),
+    prisma.prediction.aggregate({
+      where: { userId: user.id },
+      _sum: { pointsAwarded: true },
+    }),
+    prisma.pointEvent.aggregate({
+      where: { userId: user.id },
+      _sum: { points: true },
+    }),
+    getUserRankAndPoints(user.id),
+    user.competitionCenterId
+      ? getUserCenterRank(user.id, user.competitionCenterId)
+      : Promise.resolve(0),
+    getLeaderboard({}, 8),
+    user.competitionCenterId
+      ? getLeaderboard({ competitionCenterId: user.competitionCenterId }, 8)
+      : Promise.resolve([]),
   ]);
 
-  const leaderboard = createLeaderboardRows(leaderboardUsers);
-  const playerRow = leaderboard.find((row) => row.id === user.id);
-  const globalRank = playerRow ? leaderboard.findIndex((row) => row.id === user.id) + 1 : null;
-  const centerLeaderboard = leaderboard.filter((row) => row.center === (user.competitionCenter?.name ?? ""));
-  const centerRank = playerRow ? centerLeaderboard.findIndex((row) => row.id === user.id) + 1 : null;
+  const globalRank = rankData.rank > 0 ? rankData.rank : null;
+  const centerRank = centerRankResult > 0 ? centerRankResult : null;
 
-  const totalPredictionPoints = leaderboardUsers
-    .find((entry) => entry.id === user.id)
-    ?.predictions.reduce((sum, prediction) => sum + prediction.pointsAwarded, 0) ?? 0;
-  const totalBonusPoints = leaderboardUsers
-    .find((entry) => entry.id === user.id)
-    ?.pointEvents.reduce((sum, event) => sum + event.points, 0) ?? 0;
+  const totalPredictionPoints = predictionPointsAgg._sum.pointsAwarded ?? 0;
+  const totalBonusPoints = bonusPointsAgg._sum.points ?? 0;
 
   const playerName = leaderboardDisplayName({
     id: user.id,
@@ -155,7 +161,7 @@ export async function getPlayerDashboardData(user: PlayerRouteUser) {
     ).slice(0, 4),
     recentCompletedMatches: matchCards.filter((match) => match.status === "FINAL").slice(-4).reverse(),
     allMatches: matchCards,
-    leaderboardTop: leaderboard.slice(0, 8),
-    centerLeaderboardTop: centerLeaderboard.slice(0, 8),
+    leaderboardTop,
+    centerLeaderboardTop,
   };
 }

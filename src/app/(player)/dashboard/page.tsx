@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, CalendarDays, Coins, Landmark, Target, Trophy } from "lucide-react";
 import PrizeCards from "@/components/public/PrizeCards";
 import { prisma } from "@/lib/prisma";
-import { createLeaderboardRows } from "@/lib/product-logic";
+import { getUserCenterRank, getUserRankAndPoints } from "@/lib/leaderboards";
 import { isPredictionLocked } from "@/lib/scoring";
 import { requirePlayerContext } from "@/lib/player-app";
 import { t } from "@/lib/translations";
@@ -17,7 +17,7 @@ export default async function DashboardPage() {
     redirect("/center");
   }
 
-  const [predictions, matches, leaderboardUsers, pointEvents, checkIn] = await Promise.all([
+  const [predictions, matches, pointEvents, checkIn, rankData, centerRank] = await Promise.all([
     prisma.prediction.findMany({
       where: { userId: user.id },
       select: { matchId: true, pointsAwarded: true },
@@ -29,20 +29,6 @@ export default async function DashboardPage() {
       },
       orderBy: { kickoffAt: "asc" },
     }),
-    prisma.user.findMany({
-      where: { role: "USER", competitionCenterId: { not: null } },
-      select: {
-        id: true,
-        displayName: true,
-        nickname: true,
-        fullName: true,
-        email: true,
-        nationality: true,
-        competitionCenter: { select: { name: true } },
-        predictions: { select: { pointsAwarded: true } },
-        pointEvents: { select: { points: true } },
-      },
-    }),
     prisma.pointEvent.findMany({
       where: { userId: user.id },
       select: { points: true, reason: true, createdAt: true },
@@ -50,6 +36,10 @@ export default async function DashboardPage() {
       take: 5,
     }),
     prisma.centerCheckIn.findUnique({ where: { userId: user.id } }),
+    getUserRankAndPoints(user.id),
+    user.competitionCenterId
+      ? getUserCenterRank(user.id, user.competitionCenterId)
+      : Promise.resolve(0),
   ]);
 
   const predictionMap = new Map(predictions.map((prediction) => [prediction.matchId, prediction]));
@@ -57,10 +47,7 @@ export default async function DashboardPage() {
     predictions.reduce((sum, prediction) => sum + prediction.pointsAwarded, 0) +
     pointEvents.reduce((sum, event) => sum + event.points, 0);
 
-  const leaderboard = createLeaderboardRows(leaderboardUsers);
-  const globalRank = leaderboard.findIndex((row) => row.id === user.id) + 1;
-  const centerBoard = leaderboard.filter((row) => row.center === (user.competitionCenter?.name ?? ""));
-  const centerRank = centerBoard.findIndex((row) => row.id === user.id) + 1;
+  const globalRank = rankData.rank;
 
   const upcomingMatches = matches
     .filter((match) => match.status === "SCHEDULED" && !isPredictionLocked(match.kickoffAt))
@@ -86,7 +73,7 @@ export default async function DashboardPage() {
   const statCards = [
     { label: t(locale, "dashboard.totalPoints"), value: String(totalPoints), icon: Coins },
     { label: t(locale, "dashboard.globalRank"), value: globalRank > 0 ? `#${globalRank}` : "-", icon: Trophy },
-    { label: "Center rank", value: centerRank > 0 ? `#${centerRank}` : "-", icon: Landmark },
+    { label: "Center rank", value: (centerRank as number) > 0 ? `#${centerRank}` : "-", icon: Landmark },
     { label: t(locale, "dashboard.myPredictions"), value: String(predictions.length), icon: Target },
   ];
 

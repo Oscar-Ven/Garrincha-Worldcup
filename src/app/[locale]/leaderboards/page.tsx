@@ -5,6 +5,8 @@ import { demoLeaderboard } from "@/lib/ui-demo-data";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+export const revalidate = 300;
+
 type LeaderRow = {
   id: string;
   nickname: string;
@@ -24,32 +26,15 @@ async function getLeaderboard(): Promise<LeaderRow[]> {
     }));
   }
 
-  const { prisma } = await import("@/lib/prisma");
-  const users = await prisma.user.findMany({
-    where: { role: "USER" },
-    select: {
-      id: true,
-      nickname: true,
-      nationality: true,
-      competitionCenter: { select: { name: true } },
-      predictions: { select: { pointsAwarded: true } },
-    },
-    take: 200,
-  });
-
-  return users
-    .map((u) => ({
-      id: u.id,
-      nickname: u.nickname ?? "—",
-      center: (u.competitionCenter?.name ?? "—").replace("GARRINCHA ", ""),
-      nationality: u.nationality ?? "—",
-      points: u.predictions.reduce(
-        (sum, p) => sum + (p.pointsAwarded ?? 0),
-        0
-      ),
-    }))
-    .sort((a, b) => b.points - a.points)
-    .slice(0, 50);
+  const { getLeaderboard } = await import("@/lib/leaderboards");
+  const rows = await getLeaderboard({}, 50);
+  return rows.map((r) => ({
+    id: r.id,
+    nickname: r.name,
+    center: r.center.replace("GARRINCHA ", ""),
+    nationality: r.nationality,
+    points: r.points,
+  }));
 }
 
 export default async function LeaderboardsPage({

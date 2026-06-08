@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { rejectCrossOriginRequest } from "@/lib/request-security";
+import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
 import { isLocale } from "@/lib/translations";
 
 export async function POST(request: NextRequest) {
   const originError = rejectCrossOriginRequest(request);
   if (originError) return originError;
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  const ip = getClientIp(request);
   if (!(await checkRateLimit(`locale:${ip}`, 20, 60 * 60 * 1000))) {
     return NextResponse.json({ error: "Too many requests." }, { status: 429 });
   }

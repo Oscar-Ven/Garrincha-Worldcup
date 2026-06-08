@@ -4,14 +4,14 @@ import { createSession } from "@/lib/auth";
 import { getLocaleFromRequest, rotateAndSendAccessLink } from "@/lib/access-link";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { rejectCrossOriginRequest } from "@/lib/request-security";
+import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
 import { registerSchema } from "@/lib/validators";
 
 export async function POST(request: NextRequest) {
   const originError = rejectCrossOriginRequest(request);
   if (originError) return originError;
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  const ip = getClientIp(request);
   if (!(await checkRateLimit(`register:${ip}`, 5, 60 * 60 * 1000))) {
     return NextResponse.json(
       { error: "Too many registration attempts. Please try again in 1 hour." },

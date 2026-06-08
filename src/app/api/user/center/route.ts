@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { canChangeSelfServiceCenter } from "@/lib/product-logic";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { rejectCrossOriginRequest } from "@/lib/request-security";
+import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
 
 const schema = z.object({ centerId: z.string().min(1) });
 
@@ -17,7 +17,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Please log in to update your center." }, { status: 401 });
   }
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  const ip = getClientIp(request);
   if (!(await checkRateLimit(`user-center:${user.id}`, 5, 60 * 60 * 1000))) {
     return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   }

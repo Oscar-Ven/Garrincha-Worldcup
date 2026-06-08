@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
 import { hasDatabaseConfig, hasUsableDatabaseUrl, isPreviewMode } from "@/lib/app-mode";
+import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   if (process.env.DEBUG_DB_DIAGNOSTIC !== "true") {
     return NextResponse.json({ error: "Disabled." }, { status: 404 });
+  }
+
+  try {
+    await requireAdmin();
+  } catch {
+    return NextResponse.json({ error: "Admin access required." }, { status: 403 });
   }
 
   const raw = process.env.DATABASE_URL ?? "";

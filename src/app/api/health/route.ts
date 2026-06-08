@@ -44,11 +44,7 @@ export async function GET() {
     "degraded";
 
   return NextResponse.json(
-    {
-      status: overall,
-      services: { db, cache },
-      env: process.env.VERCEL_ENV ?? process.env.NODE_ENV ?? "unknown",
-    },
+    { status: overall, services: { db, cache } },
     {
       status: overall === "error" ? 503 : 200,
       headers: { "Cache-Control": "no-store" },
