@@ -144,11 +144,11 @@ export default function PrizeCards({ preview = false, prizesHref = "/en/prizes" 
             {/* Racket image — right */}
             <div className="shrink-0 md:w-[38%] flex items-center justify-center max-h-55 md:max-h-65 overflow-hidden">
               <Image
-                src="/images/prizes/belgium-team-adidas-racket.png"
+                src="/images/prizes/belgium-team-adidas-racket.jpeg"
                 alt="Belgium Team Adidas padel racket — Overall Winner prize"
-                width={400}
-                height={530}
-                className="w-auto max-w-full max-h-55 md:max-h-65 object-contain drop-shadow-[0_0_24px_rgba(10,238,150,0.15)]"
+                width={600}
+                height={800}
+                className="w-auto max-w-full max-h-55 md:max-h-65 object-contain mix-blend-screen"
                 priority
               />
             </div>
