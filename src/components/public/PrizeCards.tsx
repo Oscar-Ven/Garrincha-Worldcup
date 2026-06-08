@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Trophy, Medal } from "lucide-react";
 
@@ -141,19 +142,35 @@ export default function PrizeCards({ preview = false, prizesHref = "/en/prizes" 
         </div>
       </section>
 
-      {/* Sponsor line */}
-      <p className="text-xs text-zinc-600 border-t border-zinc-900 pt-6">
-        Gift cards sponsored by{" "}
+      {/* Sponsor section */}
+      <section className="border-t border-zinc-900 pt-10">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-6 text-center">
+          Prize Sponsor
+        </p>
         <a
           href={JUSTPADEL_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-zinc-400 hover:text-lime-400 transition-colors underline underline-offset-2"
+          className="group flex flex-col items-center gap-6 border border-zinc-800 bg-zinc-900/60 p-8 md:p-10 hover:border-zinc-700 transition-colors"
         >
-          JustPadel
+          <p className="text-sm text-zinc-400 font-medium text-center group-hover:text-white transition-colors">
+            Gift cards sponsored by <span className="text-white font-bold">JustPadel</span>
+          </p>
+          <div className="w-full flex items-center justify-center">
+            <Image
+              src="/branding/justpadel-logo.png"
+              alt="Justpadel sponsor logo"
+              width={1080}
+              height={576}
+              className="w-full max-w-65 md:max-w-80 h-auto object-contain"
+              style={{ objectFit: "contain" }}
+            />
+          </div>
+          <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 group-hover:text-lime-400 transition-colors">
+            Visit JustPadel →
+          </span>
         </a>
-        .
-      </p>
+      </section>
     </div>
   );
 }
