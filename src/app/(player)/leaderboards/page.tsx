@@ -1,8 +1,7 @@
 import { Crown, MapPin, type LucideIcon } from "lucide-react";
 import PrizeCards from "@/components/public/PrizeCards";
 import { requirePlayerContext } from "@/lib/player-app";
-import { prisma } from "@/lib/prisma";
-import { createLeaderboardRows } from "@/lib/product-logic";
+import { getLeaderboard } from "@/lib/leaderboards";
 
 export const dynamic = "force-dynamic";
 
@@ -65,23 +64,12 @@ function LeaderboardSection({
 export default async function PlayerLeaderboardsPage() {
   const { user } = await requirePlayerContext();
 
-  const users = await prisma.user.findMany({
-    where: { role: "USER", competitionCenterId: { not: null } },
-    select: {
-      id: true,
-      displayName: true,
-      nickname: true,
-      fullName: true,
-      email: true,
-      nationality: true,
-      competitionCenter: { select: { name: true } },
-      predictions: { select: { pointsAwarded: true } },
-      pointEvents: { select: { points: true } },
-    },
-  });
-
-  const globalRows = createLeaderboardRows(users);
-  const centerRows = globalRows.filter((row) => row.center === (user.competitionCenter?.name ?? ""));
+  const [globalRows, centerRows] = await Promise.all([
+    getLeaderboard({}, 200),
+    user.competitionCenterId
+      ? getLeaderboard({ competitionCenterId: user.competitionCenterId }, 200)
+      : Promise.resolve([]),
+  ]);
 
   return (
     <div className="space-y-5">

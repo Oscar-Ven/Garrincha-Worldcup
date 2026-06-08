@@ -19,3 +19,16 @@ export function rejectCrossOriginRequest(request: Request) {
   if (isSameOriginRequest(request)) return null;
   return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
 }
+
+/**
+ * Returns the real client IP address.
+ * Prefers x-real-ip (set by Vercel/Nginx edge) over x-forwarded-for,
+ * which can be spoofed in setups without a trusted proxy.
+ */
+export function getClientIp(request: Request): string {
+  return (
+    request.headers.get("x-real-ip")?.trim() ??
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    "unknown"
+  );
+}

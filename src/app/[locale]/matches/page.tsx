@@ -5,6 +5,8 @@ import { isLocale, type Locale, t } from "@/lib/translations";
 import { isPreviewMode } from "@/lib/app-mode";
 import MatchSchedule, { type PublicMatchRow } from "@/components/public/MatchSchedule";
 
+export const revalidate = 60;
+
 const DEMO_MATCHES: PublicMatchRow[] = [
   {
     id: "demo-1",

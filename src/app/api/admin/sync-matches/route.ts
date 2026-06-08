@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { createMatchDataWorkflowPlan } from "@/lib/match-data-workflow";
 import { recalculatePredictionPoints } from "@/lib/product-logic";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { rejectCrossOriginRequest } from "@/lib/request-security";
+import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
 
 // ---------------------------------------------------------------------------
 // Cron auth
@@ -250,7 +250,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Admin access required." }, { status: 403 });
   }
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  const ip = getClientIp(request);
   if (!(await checkRateLimit(`sync-matches:${ip}`, 10, 60 * 1000))) {
     return NextResponse.json({ error: "Too many sync requests." }, { status: 429 });
   }

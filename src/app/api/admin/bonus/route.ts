@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAwardBonus } from "@/lib/product-logic";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { rejectCrossOriginRequest } from "@/lib/request-security";
+import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
 import { bonusSchema } from "@/lib/validators";
 
 export async function POST(request: NextRequest) {
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Admin access required." }, { status: 403 });
   }
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  const ip = getClientIp(request);
   if (!(await checkRateLimit(`admin-bonus:${ip}`, 120, 60 * 1000))) {
     return NextResponse.json({ error: "Too many requests." }, { status: 429 });
   }

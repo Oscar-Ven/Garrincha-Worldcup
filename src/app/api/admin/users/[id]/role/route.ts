@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSuperAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { rejectCrossOriginRequest } from "@/lib/request-security";
+import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
 import { userRoleSchema } from "@/lib/validators";
 
 export async function PATCH(
@@ -20,7 +20,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Super admin access required." }, { status: 403 });
   }
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  const ip = getClientIp(request);
   if (!(await checkRateLimit(`admin-users-role:${ip}`, 30, 60 * 1000))) {
     return NextResponse.json({ error: "Too many requests." }, { status: 429 });
   }

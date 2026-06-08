@@ -17,30 +17,19 @@ import PrizeCards from "@/components/public/PrizeCards";
 import CountdownTimer from "@/components/public/CountdownTimer";
 import { prisma } from "@/lib/prisma";
 import { flagLabel, isoCodeForTeam } from "@/lib/flags";
+import { getLeaderboard } from "@/lib/leaderboards";
+
+export const revalidate = 300;
 
 async function getTopPlayers() {
-  const users = await prisma.user.findMany({
-    where: { role: "USER" },
-    select: {
-      id: true,
-      nickname: true,
-      nationality: true,
-      competitionCenter: { select: { name: true } },
-      predictions: { select: { pointsAwarded: true } },
-    },
-    take: 100,
-  });
-
-  return users
-    .map((u) => ({
-      id: u.id,
-      name: u.nickname ?? "—",
-      nationality: u.nationality ?? "—",
-      center: (u.competitionCenter?.name ?? "—").replace("GARRINCHA ", ""),
-      points: u.predictions.reduce((s, p) => s + (p.pointsAwarded ?? 0), 0),
-    }))
-    .sort((a, b) => b.points - a.points)
-    .slice(0, 5);
+  const rows = await getLeaderboard({}, 5);
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    nationality: r.nationality,
+    center: r.center.replace("GARRINCHA ", ""),
+    points: r.points,
+  }));
 }
 
 export type FeaturedFixture = {

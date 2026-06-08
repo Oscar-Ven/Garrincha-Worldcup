@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSuperAdmin, hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { rejectCrossOriginRequest } from "@/lib/request-security";
+import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
 import { z } from "zod";
 
 const createManagerSchema = z.object({
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Super admin access required." }, { status: 403 });
   }
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  const ip = getClientIp(request);
   if (!(await checkRateLimit(`admin-create-user:${ip}`, 30, 60 * 1000))) {
     return NextResponse.json({ error: "Too many requests." }, { status: 429 });
   }
