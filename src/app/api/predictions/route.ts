@@ -36,6 +36,9 @@ export async function POST(request: NextRequest) {
   if (!match) {
     return NextResponse.json({ error: "Match not found." }, { status: 404 });
   }
+  if (match.status !== "SCHEDULED") {
+    return NextResponse.json({ error: "Predictions can only be submitted for scheduled matches." }, { status: 400 });
+  }
 
   if (!isPreviewMode() && session) {
     const user = await getCurrentUser();
