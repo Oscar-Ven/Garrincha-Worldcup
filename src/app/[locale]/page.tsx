@@ -15,6 +15,7 @@ import { t, isLocale, type Locale } from "@/lib/translations";
 import FAQAccordion from "@/components/public/FAQAccordion";
 import CountdownTimer from "@/components/public/CountdownTimer";
 import { prisma } from "@/lib/prisma";
+import { flagLabel, isoCodeForTeam } from "@/lib/flags";
 
 async function getTopPlayers() {
   const users = await prisma.user.findMany({
@@ -39,6 +40,75 @@ async function getTopPlayers() {
     }))
     .sort((a, b) => b.points - a.points)
     .slice(0, 5);
+}
+
+export type FeaturedFixture = {
+  fifaMatchNo: number | null;
+  stage: string;
+  venue: string;
+  kickoffAt: Date;
+  homeTeam: { name: string; fifaCode: string; flagUrl: string };
+  awayTeam: { name: string; fifaCode: string; flagUrl: string };
+};
+
+export async function getFeaturedFixture(now = new Date()): Promise<FeaturedFixture | null> {
+  const includeTeams = {
+    homeTeam: { select: { name: true, fifaCode: true, flagUrl: true } },
+    awayTeam: { select: { name: true, fifaCode: true, flagUrl: true } },
+  };
+  const belgiumWhere = {
+    stage: "GROUP" as const,
+    OR: [
+      { homeTeam: { name: "Belgium" } },
+      { awayTeam: { name: "Belgium" } },
+    ],
+  };
+
+  const upcoming = await prisma.match.findFirst({
+    where: {
+      ...belgiumWhere,
+      status: "SCHEDULED",
+      kickoffAt: { gte: now },
+    },
+    include: includeTeams,
+    orderBy: [{ kickoffAt: "asc" }, { fifaMatchNo: "asc" }],
+  });
+  if (upcoming) return upcoming;
+
+  return prisma.match.findFirst({
+    where: belgiumWhere,
+    include: includeTeams,
+    orderBy: [{ kickoffAt: "asc" }, { fifaMatchNo: "asc" }],
+  });
+}
+
+function formatFeaturedDate(date: Date, locale: Locale) {
+  return new Intl.DateTimeFormat(locale, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function FlagMark({ team }: { team: FeaturedFixture["homeTeam"] }) {
+  const isoCode = isoCodeForTeam(team);
+  if (!isoCode || isoCode.startsWith("GB-")) {
+    return (
+      <span className="flex h-5 w-7 items-center justify-center rounded-sm bg-zinc-800 text-[10px] font-black text-white">
+        {team.fifaCode.slice(0, 2)}
+      </span>
+    );
+  }
+
+  return (
+    <Image
+      src={`https://flagcdn.com/w40/${isoCode.toLowerCase()}.png`}
+      alt={flagLabel(team.name, isoCode)}
+      width={28}
+      height={20}
+      className="rounded-sm shrink-0"
+    />
+  );
 }
 
 const CENTERS = [
@@ -72,7 +142,10 @@ export default async function LandingPage({
   if (!isLocale(lp)) redirect("/en");
   const locale = lp as Locale;
 
-  const topPlayers = await getTopPlayers();
+  const [topPlayers, featuredFixture] = await Promise.all([
+    getTopPlayers(),
+    getFeaturedFixture(),
+  ]);
 
   const faqItems = [
     { q: t(locale, "faq1q"), a: t(locale, "faq1a") },
@@ -110,23 +183,41 @@ export default async function LandingPage({
             </span>
           </h1>
 
-          {/* Belgium vs Morocco featured matchup */}
+          {/* Featured Belgium fixture */}
           <div className="flex items-center gap-4 mb-8 px-5 py-3 border border-zinc-800 bg-zinc-900/60 backdrop-blur-sm">
-            <div className="flex items-center gap-2.5">
-              <Image src="https://flagcdn.com/w40/be.png" alt="Belgium" width={28} height={20} className="rounded-sm shrink-0" />
-              <span className="text-white font-black uppercase tracking-tight text-sm hidden sm:block">Belgium</span>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-500">Group Stage</span>
-              <span className="text-lime-400 font-black text-base tracking-widest">VS</span>
-              <span className="text-[9px] font-mono text-zinc-600">Jun 11 · 2026</span>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <span className="text-white font-black uppercase tracking-tight text-sm hidden sm:block">Morocco</span>
-              <Image src="https://flagcdn.com/w40/ma.png" alt="Morocco" width={28} height={20} className="rounded-sm shrink-0" />
-            </div>
+            {featuredFixture ? (
+              <>
+                <div className="flex items-center gap-2.5">
+                  <FlagMark team={featuredFixture.homeTeam} />
+                  <span className="text-white font-black uppercase tracking-tight text-sm hidden sm:block">
+                    {featuredFixture.homeTeam.name}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+                    {featuredFixture.stage.replaceAll("_", " ")}
+                  </span>
+                  <span className="text-lime-400 font-black text-base tracking-widest">VS</span>
+                  <span className="text-[9px] font-mono text-zinc-600">
+                    {formatFeaturedDate(featuredFixture.kickoffAt, locale)}
+                  </span>
+                  <span className="max-w-[180px] truncate text-[9px] font-mono text-zinc-600">
+                    {featuredFixture.venue}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-white font-black uppercase tracking-tight text-sm hidden sm:block">
+                    {featuredFixture.awayTeam.name}
+                  </span>
+                  <FlagMark team={featuredFixture.awayTeam} />
+                </div>
+              </>
+            ) : (
+              <div className="px-2 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                Fixtures coming soon
+              </div>
+            )}
           </div>
-
           <p className="text-lg md:text-xl text-zinc-300 font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
             {t(locale, "hero_lead")}
           </p>
@@ -267,10 +358,10 @@ export default async function LandingPage({
               <div className="flex items-center justify-between gap-4 mb-10">
                 <div className="flex-1 flex flex-col items-center">
                   <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mb-3 border-2 border-zinc-700 overflow-hidden">
-                    <Image src="https://flagcdn.com/w80/be.png" alt="Belgium" width={64} height={64} className="object-cover w-full h-full" />
+                    {featuredFixture ? <FlagMark team={featuredFixture.homeTeam} /> : <span className="text-sm font-black text-white">H</span>}
                   </div>
                   <span className="text-white font-bold uppercase tracking-wide text-sm">
-                    Belgium
+                    {featuredFixture?.homeTeam.name ?? "Home"}
                   </span>
                 </div>
                 <div className="flex gap-3 items-center">
@@ -284,10 +375,10 @@ export default async function LandingPage({
                 </div>
                 <div className="flex-1 flex flex-col items-center">
                   <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mb-3 border-2 border-zinc-700 overflow-hidden">
-                    <Image src="https://flagcdn.com/w80/ma.png" alt="Morocco" width={64} height={64} className="object-cover w-full h-full" />
+                    {featuredFixture ? <FlagMark team={featuredFixture.awayTeam} /> : <span className="text-sm font-black text-white">A</span>}
                   </div>
                   <span className="text-white font-bold uppercase tracking-wide text-sm">
-                    Morocco
+                    {featuredFixture?.awayTeam.name ?? "Away"}
                   </span>
                 </div>
               </div>

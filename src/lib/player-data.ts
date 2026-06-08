@@ -46,6 +46,8 @@ export type PlayerMatchCard = {
   isLocked: boolean;
 };
 
+export const playerPredictionMatchOrderBy = [{ kickoffAt: "asc" as const }, { fifaMatchNo: "asc" as const }];
+
 export async function getPlayerDashboardData(user: PlayerRouteUser) {
   const now = new Date();
 
@@ -84,7 +86,7 @@ export async function getPlayerDashboardData(user: PlayerRouteUser) {
           take: 1,
         },
       },
-      orderBy: [{ kickoffAt: "asc" }, { fifaMatchNo: "asc" }],
+      orderBy: playerPredictionMatchOrderBy,
     }),
   ]);
 
