@@ -20,14 +20,21 @@ export default async function RegisterPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ code?: string }>;
+  searchParams: Promise<{ code?: string; source?: string; center?: string }>;
 }) {
   const { locale: lp } = await params;
   if (!isLocale(lp)) redirect("/en");
   const locale = lp as Locale;
 
-  const { code } = await searchParams;
+  const { code, source, center: centerParam } = await searchParams;
+  const fromQr = source === "qr";
   const centers = await getCenters();
+
+  // Match center by ID (safe fallback to "" if not found or invalid)
+  const matchedCenter = centerParam
+    ? centers.find((c) => c.id === centerParam)
+    : undefined;
+  const initialCenterId = matchedCenter?.id ?? "";
 
   return (
     <div className="min-h-screen bg-zinc-950 pt-24 pb-16">
@@ -66,7 +73,13 @@ export default async function RegisterPage({
           </div>
         </div>
 
-        <RegisterForm locale={locale} centers={centers} activationCode={code} />
+        <RegisterForm
+          locale={locale}
+          centers={centers}
+          activationCode={code}
+          initialCenterId={initialCenterId}
+          fromQr={fromQr}
+        />
 
         <p className="mt-8 text-center text-zinc-600 text-sm">
           {t(locale, "auth.already")}{" "}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { t, type Locale } from "@/lib/translations";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle, Smartphone } from "lucide-react";
 
 interface Center {
   id: string;
@@ -14,16 +14,24 @@ interface Props {
   locale: Locale;
   centers: Center[];
   activationCode?: string;
+  initialCenterId?: string;
+  fromQr?: boolean;
 }
 
-export default function RegisterForm({ locale, centers, activationCode }: Props) {
+export default function RegisterForm({
+  locale,
+  centers,
+  activationCode,
+  initialCenterId = "",
+  fromQr = false,
+}: Props) {
   const [form, setForm] = useState({
     fullName: "",
     email: "",
     nickname: "",
     phoneNumber: "",
     nationality: "",
-    centerId: "",
+    centerId: initialCenterId,
     termsAccepted: false,
   });
   const [loading, setLoading] = useState(false);
@@ -77,14 +85,34 @@ export default function RegisterForm({ locale, centers, activationCode }: Props)
 
   if (done) {
     return (
-      <div className="border border-lime-400/30 bg-lime-400/5 p-10 text-center">
-        <CheckCircle className="w-12 h-12 text-lime-400 mx-auto mb-5" />
-        <h2 className="text-2xl font-black text-white uppercase tracking-tight mb-3">
-          {t(locale, "auth.registrationComplete")}
-        </h2>
-        <p className="text-zinc-400 leading-relaxed max-w-md mx-auto">
-          {t(locale, "auth.accessLinkSent")}
-        </p>
+      <div className="border border-lime-400/30 bg-lime-400/5 p-10 text-center space-y-6">
+        <CheckCircle className="w-12 h-12 text-lime-400 mx-auto" />
+        <div>
+          <h2 className="text-2xl font-black text-white uppercase tracking-tight mb-3">
+            {t(locale, "auth.registrationComplete")}
+          </h2>
+          <p className="text-zinc-400 leading-relaxed max-w-md mx-auto">
+            {t(locale, "auth.accessLinkSent")}
+          </p>
+        </div>
+
+        {fromQr && (
+          <div className="border border-lime-400/20 bg-lime-400/5 p-5 max-w-md mx-auto text-left space-y-3">
+            <div className="flex items-center gap-2.5">
+              <Smartphone className="w-5 h-5 text-lime-400 shrink-0" />
+              <p className="text-sm font-bold text-white">Add GARRINCHA to your home screen</p>
+            </div>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              After clicking the link in your email and logging in, you can add this app to your phone's
+              home screen for quick access to your predictions — no app store needed.
+            </p>
+            <p className="text-xs text-zinc-500">
+              <strong className="text-zinc-400">Android:</strong> tap "Add to Home Screen" when prompted.
+              <br />
+              <strong className="text-zinc-400">iPhone:</strong> tap Share, then "Add to Home Screen".
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -169,6 +197,11 @@ export default function RegisterForm({ locale, centers, activationCode }: Props)
               </option>
             ))}
           </select>
+          {fromQr && form.centerId && (
+            <p className="mt-1.5 text-xs text-lime-400">
+              Center pre-selected from QR code. You can change it if needed.
+            </p>
+          )}
         </div>
       )}
 

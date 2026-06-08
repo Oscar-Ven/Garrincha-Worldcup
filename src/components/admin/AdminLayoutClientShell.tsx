@@ -18,6 +18,7 @@ import {
   Shield,
   History,
   ClipboardList,
+  Link2,
 } from "lucide-react";
 
 interface AdminUser {
@@ -83,6 +84,12 @@ export default function AdminLayoutClientShell({ user, children }: Props) {
       href: "/admin/checkin",
       icon: QrCode,
       roles: ["SUPER_ADMIN", "ADMIN", "CENTER_ADMIN"],
+    },
+    {
+      label: "QR Registration Links",
+      href: "/admin/qr",
+      icon: Link2,
+      roles: ["SUPER_ADMIN", "ADMIN"],
     },
     {
       label: "Audit Ledger",
