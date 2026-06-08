@@ -561,7 +561,11 @@ export default async function LandingPage({
                           : t(locale, "campaign.prize3")}
                     </div>
                     <div className="text-zinc-500 text-xs mt-1">
-                      {t(locale, "campaign.prizeValue")}
+                      {n === 1
+                        ? "Premium JustPadel gift card"
+                        : n === 2
+                          ? "JustPadel gift card"
+                          : "GARRINCHA Padel T-shirt"}
                     </div>
                   </div>
                 </div>
