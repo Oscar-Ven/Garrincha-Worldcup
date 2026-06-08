@@ -42,11 +42,13 @@ export const metadata: Metadata = {
     title: "GARRINCHA® World Cup Pronostiek 2026",
     description:
       "Predict World Cup 2026 scores, earn points, and represent your GARRINCHA Center. Scan the QR code to join.",
+    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "GARRINCHA World Cup 2026 Pronostiek" }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "GARRINCHA® World Cup Pronostiek 2026",
     description: "Predict World Cup 2026 scores and compete across GARRINCHA Centers.",
+    images: ["/opengraph-image.png"],
   },
   robots: { index: true, follow: true },
   authors: [{ name: "Kempes BV", url: "https://www.garrincha.be" }],

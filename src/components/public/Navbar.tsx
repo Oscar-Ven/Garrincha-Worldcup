@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { t, type Locale } from "@/lib/translations";
 import LanguageSwitcher from "./LanguageSwitcher";
+import CountdownTimer from "./CountdownTimer";
 import { usePathname } from "next/navigation";
 
 export default function Navbar({ locale }: { locale: Locale }) {
@@ -83,9 +84,16 @@ export default function Navbar({ locale }: { locale: Locale }) {
           </Link>
         </div>
 
-        {/* Desktop right: language + CTA */}
+        {/* Desktop right: countdown + language + CTA */}
         <div className="hidden md:flex items-center gap-4">
+          <CountdownTimer />
           <LanguageSwitcher locale={locale} />
+          <Link
+            href={`/${locale}/login`}
+            className="text-sm font-bold tracking-wide text-zinc-400 hover:text-white transition-colors uppercase"
+          >
+            Login
+          </Link>
           <Link
             href={`/${locale}/register`}
             className="flex items-center gap-2 px-5 py-2.5 bg-lime-400 text-zinc-950 font-black uppercase tracking-wider text-sm hover:bg-lime-300 transition-colors shadow-[0_0_15px_rgba(163,230,53,0.4)]"
@@ -141,6 +149,13 @@ export default function Navbar({ locale }: { locale: Locale }) {
           </Link>
           <div className="h-px bg-zinc-800 w-full" />
           <LanguageSwitcher locale={locale} />
+          <Link
+            href={`/${locale}/login`}
+            onClick={() => setOpen(false)}
+            className="text-center px-6 py-3 border border-zinc-700 text-zinc-300 font-bold uppercase tracking-wider hover:border-zinc-500 transition-colors text-sm"
+          >
+            Login
+          </Link>
           <Link
             href={`/${locale}/register`}
             className="text-center px-6 py-3 bg-lime-400 text-zinc-950 font-black uppercase tracking-wider hover:bg-lime-300 transition-colors"
