@@ -33,12 +33,10 @@ export default function AddToHomeScreenPrompt() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       !(window as any).MSStream;
 
-    setIsIOS(isIOSDevice);
-
     if (isIOSDevice) {
-      // iOS Safari has no beforeinstallprompt — show manual instructions
-      setShow(true);
-      return;
+      // iOS Safari has no beforeinstallprompt — defer to avoid synchronous setState in effect
+      const t = setTimeout(() => { setIsIOS(true); setShow(true); }, 0);
+      return () => clearTimeout(t);
     }
 
     // Android/Chrome: capture the native install prompt
@@ -140,7 +138,7 @@ export default function AddToHomeScreenPrompt() {
               Share
             </span>
             , then tap{" "}
-            <span className="font-semibold">"Add to Home Screen"</span>.
+            <span className="font-semibold">&quot;Add to Home Screen&quot;</span>.
           </div>
         ) : (
           <button

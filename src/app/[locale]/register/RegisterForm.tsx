@@ -103,13 +103,13 @@ export default function RegisterForm({
               <p className="text-sm font-bold text-white">Add GARRINCHA to your home screen</p>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              After clicking the link in your email and logging in, you can add this app to your phone's
+              After clicking the link in your email and logging in, you can add this app to your phone&apos;s
               home screen for quick access to your predictions — no app store needed.
             </p>
             <p className="text-xs text-zinc-500">
-              <strong className="text-zinc-400">Android:</strong> tap "Add to Home Screen" when prompted.
+              <strong className="text-zinc-400">Android:</strong> tap &quot;Add to Home Screen&quot; when prompted.
               <br />
-              <strong className="text-zinc-400">iPhone:</strong> tap Share, then "Add to Home Screen".
+              <strong className="text-zinc-400">iPhone:</strong> tap Share, then &quot;Add to Home Screen&quot;.
             </p>
           </div>
         )}

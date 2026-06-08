@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { QrCode, Copy, ExternalLink } from "lucide-react";
+import { QrCode, ExternalLink } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -39,9 +39,9 @@ export default async function AdminQrLinksPage() {
       <div className="bg-green-50 border border-green-200 p-5 space-y-2">
         <p className="text-xs font-semibold text-green-800 uppercase tracking-wider">Suggested poster text</p>
         <p className="text-sm font-bold text-green-900">
-          "Scan to register and predict World Cup matches. Add GARRINCHA to your home screen after registration."
+          &quot;Scan to register and predict World Cup matches. Add GARRINCHA to your home screen after registration.&quot;
         </p>
-        <p className="text-xs text-green-700 font-medium">Short version: "Scan. Register. Predict. Win points."</p>
+        <p className="text-xs text-green-700 font-medium">Short version: &quot;Scan. Register. Predict. Win points.&quot;</p>
       </div>
 
       {/* Default global link */}
@@ -58,7 +58,7 @@ export default async function AdminQrLinksPage() {
           Center-Specific Registration Links
         </h2>
         <p className="text-xs text-gray-500 mb-4">
-          These links pre-select the center in the registration form, so players don't have to choose.
+          These links pre-select the center in the registration form, so players don&apos;t have to choose.
         </p>
 
         <div className="space-y-3">
@@ -80,7 +80,7 @@ export default async function AdminQrLinksPage() {
       <div className="bg-gray-50 border border-gray-200 p-5 text-sm text-gray-600 space-y-2">
         <p className="font-semibold text-gray-700">How to create a QR code from these URLs:</p>
         <ol className="list-decimal list-inside space-y-1 text-gray-500">
-          <li>Copy the URL above using the "Copy" button.</li>
+          <li>Copy the URL above using the &quot;Copy&quot; button.</li>
           <li>Paste it into a free QR code generator (e.g. qr.io, goqr.me, or Google Workspace).</li>
           <li>Download the QR code as a high-resolution PNG.</li>
           <li>Add it to your center poster alongside the suggested text above.</li>
