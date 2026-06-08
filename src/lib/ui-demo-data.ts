@@ -6,7 +6,17 @@ export { hasDatabaseConfig, isPreviewMode } from "@/lib/app-mode";
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const demoCenters = [
-  { id: "demo-head-quarter", name: "Head Quarter", city: "Brussels", country: "Belgium" },
+  { id: "demo-head-quarter",              name: "Head Quarter",                   city: "Brussels",  country: "Belgium" },
+  { id: "demo-antwerpen-noord",           name: "GARRINCHA Antwerpen Noord",      city: "Antwerpen", country: "Belgium" },
+  { id: "demo-antwerpen-zuid",            name: "GARRINCHA Antwerpen Zuid",       city: "Antwerpen", country: "Belgium" },
+  { id: "demo-charleroi-dampremy",        name: "GARRINCHA Charleroi Dampremy",   city: "Charleroi", country: "Belgium" },
+  { id: "demo-charleroi-montignies",      name: "GARRINCHA Charleroi Montignies", city: "Charleroi", country: "Belgium" },
+  { id: "demo-diegem",                    name: "GARRINCHA Diegem",               city: "Diegem",    country: "Belgium" },
+  { id: "demo-gent-arsenaal",             name: "GARRINCHA Gent Arsenaal",        city: "Gent",      country: "Belgium" },
+  { id: "demo-gent-theloop",              name: "GARRINCHA Gent The Loop",        city: "Gent",      country: "Belgium" },
+  { id: "demo-kortrijk",                  name: "GARRINCHA Kortrijk",             city: "Kortrijk",  country: "Belgium" },
+  { id: "demo-luik",                      name: "GARRINCHA Luik",                 city: "Luik",      country: "Belgium" },
+  { id: "demo-westgate-dilbeek",          name: "GARRINCHA Westgate Dilbeek",     city: "Dilbeek",   country: "Belgium" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
