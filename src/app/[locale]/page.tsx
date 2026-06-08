@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { t, isLocale, type Locale } from "@/lib/translations";
 import FAQAccordion from "@/components/public/FAQAccordion";
+import PrizeCards from "@/components/public/PrizeCards";
 import CountdownTimer from "@/components/public/CountdownTimer";
 import { prisma } from "@/lib/prisma";
 import { flagLabel, isoCodeForTeam } from "@/lib/flags";
@@ -582,6 +583,13 @@ export default async function LandingPage({
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── Prizes ───────────────────────────────────────────────────────── */}
+      <section id="prizes" className="py-24 bg-zinc-950 relative border-t border-zinc-800">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <PrizeCards preview prizesHref={`/${locale}/prizes`} />
         </div>
       </section>
 

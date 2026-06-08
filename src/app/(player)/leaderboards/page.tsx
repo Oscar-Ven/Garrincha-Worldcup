@@ -1,4 +1,5 @@
 import { Crown, MapPin, type LucideIcon } from "lucide-react";
+import PrizeCards from "@/components/public/PrizeCards";
 import { requirePlayerContext } from "@/lib/player-app";
 import { prisma } from "@/lib/prisma";
 import { createLeaderboardRows } from "@/lib/product-logic";
@@ -93,6 +94,8 @@ export default async function PlayerLeaderboardsPage() {
         <LeaderboardSection title="Global leaderboard" rows={globalRows} icon={Crown} currentUserId={user.id} />
         <LeaderboardSection title="Center leaderboard" rows={centerRows} icon={MapPin} currentUserId={user.id} />
       </div>
+
+      <PrizeCards preview prizesHref="/prizes" />
     </div>
   );
 }
