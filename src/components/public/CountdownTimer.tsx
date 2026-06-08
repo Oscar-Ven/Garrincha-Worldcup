@@ -36,31 +36,19 @@ export default function CountdownTimer() {
   if (!time) return null;
 
   return (
-    <div className="border border-zinc-800 bg-zinc-950/80 backdrop-blur-sm p-5 w-36">
-      <p className="text-lime-400 font-bold uppercase tracking-[0.2em] text-[10px] mb-4 text-center">
-        Kickoff in
-      </p>
-      <div className="flex flex-col gap-2">
-        {[
-          { value: time.d, label: "Days" },
-          { value: time.h, label: "Hours" },
-          { value: time.m, label: "Minutes" },
-          { value: time.s, label: "Seconds" },
-        ].map(({ value, label }) => (
-          <div key={label} className="flex items-center justify-between">
-            <span className="text-zinc-600 text-[10px] uppercase tracking-widest font-mono">
-              {label}
-            </span>
-            <span className="text-white font-black text-xl tabular-nums leading-none">
-              {pad(value)}
-            </span>
-          </div>
-        ))}
-      </div>
-      <div className="mt-4 h-px bg-lime-400/20" />
-      <p className="text-zinc-600 font-mono text-[9px] uppercase tracking-widest mt-3 text-center">
-        Jun 11 · 2026
-      </p>
+    <div className="hidden lg:flex items-center gap-0.5 border border-lime-400/20 bg-lime-400/5 px-3 h-8">
+      {[
+        { value: time.d, label: "D" },
+        { value: time.h, label: "H" },
+        { value: time.m, label: "M" },
+        { value: time.s, label: "S" },
+      ].map(({ value, label }, i) => (
+        <span key={label} className="flex items-baseline gap-px">
+          {i > 0 && <span className="text-lime-400/30 font-bold text-xs mx-1">:</span>}
+          <span className="text-white font-black text-sm tabular-nums leading-none">{pad(value)}</span>
+          <span className="text-lime-400/60 font-bold text-[9px] uppercase leading-none">{label}</span>
+        </span>
+      ))}
     </div>
   );
 }
