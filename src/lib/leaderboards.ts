@@ -20,7 +20,7 @@ export async function getLeaderboard(
   if (hasFilter) {
     // ORM path — used for filtered sub-leaderboards (nationality, center)
     const users = await prisma.user.findMany({
-      where: { ...where, competitionCenterId: { not: null } },
+      where: { competitionCenterId: { not: null }, ...where },
       select: {
         id: true,
         nickname: true,

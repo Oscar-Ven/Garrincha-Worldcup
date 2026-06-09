@@ -135,7 +135,7 @@ export default function AdminLayoutClientShell({ user, children }: Props) {
             />
           </div>
           <span className="ml-auto text-[10px] font-bold uppercase tracking-widest text-green-400 border border-green-700/60 bg-green-900/40 px-2 py-0.5 whitespace-nowrap shrink-0">
-            Admin
+            Dashboard
           </span>
         </div>
 
