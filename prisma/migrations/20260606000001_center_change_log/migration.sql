@@ -1,4 +1,4 @@
-﻿-- CreateTable: audit log for competition center changes
+-- CreateTable: audit log for competition center changes
 CREATE TABLE "CenterChangeLog" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
