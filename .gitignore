@@ -39,6 +39,10 @@ garrincha-prototype.pdf
 # Vercel local config
 .vercel/
 
+# Claude Code local session state (contains approved-command allowlist which may include tokens)
+.claude/settings.json
+.claude/settings.local.json
+
 # Playwright MCP session files
 .playwright-mcp/
 
