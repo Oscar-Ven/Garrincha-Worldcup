@@ -2,8 +2,31 @@
 
 import { startTransition, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { AlertCircle, CheckCircle2, Clock3, Lock, Save, Trophy } from "lucide-react";
 import { formatBelgiumDateShort, formatBelgiumTime } from "@/lib/date";
+import { isoCodeForTeam } from "@/lib/flags";
+
+function TeamFlag({ flagUrl, name }: { flagUrl: string; name: string }) {
+  const isoCode = isoCodeForTeam({ flagUrl });
+  if (!isoCode || isoCode.startsWith("GB-")) {
+    return (
+      <span className="inline-flex h-4 w-6 shrink-0 items-center justify-center rounded-sm bg-white/10 text-[9px] font-bold text-zinc-400">
+        {name.slice(0, 3).toUpperCase()}
+      </span>
+    );
+  }
+  return (
+    <Image
+      src={`https://flagcdn.com/w40/${isoCode.toLowerCase()}.png`}
+      alt={`${name} flag`}
+      width={24}
+      height={16}
+      className="shrink-0 rounded-sm object-cover"
+      unoptimized
+    />
+  );
+}
 
 type MatchItem = {
   id: string;
@@ -228,14 +251,16 @@ export default function PredictionBoard({ matches, mode }: PredictionBoardProps)
                     </div>
 
                     <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-                      <div className="min-w-0 text-left">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <TeamFlag flagUrl={match.homeTeamFlag} name={match.homeTeamName} />
                         <div className="truncate text-sm font-semibold text-white">{match.homeTeamName}</div>
                       </div>
                       <div className="rounded-2xl border border-white/10 bg-zinc-950/70 px-3 py-2 text-sm font-semibold text-zinc-200">
                         {match.status === "FINAL" ? `${match.homeScore ?? "-"} : ${match.awayScore ?? "-"}` : "vs"}
                       </div>
-                      <div className="min-w-0 text-right">
-                        <div className="truncate text-sm font-semibold text-white">{match.awayTeamName}</div>
+                      <div className="flex items-center justify-end gap-2 min-w-0">
+                        <div className="truncate text-sm font-semibold text-white text-right">{match.awayTeamName}</div>
+                        <TeamFlag flagUrl={match.awayTeamFlag} name={match.awayTeamName} />
                       </div>
                     </div>
 
