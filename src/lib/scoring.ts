@@ -37,12 +37,13 @@ export function calculatePredictionPoints(
     points = predDiff === finalDiff ? 3 : 2;
   }
 
-  // Penalty bonus — knockout only, awarded only when the match went to penalties
-  // and the player predicted the draw (and provided a penalty winner).
+  // Penalty bonus — knockout only, awarded when the match went to penalties,
+  // the player predicted a draw, and provided a penalty winner.
   if (
     penalty?.wentToPenalties &&
     penalty.penaltyWinner &&
-    prediction.penaltyWinner
+    prediction.penaltyWinner &&
+    prediction.homeScore === prediction.awayScore
   ) {
     if (prediction.penaltyWinner === penalty.penaltyWinner) {
       points += 2; // +2 correct penalty winner

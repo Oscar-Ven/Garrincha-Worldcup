@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
@@ -44,15 +45,23 @@ export async function PATCH(request: NextRequest) {
     }
   }
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      fullName,
-      nickname,
-      ...(nationality !== undefined ? { nationality } : {}),
-      ...(phoneNumber !== undefined ? { phoneNumber } : {}),
-    },
-  });
+  try {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        fullName,
+        nickname,
+        ...(nationality !== undefined ? { nationality } : {}),
+        ...(phoneNumber !== undefined ? { phoneNumber } : {}),
+      },
+    });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      return NextResponse.json({ error: "That nickname is already taken." }, { status: 409 });
+    }
+    console.error("[user/profile]", err);
+    return NextResponse.json({ error: "Failed to update profile." }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }
