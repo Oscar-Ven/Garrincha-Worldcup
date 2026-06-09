@@ -33,13 +33,21 @@ async function proxyInner(request: NextRequest) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
 
+  // Redirect old /admin/login bookmark to new /dashboard/login
+  if (pathname === "/admin/login") {
+    const url = new URL("/dashboard/login", request.url);
+    const next = request.nextUrl.searchParams.get("next");
+    if (next) url.searchParams.set("next", next);
+    return NextResponse.redirect(url, { status: 301 });
+  }
+
   const secret = getSecret();
   const token = request.cookies.get(SESSION_COOKIE)?.value;
 
   // Admin route guard — skip in preview mode so the UI is browsable without credentials
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login" && !isPreviewMode()) {
+  if (pathname.startsWith("/admin") && !isPreviewMode()) {
     if (!token || !secret) {
-      const url = new URL("/admin/login", request.url);
+      const url = new URL("/dashboard/login", request.url);
       url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }
@@ -47,12 +55,12 @@ async function proxyInner(request: NextRequest) {
     try {
       const { payload } = await jwtVerify(token, secret);
       if (payload.role !== "ADMIN" && payload.role !== "CENTER_ADMIN" && payload.role !== "SUPER_ADMIN") {
-        const url = new URL("/admin/login", request.url);
+        const url = new URL("/dashboard/login", request.url);
         url.searchParams.set("next", pathname);
         return NextResponse.redirect(url);
       }
     } catch {
-      const url = new URL("/admin/login", request.url);
+      const url = new URL("/dashboard/login", request.url);
       url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }

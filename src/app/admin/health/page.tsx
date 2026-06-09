@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/purity */
+﻿/* eslint-disable react-hooks/purity */
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 export default async function SystemHealthPage() {
   const admin = await getCurrentUser();
   if (!admin) {
-    redirect("/admin/login");
+    redirect("/dashboard/login");
   }
 
   const isOwner = admin.role === "SUPER_ADMIN" || admin.role === "ADMIN";
@@ -90,7 +90,7 @@ export default async function SystemHealthPage() {
           </div>
           <span className="text-xs text-gray-500 flex items-center gap-1">
             <Database className="w-3.5 h-3.5 text-gray-400" />
-            Prisma → Supabase PostgreSQL
+            Prisma â†’ Supabase PostgreSQL
           </span>
         </div>
 
@@ -201,3 +201,4 @@ export default async function SystemHealthPage() {
     </div>
   );
 }
+

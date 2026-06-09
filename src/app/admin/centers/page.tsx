@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createLeaderboardRows, LeaderboardInputUser } from "@/lib/product-logic";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function CentersOverviewPage() {
   const admin = await getCurrentUser();
   if (!admin) {
-    redirect("/admin/login");
+    redirect("/dashboard/login");
   }
 
   const isOwner = admin.role === "SUPER_ADMIN" || admin.role === "ADMIN";
@@ -170,3 +170,4 @@ export default async function CentersOverviewPage() {
     </div>
   );
 }
+

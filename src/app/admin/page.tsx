@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/admin/login");
+    redirect("/dashboard/login");
   }
 
   const isOwner = user.role === "SUPER_ADMIN" || user.role === "ADMIN";
@@ -185,7 +185,7 @@ export default async function AdminPage() {
                             {ctr.activeCode}
                           </span>
                         ) : (
-                          <span className="text-gray-300">—</span>
+                          <span className="text-gray-300">â€”</span>
                         )}
                       </td>
                     </tr>
@@ -473,3 +473,4 @@ export default async function AdminPage() {
     </div>
   );
 }
+

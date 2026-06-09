@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { History, ArrowLeftRight, Coins, Clock } from "lucide-react";
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function AuditViewPage() {
   const admin = await getCurrentUser();
   if (!admin) {
-    redirect("/admin/login");
+    redirect("/dashboard/login");
   }
 
   const isOwner = admin.role === "SUPER_ADMIN" || admin.role === "ADMIN";
@@ -52,7 +52,7 @@ export default async function AuditViewPage() {
     playerNick: log.user?.nickname ?? "anonymous",
     playerEmail: log.user?.email ?? "",
     fromCenter: centers.find((c) => c.id === log.fromCenterId)?.name.replace("GARRINCHA ", "") ?? "Initial Activation",
-    toCenter: centers.find((c) => c.id === log.toCenterId)?.name.replace("GARRINCHA ", "") ?? "—",
+    toCenter: centers.find((c) => c.id === log.toCenterId)?.name.replace("GARRINCHA ", "") ?? "â€”",
     actor: log.changedBy,
   }));
 
@@ -65,7 +65,7 @@ export default async function AuditViewPage() {
     points: log.points,
     reason: log.reason,
     actor: log.awardedBy ?? "System",
-    centerName: log.user?.competitionCenter?.name.replace("GARRINCHA ", "") ?? "—",
+    centerName: log.user?.competitionCenter?.name.replace("GARRINCHA ", "") ?? "â€”",
   }));
 
   const thCls = "px-6 py-3 text-gray-500 text-xs font-semibold uppercase tracking-wider";
@@ -116,11 +116,11 @@ export default async function AuditViewPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="font-semibold text-gray-900">{log.playerName}</div>
-                        <div className="text-xs text-gray-500 font-mono">@{log.playerNick} · {log.playerEmail}</div>
+                        <div className="text-xs text-gray-500 font-mono">@{log.playerNick} Â· {log.playerEmail}</div>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className="text-gray-600 font-medium">{log.fromCenter}</span>
-                        <span className="mx-2 text-green-600 font-bold">→</span>
+                        <span className="mx-2 text-green-600 font-bold">â†’</span>
                         <span className="text-green-700 font-semibold">{log.toCenter}</span>
                       </td>
                       <td className="px-6 py-4 text-right font-mono text-gray-500 text-xs whitespace-nowrap">
@@ -192,3 +192,4 @@ export default async function AuditViewPage() {
     </div>
   );
 }
+

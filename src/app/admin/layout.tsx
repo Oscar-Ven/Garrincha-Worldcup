@@ -5,7 +5,7 @@ import AdminLayoutClientShell from "@/components/admin/AdminLayoutClientShell";
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
 
-  // No user — proxy already redirected protected routes; this only fires for /admin/login itself
+  // No user — middleware already redirected protected routes; this only fires for /admin/login itself
   if (!user) {
     return <>{children}</>;
   }

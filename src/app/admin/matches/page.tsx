@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function MatchesPage() {
   const admin = await getCurrentUser();
   if (!admin) {
-    redirect("/admin/login");
+    redirect("/dashboard/login");
   }
 
   const isOwner = admin.role === "SUPER_ADMIN" || admin.role === "ADMIN";
@@ -61,3 +61,4 @@ export default async function MatchesPage() {
     />
   );
 }
+

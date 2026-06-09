@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { QrCode, ExternalLink } from "lucide-react";
@@ -9,7 +9,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://worldcup.garrincha.
 
 export default async function AdminQrLinksPage() {
   const admin = await getCurrentUser();
-  if (!admin) redirect("/admin/login");
+  if (!admin) redirect("/dashboard/login");
 
   const isOwner = admin.role === "SUPER_ADMIN" || admin.role === "ADMIN";
   if (!isOwner) redirect("/admin");
@@ -68,7 +68,7 @@ export default async function AdminQrLinksPage() {
             return (
               <QrLinkRow
                 key={center.id}
-                label={`${label} — ${center.city}`}
+                label={`${label} â€” ${center.city}`}
                 url={url}
               />
             );
@@ -116,3 +116,4 @@ function QrLinkRow({ label, url }: { label: string; url: string }) {
 
 // Client component is declared separately so the server page stays clean
 import CopyButton from "./CopyButton";
+
