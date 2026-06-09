@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createLeaderboardRows, LeaderboardInputUser } from "@/lib/product-logic";
 import { Building, Trophy, MapPin, User } from "lucide-react";
+import AddCenterButton from "./CentersClient";
 
 export const dynamic = "force-dynamic";
 
@@ -73,14 +74,17 @@ export default async function CentersOverviewPage() {
   return (
     <div className="space-y-6 font-sans">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-2.5 mb-1">
-          <Building className="w-6 h-6 text-green-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Centers Directory</h1>
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2.5 mb-1">
+            <Building className="w-6 h-6 text-green-600" />
+            <h1 className="text-2xl font-bold text-gray-900">Centers Directory</h1>
+          </div>
+          <p className="text-sm text-gray-500">
+            Sports center locations, manager assignments, and top regional player rankings.
+          </p>
         </div>
-        <p className="text-sm text-gray-500">
-          Sports center locations, manager assignments, and top regional player rankings.
-        </p>
+        <AddCenterButton />
       </div>
 
       {/* Grid */}

@@ -57,11 +57,16 @@ export async function POST(request: NextRequest) {
 
   if (!isPreviewMode() && session) {
     const user = await getCurrentUser();
-    if (!user || !user.competitionCenterId) {
-      return NextResponse.json(
-        { error: "Choose the GARRINCHA Center you want to represent before predicting." },
-        { status: 403 },
-      );
+    if (!user) {
+      return NextResponse.json({ error: "User not found." }, { status: 401 });
+    }
+    if (!user.competitionCenterId) {
+      // Auto-assign the activation center as competition center for users who
+      // registered before competitionCenterId became required.
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { competitionCenterId: user.center.id },
+      });
     }
   }
 
