@@ -84,27 +84,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
-  await prisma.prediction.upsert({
-    where: { userId_matchId: { userId: session.userId, matchId: parsed.data.matchId } },
-    create: {
-      userId: session.userId,
-      matchId: parsed.data.matchId,
-      homeScore: parsed.data.homeScore,
-      awayScore: parsed.data.awayScore,
-      penaltyWinner,
-      homePenaltyScore,
-      awayPenaltyScore,
-    },
-    update: {
-      homeScore: parsed.data.homeScore,
-      awayScore: parsed.data.awayScore,
-      penaltyWinner,
-      homePenaltyScore,
-      awayPenaltyScore,
-      pointsAwarded: 0,
-      calculatedAt: null,
-    },
-  });
+  try {
+    await prisma.prediction.upsert({
+      where: { userId_matchId: { userId: session.userId, matchId: parsed.data.matchId } },
+      create: {
+        userId: session.userId,
+        matchId: parsed.data.matchId,
+        homeScore: parsed.data.homeScore,
+        awayScore: parsed.data.awayScore,
+        penaltyWinner,
+        homePenaltyScore,
+        awayPenaltyScore,
+      },
+      update: {
+        homeScore: parsed.data.homeScore,
+        awayScore: parsed.data.awayScore,
+        penaltyWinner,
+        homePenaltyScore,
+        awayPenaltyScore,
+        pointsAwarded: 0,
+        calculatedAt: null,
+      },
+    });
+  } catch (err) {
+    console.error("[predictions]", err);
+    return NextResponse.json({ error: "Failed to save prediction. Please try again." }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }
