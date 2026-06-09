@@ -17,13 +17,26 @@ type MatchItem = {
   awayTeamFlag: string;
   homeScore: number | null;
   awayScore: number | null;
+  wentToPenalties?: boolean;
+  penaltyWinner?: string | null;
   prediction: {
     homeScore: number;
     awayScore: number;
+    penaltyWinner?: string | null;
+    homePenaltyScore?: number | null;
+    awayPenaltyScore?: number | null;
     pointsAwarded: number;
     calculatedAt: string | null;
   } | null;
   isLocked: boolean;
+};
+
+type PredictionValues = {
+  home: string;
+  away: string;
+  penaltyWinner: string | null;
+  penaltyHome: string;
+  penaltyAway: string;
 };
 
 type PredictionBoardProps = {
@@ -52,13 +65,16 @@ function formatTimeLabel(value: string, locale: string) {
 export default function PredictionBoard({ locale, matches, mode }: PredictionBoardProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>(mode === "predictions" ? "upcoming" : "all");
-  const [values, setValues] = useState<Record<string, { home: string; away: string }>>(
+  const [values, setValues] = useState<Record<string, PredictionValues>>(
     Object.fromEntries(
       matches.map((match) => [
         match.id,
         {
           home: match.prediction ? String(match.prediction.homeScore) : "",
           away: match.prediction ? String(match.prediction.awayScore) : "",
+          penaltyWinner: match.prediction?.penaltyWinner ?? null,
+          penaltyHome: match.prediction?.homePenaltyScore != null ? String(match.prediction.homePenaltyScore) : "",
+          penaltyAway: match.prediction?.awayPenaltyScore != null ? String(match.prediction.awayPenaltyScore) : "",
         },
       ]),
     ),
@@ -85,6 +101,7 @@ export default function PredictionBoard({ locale, matches, mode }: PredictionBoa
   }, [filteredMatches, locale]);
 
   async function handleSave(matchId: string) {
+    const match = matches.find((m) => m.id === matchId);
     const current = values[matchId];
     const homeScore = Number.parseInt(current?.home ?? "", 10);
     const awayScore = Number.parseInt(current?.away ?? "", 10);
@@ -97,6 +114,27 @@ export default function PredictionBoard({ locale, matches, mode }: PredictionBoa
       return;
     }
 
+    const isKnockout = match?.stage !== "GROUP";
+    const isDraw = homeScore === awayScore;
+
+    if (isKnockout && isDraw && !current.penaltyWinner) {
+      setMessageByMatch((prev) => ({
+        ...prev,
+        [matchId]: { type: "error", text: "Select a penalty winner for this knockout draw." },
+      }));
+      return;
+    }
+
+    const penaltyWinner = isKnockout && isDraw ? (current.penaltyWinner ?? null) : null;
+    const homePenaltyScore =
+      penaltyWinner && current.penaltyHome !== "" && !Number.isNaN(Number.parseInt(current.penaltyHome, 10))
+        ? Number.parseInt(current.penaltyHome, 10)
+        : null;
+    const awayPenaltyScore =
+      penaltyWinner && current.penaltyAway !== "" && !Number.isNaN(Number.parseInt(current.penaltyAway, 10))
+        ? Number.parseInt(current.penaltyAway, 10)
+        : null;
+
     setSavingId(matchId);
     setMessageByMatch((prev) => {
       const next = { ...prev };
@@ -108,7 +146,7 @@ export default function PredictionBoard({ locale, matches, mode }: PredictionBoa
       const response = await fetch("/api/predictions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matchId, homeScore, awayScore }),
+        body: JSON.stringify({ matchId, homeScore, awayScore, penaltyWinner, homePenaltyScore, awayPenaltyScore }),
       });
       const payload = await response.json();
 
@@ -173,8 +211,14 @@ export default function PredictionBoard({ locale, matches, mode }: PredictionBoa
             <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-500">{groupLabel}</div>
             <div className="space-y-3">
               {groupMatches.map((match) => {
-                const current = values[match.id] ?? { home: "", away: "" };
+                const current = values[match.id] ?? { home: "", away: "", penaltyWinner: null, penaltyHome: "", penaltyAway: "" };
                 const readOnly = mode === "matches" || match.isLocked || match.status === "FINAL";
+                const isKnockout = match.stage !== "GROUP";
+
+                const homeNum = Number.parseInt(current.home, 10);
+                const awayNum = Number.parseInt(current.away, 10);
+                const isPredictedDraw = !Number.isNaN(homeNum) && !Number.isNaN(awayNum) && homeNum === awayNum;
+                const showPenaltySection = !readOnly && isKnockout && isPredictedDraw;
 
                 return (
                   <article key={match.id} className="rounded-[28px] border border-white/8 bg-white/[0.03] p-4 shadow-[0_14px_40px_rgba(0,0,0,0.18)] sm:p-5">
@@ -210,38 +254,136 @@ export default function PredictionBoard({ locale, matches, mode }: PredictionBoa
                       </div>
                     </div>
 
-                    <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-[22px] border border-white/8 bg-black/20 p-3">
-                      <input
-                        type="number"
-                        min="0"
-                        inputMode="numeric"
-                        disabled={readOnly}
-                        value={current.home}
-                        onChange={(event) =>
-                          setValues((prev) => ({
-                            ...prev,
-                            [match.id]: { ...prev[match.id], home: event.target.value, away: prev[match.id]?.away ?? "" },
-                          }))
-                        }
-                        className="h-12 min-w-0 rounded-2xl border border-white/10 bg-zinc-950 px-3 text-center text-lg font-semibold text-white outline-none transition-colors focus:border-lime-400 disabled:cursor-not-allowed disabled:text-zinc-500"
-                        placeholder="0"
-                      />
-                      <div className="text-sm font-semibold text-zinc-500">:</div>
-                      <input
-                        type="number"
-                        min="0"
-                        inputMode="numeric"
-                        disabled={readOnly}
-                        value={current.away}
-                        onChange={(event) =>
-                          setValues((prev) => ({
-                            ...prev,
-                            [match.id]: { home: prev[match.id]?.home ?? "", away: event.target.value },
-                          }))
-                        }
-                        className="h-12 min-w-0 rounded-2xl border border-white/10 bg-zinc-950 px-3 text-center text-lg font-semibold text-white outline-none transition-colors focus:border-lime-400 disabled:cursor-not-allowed disabled:text-zinc-500"
-                        placeholder="0"
-                      />
+                    {/* Penalty result for completed knockout matches */}
+                    {match.status === "FINAL" && match.wentToPenalties && match.penaltyWinner && (
+                      <div className="mt-2 text-center text-[11px] text-zinc-500">
+                        Penalties: {match.penaltyWinner === "home" ? match.homeTeamName : match.awayTeamName} won
+                      </div>
+                    )}
+
+                    <div className="mt-4 rounded-[22px] border border-white/8 bg-black/20 p-3 space-y-3">
+                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                        <input
+                          type="number"
+                          min="0"
+                          inputMode="numeric"
+                          disabled={readOnly}
+                          value={current.home}
+                          onChange={(event) =>
+                            setValues((prev) => ({
+                              ...prev,
+                              [match.id]: { ...prev[match.id], home: event.target.value, penaltyWinner: null },
+                            }))
+                          }
+                          className="h-12 min-w-0 rounded-2xl border border-white/10 bg-zinc-950 px-3 text-center text-lg font-semibold text-white outline-none transition-colors focus:border-lime-400 disabled:cursor-not-allowed disabled:text-zinc-500"
+                          placeholder="0"
+                        />
+                        <div className="text-sm font-semibold text-zinc-500">:</div>
+                        <input
+                          type="number"
+                          min="0"
+                          inputMode="numeric"
+                          disabled={readOnly}
+                          value={current.away}
+                          onChange={(event) =>
+                            setValues((prev) => ({
+                              ...prev,
+                              [match.id]: { ...prev[match.id], away: event.target.value, penaltyWinner: null },
+                            }))
+                          }
+                          className="h-12 min-w-0 rounded-2xl border border-white/10 bg-zinc-950 px-3 text-center text-lg font-semibold text-white outline-none transition-colors focus:border-lime-400 disabled:cursor-not-allowed disabled:text-zinc-500"
+                          placeholder="0"
+                        />
+                      </div>
+
+                      {/* Knockout hint */}
+                      {!readOnly && isKnockout && (
+                        <p className="text-[11px] text-zinc-500 text-center">
+                          Predict the score after 120 minutes. If you predict a draw, choose the penalty winner.
+                        </p>
+                      )}
+
+                      {/* Penalty winner selector — shown when knockout + predicted draw */}
+                      {showPenaltySection && (
+                        <div className="space-y-2 border-t border-white/8 pt-3">
+                          <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Penalty winner (required)</p>
+                          <div className="flex gap-2">
+                            {(["home", "away"] as const).map((side) => (
+                              <button
+                                key={side}
+                                type="button"
+                                onClick={() =>
+                                  setValues((prev) => ({
+                                    ...prev,
+                                    [match.id]: {
+                                      ...prev[match.id],
+                                      penaltyWinner: prev[match.id]?.penaltyWinner === side ? null : side,
+                                    },
+                                  }))
+                                }
+                                className={`flex-1 rounded-2xl py-2 text-xs font-semibold transition-colors border ${
+                                  current.penaltyWinner === side
+                                    ? "bg-lime-400 text-zinc-950 border-lime-400"
+                                    : "bg-zinc-950/70 text-zinc-300 border-white/10 hover:border-white/20"
+                                }`}
+                              >
+                                {side === "home" ? match.homeTeamName : match.awayTeamName}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Optional penalty score */}
+                          {current.penaltyWinner && (
+                            <div className="space-y-1.5 pt-1">
+                              <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Penalty score (optional, +1 pt)</p>
+                              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="20"
+                                  inputMode="numeric"
+                                  value={current.penaltyHome}
+                                  onChange={(e) =>
+                                    setValues((prev) => ({
+                                      ...prev,
+                                      [match.id]: { ...prev[match.id], penaltyHome: e.target.value },
+                                    }))
+                                  }
+                                  className="h-10 min-w-0 rounded-2xl border border-white/10 bg-zinc-950 px-3 text-center text-base font-semibold text-white outline-none transition-colors focus:border-lime-400"
+                                  placeholder="0"
+                                />
+                                <div className="text-sm font-semibold text-zinc-500">:</div>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="20"
+                                  inputMode="numeric"
+                                  value={current.penaltyAway}
+                                  onChange={(e) =>
+                                    setValues((prev) => ({
+                                      ...prev,
+                                      [match.id]: { ...prev[match.id], penaltyAway: e.target.value },
+                                    }))
+                                  }
+                                  className="h-10 min-w-0 rounded-2xl border border-white/10 bg-zinc-950 px-3 text-center text-base font-semibold text-white outline-none transition-colors focus:border-lime-400"
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Read-only: show predicted penalty winner if applicable */}
+                      {readOnly && current.penaltyWinner && (
+                        <p className="text-[11px] text-zinc-500 text-center border-t border-white/8 pt-2">
+                          Predicted penalties:{" "}
+                          {current.penaltyWinner === "home" ? match.homeTeamName : match.awayTeamName} wins
+                          {current.penaltyHome && current.penaltyAway
+                            ? ` (${current.penaltyHome}–${current.penaltyAway})`
+                            : ""}
+                        </p>
+                      )}
                     </div>
 
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-400">

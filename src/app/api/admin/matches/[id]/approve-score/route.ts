@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { recalculatePredictionPoints } from "@/lib/product-logic";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
+import { type PenaltyResult } from "@/lib/scoring";
 
 export async function POST(
   request: NextRequest,
@@ -28,7 +29,15 @@ export async function POST(
 
   const match = await prisma.match.findUnique({
     where: { id },
-    select: { pendingHomeScore: true, pendingAwayScore: true, scoreSyncStatus: true },
+    select: {
+      pendingHomeScore: true,
+      pendingAwayScore: true,
+      scoreSyncStatus: true,
+      wentToPenalties: true,
+      penaltyWinner: true,
+      homePenaltyScore: true,
+      awayPenaltyScore: true,
+    },
   });
 
   if (!match) {
@@ -44,6 +53,15 @@ export async function POST(
   const finalHome = match.pendingHomeScore;
   const finalAway = match.pendingAwayScore;
   const now = new Date();
+
+  const penalty: PenaltyResult | null = match.wentToPenalties
+    ? {
+        wentToPenalties: true,
+        penaltyWinner: match.penaltyWinner,
+        homePenaltyScore: match.homePenaltyScore,
+        awayPenaltyScore: match.awayPenaltyScore,
+      }
+    : null;
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -66,13 +84,22 @@ export async function POST(
 
       const predictions = await tx.prediction.findMany({
         where: { matchId: id },
-        select: { id: true, userId: true, homeScore: true, awayScore: true },
+        select: {
+          id: true,
+          userId: true,
+          homeScore: true,
+          awayScore: true,
+          penaltyWinner: true,
+          homePenaltyScore: true,
+          awayPenaltyScore: true,
+        },
       });
 
       if (predictions.length > 0) {
         const updates = recalculatePredictionPoints({
           predictions,
           finalScore: { homeScore: finalHome, awayScore: finalAway },
+          penalty,
           calculatedAt: now,
         });
 

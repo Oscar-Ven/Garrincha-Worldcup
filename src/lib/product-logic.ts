@@ -1,4 +1,4 @@
-import { calculatePredictionPoints, isPredictionLocked, type Score } from "@/lib/scoring";
+import { calculatePredictionPoints, isPredictionLocked, type PenaltyResult, type Score } from "@/lib/scoring";
 
 export type AppRole = "USER" | "ADMIN" | "CENTER_ADMIN" | "SUPER_ADMIN";
 
@@ -17,6 +17,9 @@ export type PredictionRecord = {
   userId: string;
   homeScore: number;
   awayScore: number;
+  penaltyWinner?: string | null;
+  homePenaltyScore?: number | null;
+  awayPenaltyScore?: number | null;
 };
 
 export type PredictionPointUpdate = {
@@ -101,15 +104,27 @@ export function canSavePrediction({
 export function recalculatePredictionPoints({
   predictions,
   finalScore,
+  penalty = null,
   calculatedAt = new Date(),
 }: {
   predictions: PredictionRecord[];
   finalScore: Score;
+  penalty?: PenaltyResult | null;
   calculatedAt?: Date;
 }): PredictionPointUpdate[] {
   return predictions.map((prediction) => ({
     id: prediction.id,
-    pointsAwarded: calculatePredictionPoints({ homeScore: prediction.homeScore, awayScore: prediction.awayScore }, finalScore),
+    pointsAwarded: calculatePredictionPoints(
+      {
+        homeScore: prediction.homeScore,
+        awayScore: prediction.awayScore,
+        penaltyWinner: prediction.penaltyWinner,
+        homePenaltyScore: prediction.homePenaltyScore,
+        awayPenaltyScore: prediction.awayPenaltyScore,
+      },
+      finalScore,
+      penalty,
+    ),
     calculatedAt,
   }));
 }

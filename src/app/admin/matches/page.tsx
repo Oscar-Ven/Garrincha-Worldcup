@@ -48,6 +48,10 @@ export default async function MatchesPage() {
     lastScoreSyncAt: m.lastScoreSyncAt ? m.lastScoreSyncAt.toISOString() : null,
     pendingHomeScore: m.pendingHomeScore ?? null,
     pendingAwayScore: m.pendingAwayScore ?? null,
+    wentToPenalties: m.wentToPenalties,
+    penaltyWinner: m.penaltyWinner ?? null,
+    homePenaltyScore: m.homePenaltyScore ?? null,
+    awayPenaltyScore: m.awayPenaltyScore ?? null,
   }));
 
   return (

@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 const score = z.coerce.number().int().min(0).max(30);
+const penaltyScore = z.coerce.number().int().min(0).max(20);
+const penaltyWinner = z.enum(["home", "away"]);
 
 const acceptedConsent = z.preprocess(
   (value) => value === true || value === "true" || value === "on",
@@ -29,11 +31,20 @@ export const predictionSchema = z.object({
   matchId: z.string().min(1),
   homeScore: score,
   awayScore: score,
+  // Knockout penalty fields — required when predicting a draw in knockout stage.
+  penaltyWinner: penaltyWinner.nullable().optional(),
+  homePenaltyScore: penaltyScore.nullable().optional(),
+  awayPenaltyScore: penaltyScore.nullable().optional(),
 });
 
 export const finalScoreSchema = z.object({
   homeScore: score,
   awayScore: score,
+  // Penalty fields — only for knockout matches that went to a shootout.
+  wentToPenalties: z.boolean().optional(),
+  penaltyWinner: penaltyWinner.nullable().optional(),
+  homePenaltyScore: penaltyScore.nullable().optional(),
+  awayPenaltyScore: penaltyScore.nullable().optional(),
 });
 
 export const bonusSchema = z.object({

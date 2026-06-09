@@ -43,6 +43,12 @@ interface ApiFixture {
     home: number | null;
     away: number | null;
   };
+  score: {
+    penalty: {
+      home: number | null;
+      away: number | null;
+    };
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -63,9 +69,31 @@ export type MappedFixture = IncomingMatchData & {
 // ---------------------------------------------------------------------------
 
 function mapFixture(f: ApiFixture): MappedFixture {
-  const status = mapStatus(f.fixture.status.short);
+  const statusShort = f.fixture.status.short;
+  const status = mapStatus(statusShort);
   const isFinished = status === "FINISHED";
   const hasGoals = f.goals.home !== null && f.goals.away !== null;
+  const wentToPenalties = statusShort === "PEN";
+  const hasPenaltyScores = f.score?.penalty?.home != null && f.score?.penalty?.away != null;
+
+  let penaltyResult: MappedFixture["penaltyResult"] | undefined;
+  if (wentToPenalties && hasPenaltyScores) {
+    const ph = f.score.penalty.home as number;
+    const pa = f.score.penalty.away as number;
+    penaltyResult = {
+      wentToPenalties: true,
+      penaltyWinner: ph > pa ? "home" : "away",
+      homePenaltyScore: ph,
+      awayPenaltyScore: pa,
+    };
+  } else if (wentToPenalties) {
+    penaltyResult = {
+      wentToPenalties: true,
+      penaltyWinner: null,
+      homePenaltyScore: null,
+      awayPenaltyScore: null,
+    };
+  }
 
   return {
     provider: "api-football" as MatchDataProvider,
@@ -81,6 +109,7 @@ function mapFixture(f: ApiFixture): MappedFixture {
       isFinished && hasGoals
         ? { homeScore: f.goals.home as number, awayScore: f.goals.away as number }
         : undefined,
+    penaltyResult,
   };
 }
 

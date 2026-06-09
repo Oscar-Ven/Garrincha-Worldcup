@@ -37,6 +37,10 @@ interface SerializedMatch {
   lastScoreSyncAt: string | null;
   pendingHomeScore: number | null;
   pendingAwayScore: number | null;
+  wentToPenalties: boolean;
+  penaltyWinner: string | null;
+  homePenaltyScore: number | null;
+  awayPenaltyScore: number | null;
 }
 
 interface Props {
@@ -54,6 +58,13 @@ const STAGE_LABELS: Record<string, string> = {
   FINAL: "Final",
 };
 
+type PenaltyState = {
+  wentToPenalties: boolean;
+  penaltyWinner: string | null;
+  homePenalty: string;
+  awayPenalty: string;
+};
+
 export default function MatchesClient({ currentUserRole, initialMatches }: Props) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"all" | "scheduled" | "finalized">("all");
@@ -64,6 +75,12 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
   const [scoreDialogOpen, setScoreDialogOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<SerializedMatch | null>(null);
   const [scores, setScores] = useState({ home: "", away: "" });
+  const [penalty, setPenalty] = useState<PenaltyState>({
+    wentToPenalties: false,
+    penaltyWinner: null,
+    homePenalty: "",
+    awayPenalty: "",
+  });
 
   const [loading, setLoading] = useState(false);
   const [approvingId, setApprovingId] = useState<string | null>(null);
@@ -108,11 +125,30 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
       return;
     }
 
+    const isKnockout = selectedMatch.stage !== "GROUP";
+
+    if (isKnockout && penalty.wentToPenalties && !penalty.penaltyWinner) {
+      setError("Please select the penalty winner.");
+      setLoading(false);
+      return;
+    }
+
+    const body: Record<string, unknown> = { homeScore: homeNum, awayScore: awayNum };
+
+    if (isKnockout && penalty.wentToPenalties && penalty.penaltyWinner) {
+      body.wentToPenalties = true;
+      body.penaltyWinner = penalty.penaltyWinner;
+      const hp = penalty.homePenalty !== "" ? parseInt(penalty.homePenalty, 10) : null;
+      const ap = penalty.awayPenalty !== "" ? parseInt(penalty.awayPenalty, 10) : null;
+      if (hp !== null && !isNaN(hp)) body.homePenaltyScore = hp;
+      if (ap !== null && !isNaN(ap)) body.awayPenaltyScore = ap;
+    }
+
     try {
       const res = await fetch(`/api/admin/matches/${selectedMatch.id}/score`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ homeScore: homeNum, awayScore: awayNum }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -190,6 +226,12 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
       home: match.homeScore !== null ? match.homeScore.toString() : "",
       away: match.awayScore !== null ? match.awayScore.toString() : "",
     });
+    setPenalty({
+      wentToPenalties: match.wentToPenalties,
+      penaltyWinner: match.penaltyWinner,
+      homePenalty: match.homePenaltyScore !== null ? match.homePenaltyScore.toString() : "",
+      awayPenalty: match.awayPenaltyScore !== null ? match.awayPenaltyScore.toString() : "",
+    });
     setError(null);
     setApproveError(null);
     setSuccess(null);
@@ -198,6 +240,8 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
 
   const scheduledCount = initialMatches.filter((m) => m.status === "SCHEDULED").length;
   const finalCount = initialMatches.filter((m) => m.status === "FINAL").length;
+
+  const isKnockout = selectedMatch ? selectedMatch.stage !== "GROUP" : false;
 
   return (
     <div className="space-y-6">
@@ -352,15 +396,25 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                     {match.homeTeamName}
                   </span>
 
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 font-mono font-bold text-sm shrink-0">
-                    {isCompleted || isLive ? (
-                      <>
-                        <span className="text-gray-900">{match.homeScore}</span>
-                        <span className="text-gray-400">:</span>
-                        <span className="text-gray-900">{match.awayScore}</span>
-                      </>
-                    ) : (
-                      <span className="text-gray-400 tracking-widest text-xs">VS</span>
+                  <div className="flex flex-col items-center gap-0.5 shrink-0">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 font-mono font-bold text-sm">
+                      {isCompleted || isLive ? (
+                        <>
+                          <span className="text-gray-900">{match.homeScore}</span>
+                          <span className="text-gray-400">:</span>
+                          <span className="text-gray-900">{match.awayScore}</span>
+                        </>
+                      ) : (
+                        <span className="text-gray-400 tracking-widest text-xs">VS</span>
+                      )}
+                    </div>
+                    {isCompleted && match.wentToPenalties && match.penaltyWinner && (
+                      <span className="text-[10px] text-gray-500">
+                        Pen: {match.penaltyWinner === "home" ? "H" : "A"}
+                        {match.homePenaltyScore != null && match.awayPenaltyScore != null
+                          ? ` (${match.homePenaltyScore}–${match.awayPenaltyScore})`
+                          : ""}
+                      </span>
                     )}
                   </div>
 
@@ -414,8 +468,8 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
 
       {/* Score entry modal */}
       {scoreDialogOpen && selectedMatch && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-in fade-in">
-          <div className="bg-white border border-gray-200 shadow-xl max-w-sm w-full p-6 space-y-5 relative">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-start justify-center p-6 z-50 animate-in fade-in overflow-y-auto">
+          <div className="bg-white border border-gray-200 shadow-xl max-w-sm w-full p-6 space-y-5 relative my-auto">
             <button
               onClick={() => setScoreDialogOpen(false)}
               className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-sm transition-colors"
@@ -432,11 +486,14 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
               </div>
               <p className="text-sm text-gray-500">
                 {STAGE_LABELS[selectedMatch.stage] ?? selectedMatch.stage}
+                {isKnockout && " · Knockout stage"}
               </p>
             </div>
 
             <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-sm leading-relaxed">
-              Submitting this score immediately calculates points for all locked predictions. This action is permanent.
+              {isKnockout
+                ? "Enter the score after 120 minutes. If the match went to penalties, check the box below."
+                : "Submitting this score immediately calculates points for all locked predictions. This action is permanent."}
             </div>
 
             <form onSubmit={handleSetScore} className="space-y-5">
@@ -477,6 +534,77 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                   />
                 </div>
               </div>
+
+              {/* Knockout penalty section */}
+              {isKnockout && (
+                <div className="space-y-4 border-t border-gray-100 pt-4">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={penalty.wentToPenalties}
+                      onChange={(e) =>
+                        setPenalty({
+                          wentToPenalties: e.target.checked,
+                          penaltyWinner: null,
+                          homePenalty: "",
+                          awayPenalty: "",
+                        })
+                      }
+                      className="w-4 h-4 accent-green-600"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Match went to penalties</span>
+                  </label>
+
+                  {penalty.wentToPenalties && (
+                    <>
+                      <div>
+                        <p className="text-xs font-semibold text-gray-600 mb-2">Penalty winner</p>
+                        <div className="flex gap-2">
+                          {(["home", "away"] as const).map((side) => (
+                            <button
+                              key={side}
+                              type="button"
+                              onClick={() => setPenalty((p) => ({ ...p, penaltyWinner: p.penaltyWinner === side ? null : side }))}
+                              className={`flex-1 py-2 text-xs font-semibold transition-colors border rounded-sm ${
+                                penalty.penaltyWinner === side
+                                  ? "bg-green-600 text-white border-green-600"
+                                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                              }`}
+                            >
+                              {side === "home" ? selectedMatch.homeTeamName : selectedMatch.awayTeamName}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-semibold text-gray-600 mb-2">Penalty score (optional, e.g. 4–3)</p>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="number"
+                            min="0"
+                            max="20"
+                            placeholder="0"
+                            value={penalty.homePenalty}
+                            onChange={(e) => setPenalty((p) => ({ ...p, homePenalty: e.target.value }))}
+                            className="w-14 h-10 bg-white border border-gray-300 hover:border-gray-400 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 text-center text-lg font-bold text-gray-900 transition-colors"
+                          />
+                          <span className="text-gray-400 font-bold">–</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="20"
+                            placeholder="0"
+                            value={penalty.awayPenalty}
+                            onChange={(e) => setPenalty((p) => ({ ...p, awayPenalty: e.target.value }))}
+                            className="w-14 h-10 bg-white border border-gray-300 hover:border-gray-400 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 text-center text-lg font-bold text-gray-900 transition-colors"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               {error && (
                 <div role="alert" className="flex items-start gap-2.5 p-3 border border-red-200 bg-red-50 text-red-700 text-sm rounded-sm">
