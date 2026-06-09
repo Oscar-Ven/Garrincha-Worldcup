@@ -272,7 +272,7 @@ export default function PredictionBoard({ locale, matches, mode }: PredictionBoa
                           onChange={(event) =>
                             setValues((prev) => ({
                               ...prev,
-                              [match.id]: { ...prev[match.id], home: event.target.value, penaltyWinner: null },
+                              [match.id]: { ...prev[match.id], home: event.target.value, penaltyWinner: null, penaltyHome: "", penaltyAway: "" },
                             }))
                           }
                           className="h-12 min-w-0 rounded-2xl border border-white/10 bg-zinc-950 px-3 text-center text-lg font-semibold text-white outline-none transition-colors focus:border-lime-400 disabled:cursor-not-allowed disabled:text-zinc-500"
@@ -288,7 +288,7 @@ export default function PredictionBoard({ locale, matches, mode }: PredictionBoa
                           onChange={(event) =>
                             setValues((prev) => ({
                               ...prev,
-                              [match.id]: { ...prev[match.id], away: event.target.value, penaltyWinner: null },
+                              [match.id]: { ...prev[match.id], away: event.target.value, penaltyWinner: null, penaltyHome: "", penaltyAway: "" },
                             }))
                           }
                           className="h-12 min-w-0 rounded-2xl border border-white/10 bg-zinc-950 px-3 text-center text-lg font-semibold text-white outline-none transition-colors focus:border-lime-400 disabled:cursor-not-allowed disabled:text-zinc-500"
