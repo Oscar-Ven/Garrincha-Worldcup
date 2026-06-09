@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function CheckinManagerPage() {
   const admin = await getCurrentUser();
   if (!admin) {
-    redirect("/admin/login");
+    redirect("/dashboard/login");
   }
 
   const isOwner = admin.role === "SUPER_ADMIN" || admin.role === "ADMIN";
@@ -90,3 +90,4 @@ export default async function CheckinManagerPage() {
 function pId(val: string | undefined): string {
   return val ?? Math.random().toString();
 }
+

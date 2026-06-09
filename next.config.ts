@@ -38,6 +38,16 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "flagcdn.com" },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/admin/login",
+        destination: "/dashboard/login",
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {
