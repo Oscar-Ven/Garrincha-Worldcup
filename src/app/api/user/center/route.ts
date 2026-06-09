@@ -60,15 +60,19 @@ export async function PUT(request: NextRequest) {
     );
   }
 
-  await prisma.centerChangeLog.create({
-    data: {
-      userId: user.id,
-      fromCenterId: user.competitionCenterId ?? null,
-      toCenterId: centerId,
-      changedBy: user.email,
-      changeType: "SELF_SERVICE",
-    },
-  });
+  try {
+    await prisma.centerChangeLog.create({
+      data: {
+        userId: user.id,
+        fromCenterId: user.competitionCenterId ?? null,
+        toCenterId: centerId,
+        changedBy: user.email,
+        changeType: "SELF_SERVICE",
+      },
+    });
+  } catch (err) {
+    console.error("[user/center] Failed to write change log:", err);
+  }
 
   return NextResponse.json({ ok: true, centerId, centerName: center.name });
 }

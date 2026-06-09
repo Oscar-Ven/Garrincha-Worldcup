@@ -75,10 +75,15 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Please log in." }, { status: 401 });
   }
 
-  await prisma.user.update({
-    where: { id: session.userId },
-    data: { avatarUrl: null },
-  });
+  try {
+    await prisma.user.update({
+      where: { id: session.userId },
+      data: { avatarUrl: null },
+    });
+  } catch (err) {
+    console.error("[user/avatar DELETE]", err);
+    return NextResponse.json({ error: "Failed to remove avatar." }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }
