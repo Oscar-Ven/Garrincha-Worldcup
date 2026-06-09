@@ -30,20 +30,6 @@ function sanitizeConnectionString(raw: string): string {
 
 const connectionString = sanitizeConnectionString(process.env.DATABASE_URL ?? "");
 
-if (process.env.NODE_ENV === "production" && connectionString) {
-  try {
-    const u = new URL(connectionString);
-    console.log("[prisma] init:", {
-      protocol: u.protocol,
-      host: u.hostname.replace(/^[^.]+/, "***"),
-      port: u.port || "default",
-      db: u.pathname,
-      isPooler: u.hostname.includes("pooler"),
-    });
-  } catch {
-    console.log("[prisma] init: URL parse failed");
-  }
-}
 
 const adapter = new PrismaPg({ connectionString, ssl });
 
