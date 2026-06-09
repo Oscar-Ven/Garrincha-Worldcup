@@ -168,12 +168,17 @@ async function runSync(): Promise<NextResponse> {
       await prisma.match.update({
         where: { id: dbMatch.id },
         data: {
-            scoreSyncStatus: "pending_review",
-            pendingHomeScore: finalHome,
-            pendingAwayScore: finalAway,
-            externalUpdatedAt: now,
-            lastScoreSyncAt: now,
-          },
+          scoreSyncStatus: "pending_review",
+          pendingHomeScore: finalHome,
+          pendingAwayScore: finalAway,
+          // Penalty data stored in place so approve-score can read it without extra columns.
+          wentToPenalties: fixture.penaltyResult?.wentToPenalties ?? false,
+          penaltyWinner: fixture.penaltyResult?.penaltyWinner ?? null,
+          homePenaltyScore: fixture.penaltyResult?.homePenaltyScore ?? null,
+          awayPenaltyScore: fixture.penaltyResult?.awayPenaltyScore ?? null,
+          externalUpdatedAt: now,
+          lastScoreSyncAt: now,
+        },
       });
       report.pending_review++;
       report.warnings.push(
@@ -196,6 +201,10 @@ async function runSync(): Promise<NextResponse> {
             finalizedAt: now,
             scoreSource: "api-football",
             scoreSyncStatus: "auto_applied",
+            wentToPenalties: fixture.penaltyResult?.wentToPenalties ?? false,
+            penaltyWinner: fixture.penaltyResult?.penaltyWinner ?? null,
+            homePenaltyScore: fixture.penaltyResult?.homePenaltyScore ?? null,
+            awayPenaltyScore: fixture.penaltyResult?.awayPenaltyScore ?? null,
             externalUpdatedAt: now,
             lastScoreSyncAt: now,
           },
@@ -203,13 +212,22 @@ async function runSync(): Promise<NextResponse> {
 
         const predictions = await tx.prediction.findMany({
           where: { matchId: dbMatch!.id },
-          select: { id: true, userId: true, homeScore: true, awayScore: true },
+          select: {
+            id: true,
+            userId: true,
+            homeScore: true,
+            awayScore: true,
+            penaltyWinner: true,
+            homePenaltyScore: true,
+            awayPenaltyScore: true,
+          },
         });
 
         if (predictions.length > 0) {
           const updates = recalculatePredictionPoints({
             predictions,
             finalScore: { homeScore: finalHome, awayScore: finalAway },
+            penalty: fixture.penaltyResult ?? null,
             calculatedAt: now,
           });
           const byPoints = new Map<number, string[]>();

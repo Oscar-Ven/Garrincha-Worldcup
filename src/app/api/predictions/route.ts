@@ -40,6 +40,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Predictions can only be submitted for scheduled matches." }, { status: 400 });
   }
 
+  // Only save penalty fields for knockout matches where the prediction is a draw.
+  const isKnockout = match.stage !== "GROUP";
+  const isDraw = parsed.data.homeScore === parsed.data.awayScore;
+  const penaltyWinner = isKnockout && isDraw ? (parsed.data.penaltyWinner ?? null) : null;
+  const homePenaltyScore = penaltyWinner ? (parsed.data.homePenaltyScore ?? null) : null;
+  const awayPenaltyScore = penaltyWinner ? (parsed.data.awayPenaltyScore ?? null) : null;
+
   if (!isPreviewMode() && session) {
     const user = await getCurrentUser();
     if (!user || !user.competitionCenterId) {
@@ -76,10 +83,16 @@ export async function POST(request: NextRequest) {
       matchId: parsed.data.matchId,
       homeScore: parsed.data.homeScore,
       awayScore: parsed.data.awayScore,
+      penaltyWinner,
+      homePenaltyScore,
+      awayPenaltyScore,
     },
     update: {
       homeScore: parsed.data.homeScore,
       awayScore: parsed.data.awayScore,
+      penaltyWinner,
+      homePenaltyScore,
+      awayPenaltyScore,
       pointsAwarded: 0,
       calculatedAt: null,
     },

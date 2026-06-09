@@ -1,4 +1,4 @@
-import { isPredictionLocked, type Score } from "@/lib/scoring";
+import { isPredictionLocked, type PenaltyResult, type Score } from "@/lib/scoring";
 
 export type MatchDataProvider = "manual" | "football-data.org" | "sportmonks" | "api-football";
 
@@ -30,6 +30,7 @@ export type IncomingMatchData = {
   venue?: string;
   status: ExternalMatchStatus;
   finalScore?: Score;
+  penaltyResult?: PenaltyResult;
   provider: MatchDataProvider;
 };
 

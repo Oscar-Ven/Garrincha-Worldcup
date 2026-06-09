@@ -38,9 +38,16 @@ export type PlayerMatchCard = {
   awayTeamFlag: string;
   homeScore: number | null;
   awayScore: number | null;
+  wentToPenalties: boolean;
+  penaltyWinner: string | null;
+  homePenaltyScore: number | null;
+  awayPenaltyScore: number | null;
   prediction: {
     homeScore: number;
     awayScore: number;
+    penaltyWinner: string | null;
+    homePenaltyScore: number | null;
+    awayPenaltyScore: number | null;
     pointsAwarded: number;
     calculatedAt: string | null;
   } | null;
@@ -77,6 +84,9 @@ export async function getPlayerDashboardData(user: PlayerRouteUser) {
           select: {
             homeScore: true,
             awayScore: true,
+            penaltyWinner: true,
+            homePenaltyScore: true,
+            awayPenaltyScore: true,
             pointsAwarded: true,
             calculatedAt: true,
           },
@@ -129,10 +139,17 @@ export async function getPlayerDashboardData(user: PlayerRouteUser) {
     awayTeamFlag: match.awayTeam.flagUrl,
     homeScore: match.homeScore,
     awayScore: match.awayScore,
+    wentToPenalties: match.wentToPenalties,
+    penaltyWinner: match.penaltyWinner,
+    homePenaltyScore: match.homePenaltyScore,
+    awayPenaltyScore: match.awayPenaltyScore,
     prediction: match.predictions[0]
       ? {
           homeScore: match.predictions[0].homeScore,
           awayScore: match.predictions[0].awayScore,
+          penaltyWinner: match.predictions[0].penaltyWinner,
+          homePenaltyScore: match.predictions[0].homePenaltyScore,
+          awayPenaltyScore: match.predictions[0].awayPenaltyScore,
           pointsAwarded: match.predictions[0].pointsAwarded,
           calculatedAt: match.predictions[0].calculatedAt?.toISOString() ?? null,
         }

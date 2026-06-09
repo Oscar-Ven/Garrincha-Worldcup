@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { recalculatePredictionPoints } from "@/lib/product-logic";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
+import { type PenaltyResult } from "@/lib/scoring";
 import { finalScoreSchema } from "@/lib/validators";
 
 export async function POST(
@@ -33,6 +34,15 @@ export async function POST(
 
   const now = new Date();
 
+  const penalty: PenaltyResult | null = parsed.data.wentToPenalties
+    ? {
+        wentToPenalties: true,
+        penaltyWinner: parsed.data.penaltyWinner ?? null,
+        homePenaltyScore: parsed.data.homePenaltyScore ?? null,
+        awayPenaltyScore: parsed.data.awayPenaltyScore ?? null,
+      }
+    : null;
+
   try {
     await prisma.$transaction(async (tx) => {
       await tx.match.update({
@@ -44,22 +54,35 @@ export async function POST(
           finalizedAt: now,
           scoreSource: "manual",
           scoreSyncStatus: null,
+          wentToPenalties: penalty?.wentToPenalties ?? false,
+          penaltyWinner: penalty?.penaltyWinner ?? null,
+          homePenaltyScore: penalty?.homePenaltyScore ?? null,
+          awayPenaltyScore: penalty?.awayPenaltyScore ?? null,
         },
       });
 
       const predictions = await tx.prediction.findMany({
         where: { matchId: id },
-        select: { id: true, userId: true, homeScore: true, awayScore: true },
+        select: {
+          id: true,
+          userId: true,
+          homeScore: true,
+          awayScore: true,
+          penaltyWinner: true,
+          homePenaltyScore: true,
+          awayPenaltyScore: true,
+        },
       });
 
       const updates = recalculatePredictionPoints({
         predictions,
         finalScore: parsed.data,
+        penalty,
         calculatedAt: now,
       });
 
-      // Batch updates by points category (at most 4: 0/2/3/5).
-      // Reduces N sequential UPDATEs to ≤4 updateMany calls.
+      // Batch updates by points category (at most 6: 0/2/3/5/6/7/8).
+      // Reduces N sequential UPDATEs to ≤6 updateMany calls.
       const byPoints = new Map<number, string[]>();
       for (const u of updates) {
         const list = byPoints.get(u.pointsAwarded) ?? [];
