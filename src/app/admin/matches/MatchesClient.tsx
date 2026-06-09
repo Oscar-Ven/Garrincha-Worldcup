@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { formatBelgiumDateTime } from "@/lib/date";
 import {
   Calendar,
   Search,
@@ -337,7 +338,6 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
           filteredMatches.map((match) => {
             const isCompleted = match.status === "FINAL";
             const isLive = match.status === "LIVE";
-            const kickoffDate = new Date(match.kickoffAt);
             const stageLabel = STAGE_LABELS[match.stage] ?? match.stage;
 
             return (
@@ -428,7 +428,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                   <div className="text-xs text-gray-500 flex flex-col gap-0.5 min-w-0">
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3 text-gray-400 shrink-0" />
-                      {kickoffDate.toLocaleString([], { dateStyle: "short", timeStyle: "short" })}
+                      {formatBelgiumDateTime(match.kickoffAt)} (BE)
                     </span>
                     <span className="flex items-center gap-1 truncate">
                       <MapPin className="w-3 h-3 text-gray-400 shrink-0" />

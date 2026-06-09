@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getUserCenterRank, getUserRankAndPoints } from "@/lib/leaderboards";
 import { isPredictionLocked } from "@/lib/scoring";
 import { requirePlayerContext } from "@/lib/player-app";
+import { formatBelgiumDateTime } from "@/lib/date";
 import { t } from "@/lib/translations";
 
 export const dynamic = "force-dynamic";
@@ -132,7 +133,7 @@ export default async function DashboardPage() {
                   <div key={match.id} className="flex min-w-0 items-center justify-between gap-3 rounded-3xl border border-white/8 bg-white/[0.03] px-4 py-4">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium text-white">{match.label}</div>
-                      <div className="mt-1 text-xs text-zinc-500">{new Date(match.kickoffAt).toLocaleString()}</div>
+                      <div className="mt-1 text-xs text-zinc-500">{formatBelgiumDateTime(match.kickoffAt)}</div>
                     </div>
                     <div className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${match.predicted ? "bg-lime-400/15 text-lime-300" : "bg-amber-500/10 text-amber-300"}`}>
                       {match.predicted ? "Predicted" : "Not predicted"}
