@@ -89,7 +89,7 @@ export default async function RegisterPage({
         <p className="mt-8 text-center text-zinc-600 text-sm">
           {t(locale, "auth.already")}{" "}
           <a
-            href={`/${locale}`}
+            href={`/${locale}/login`}
             className="text-zinc-400 hover:text-lime-400 underline underline-offset-4 transition-colors"
           >
             {t(locale, "auth.requestLink")}
