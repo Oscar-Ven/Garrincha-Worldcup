@@ -86,7 +86,7 @@ describe("PWA icon files", () => {
 // ── QR URL format ────────────────────────────────────────────────────────────
 
 describe("QR registration URL format", () => {
-  const BASE = "https://worldcup-garrincha.com";
+  const BASE = "https://worldcup.garrincha.be";
 
   it("default QR URL has source=qr param", () => {
     const url = `${BASE}/en/register?source=qr`;
