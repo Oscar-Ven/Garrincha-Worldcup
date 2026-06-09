@@ -8,6 +8,7 @@ import { createMatchDataWorkflowPlan } from "@/lib/match-data-workflow";
 import { recalculatePredictionPoints } from "@/lib/product-logic";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
+import { finalScoreSchema } from "@/lib/validators";
 
 // ---------------------------------------------------------------------------
 // Cron auth
@@ -154,28 +155,35 @@ async function runSync(): Promise<NextResponse> {
 
     if (!plan.canStoreFinalScoreDraft || !fixture.finalScore) continue;
 
+    // Validate API score before storing — guards against corrupt provider data.
+    const scoreValidation = finalScoreSchema.safeParse(fixture.finalScore);
+    if (!scoreValidation.success) {
+      report.warnings.push(`[match ${dbMatch.id}] skipped — invalid score from API: ${JSON.stringify(fixture.finalScore)}`);
+      continue;
+    }
+    const { homeScore: finalHome, awayScore: finalAway } = scoreValidation.data;
+
     // --- 5a. Needs admin review ---
     if (plan.requiresAdminConfirmation) {
       await prisma.match.update({
         where: { id: dbMatch.id },
         data: {
             scoreSyncStatus: "pending_review",
-            pendingHomeScore: fixture.finalScore.homeScore,
-            pendingAwayScore: fixture.finalScore.awayScore,
+            pendingHomeScore: finalHome,
+            pendingAwayScore: finalAway,
             externalUpdatedAt: now,
             lastScoreSyncAt: now,
           },
       });
       report.pending_review++;
       report.warnings.push(
-        `${dbMatch.homeTeam.name} ${fixture.finalScore.homeScore}–${fixture.finalScore.awayScore} ${dbMatch.awayTeam.name} ` +
+        `${dbMatch.homeTeam.name} ${finalHome}–${finalAway} ${dbMatch.awayTeam.name} ` +
         `[match ${dbMatch.id}] needs review: ${plan.warnings.join("; ")}`,
       );
       continue;
     }
 
     // --- 5b. Safe auto-apply ---
-    const { homeScore: finalHome, awayScore: finalAway } = fixture.finalScore;
 
     try {
       await prisma.$transaction(async (tx) => {

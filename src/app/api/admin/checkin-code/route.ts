@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { requireCenterAdmin } from "@/lib/auth";
 import { generateSessionCode, getActiveSession, sessionExpiresAt } from "@/lib/checkin";
@@ -88,8 +89,21 @@ export async function POST(request: NextRequest) {
       data: { centerId, code, expiresAt, createdBy: admin.email },
     });
   } catch (err) {
-    console.error("[admin/checkin-code]", err);
-    return NextResponse.json({ error: "Failed to generate code." }, { status: 500 });
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      // Concurrent request won the race for the same code — generate a fresh one.
+      code = generateSessionCode();
+      try {
+        await prisma.centerSession.create({
+          data: { centerId, code, expiresAt, createdBy: admin.email },
+        });
+      } catch (retryErr) {
+        console.error("[admin/checkin-code] retry failed", retryErr);
+        return NextResponse.json({ error: "Failed to generate code. Please try again." }, { status: 500 });
+      }
+    } else {
+      console.error("[admin/checkin-code]", err);
+      return NextResponse.json({ error: "Failed to generate code." }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ code, expiresAt: expiresAt.toISOString() });

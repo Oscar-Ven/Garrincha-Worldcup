@@ -132,6 +132,7 @@ export default function RegisterForm({
           minLength={2}
           maxLength={120}
           autoComplete="name"
+          disabled={loading}
         />
         <Field
           label={t(locale, "f_email")}
@@ -140,6 +141,7 @@ export default function RegisterForm({
           onChange={(v) => setForm((f) => ({ ...f, email: v }))}
           required
           autoComplete="email"
+          disabled={loading}
         />
         <div>
           <Field
@@ -151,6 +153,7 @@ export default function RegisterForm({
             minLength={2}
             maxLength={50}
             autoComplete="username"
+            disabled={loading}
           />
           <p className="mt-1.5 text-xs text-zinc-600">{t(locale, "f_nick_hint")}</p>
         </div>
@@ -163,6 +166,7 @@ export default function RegisterForm({
           minLength={6}
           maxLength={32}
           autoComplete="tel"
+          disabled={loading}
         />
       </div>
 
@@ -188,7 +192,8 @@ export default function RegisterForm({
             value={form.centerId}
             onChange={(e) => setForm((f) => ({ ...f, centerId: e.target.value }))}
             required
-            className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 text-white text-sm focus:outline-none focus:border-lime-400 transition-colors appearance-none"
+            disabled={loading}
+            className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 text-white text-sm focus:outline-none focus:border-lime-400 transition-colors appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="">{t(locale, "form.selectCenter")}</option>
             {centers.map((c) => (
@@ -206,12 +211,13 @@ export default function RegisterForm({
       )}
 
       {/* Terms */}
-      <label className="flex items-start gap-3 cursor-pointer group">
+      <label className={`flex items-start gap-3 group ${loading ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
         <div className="relative mt-0.5 shrink-0">
           <input
             type="checkbox"
             checked={form.termsAccepted}
             onChange={(e) => setForm((f) => ({ ...f, termsAccepted: e.target.checked }))}
+            disabled={loading}
             className="sr-only"
           />
           <div
@@ -270,6 +276,7 @@ function Field({
   minLength,
   maxLength,
   autoComplete,
+  disabled,
 }: {
   label: string;
   type: string;
@@ -279,6 +286,7 @@ function Field({
   minLength?: number;
   maxLength?: number;
   autoComplete?: string;
+  disabled?: boolean;
 }) {
   return (
     <div>
@@ -293,7 +301,8 @@ function Field({
         minLength={minLength}
         maxLength={maxLength}
         autoComplete={autoComplete}
-        className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-lime-400 transition-colors"
+        disabled={disabled}
+        className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-lime-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       />
     </div>
   );

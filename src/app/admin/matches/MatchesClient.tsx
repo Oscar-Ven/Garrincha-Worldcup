@@ -66,8 +66,10 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
   const [scores, setScores] = useState({ home: "", away: "" });
 
   const [loading, setLoading] = useState(false);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
   const [syncLoading, setSyncLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [approveError, setApproveError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const filteredMatches = initialMatches.filter((match) => {
@@ -161,9 +163,11 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
     )
       return;
 
-    setLoading(true);
-    setError(null);
+    setApprovingId(match.id);
+    setApproveError(null);
     setSuccess(null);
+
+    const approvedScore = `${match.pendingHomeScore}–${match.pendingAwayScore}`;
 
     try {
       const res = await fetch(`/api/admin/matches/${match.id}/approve-score`, { method: "POST" });
@@ -171,12 +175,12 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
       if (!res.ok) {
         throw new Error(data.error ?? "Failed to approve score.");
       }
-      setSuccess(`Match #${match.fifaMatchNo} approved (${match.pendingHomeScore}–${match.pendingAwayScore}). Points awarded.`);
+      setSuccess(`Match #${match.fifaMatchNo} approved (${approvedScore}). Points awarded.`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to approve score.");
+      setApproveError(err instanceof Error ? err.message : "Failed to approve score.");
     } finally {
-      setLoading(false);
+      setApprovingId(null);
     }
   }
 
@@ -187,6 +191,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
       away: match.awayScore !== null ? match.awayScore.toString() : "",
     });
     setError(null);
+    setApproveError(null);
     setSuccess(null);
     setScoreDialogOpen(true);
   }
@@ -264,6 +269,12 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
           <span>{success}</span>
         </div>
       )}
+      {approveError && (
+        <div role="alert" className="flex items-start gap-3 p-3 border border-red-200 bg-red-50 text-red-700 text-sm rounded-sm">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>{approveError}</span>
+        </div>
+      )}
       {error && !scoreDialogOpen && (
         <div role="alert" className="flex items-start gap-3 p-3 border border-red-200 bg-red-50 text-red-700 text-sm rounded-sm">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -317,7 +328,12 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                         Review
                       </span>
                     )}
-                    {isCompleted && match.scoreSource === "api-football" && (
+                    {isCompleted && match.scoreSyncStatus === "admin_approved" && (
+                      <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                        Admin
+                      </span>
+                    )}
+                    {isCompleted && match.scoreSyncStatus !== "admin_approved" && match.scoreSource === "api-football" && (
                       <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-teal-50 text-teal-700 border border-teal-200">
                         API
                       </span>
@@ -373,7 +389,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                         match.pendingAwayScore !== null && (
                           <button
                             onClick={() => handleApproveScore(match)}
-                            disabled={loading}
+                            disabled={approvingId === match.id}
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-300 hover:bg-amber-100 text-amber-800 font-semibold text-xs transition-colors whitespace-nowrap disabled:opacity-50"
                           >
                             <CheckCircle className="w-3.5 h-3.5" />

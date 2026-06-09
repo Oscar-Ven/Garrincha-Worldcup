@@ -47,20 +47,22 @@ export async function POST(
 
   try {
     await prisma.$transaction(async (tx) => {
-      await tx.match.update({
-        where: { id },
+      // Atomic optimistic lock: only update if still pending_review — prevents double-approve races.
+      const { count } = await tx.match.updateMany({
+        where: { id, scoreSyncStatus: "pending_review" },
         data: {
           homeScore: finalHome,
           awayScore: finalAway,
           status: MatchStatus.FINAL,
           finalizedAt: now,
           scoreSource: "api-football",
-          scoreSyncStatus: "auto_applied",
+          scoreSyncStatus: "admin_approved",
           pendingHomeScore: null,
           pendingAwayScore: null,
           lastScoreSyncAt: now,
         },
       });
+      if (count === 0) throw new Error("ALREADY_PROCESSED");
 
       const predictions = await tx.prediction.findMany({
         where: { matchId: id },
@@ -92,6 +94,9 @@ export async function POST(
       }
     });
   } catch (err) {
+    if ((err as Error).message === "ALREADY_PROCESSED") {
+      return NextResponse.json({ error: "This score was already approved." }, { status: 409 });
+    }
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
       return NextResponse.json({ error: "Match not found." }, { status: 404 });
     }
