@@ -10,6 +10,7 @@ import {
   filterLeaderboardByNationality,
   leaderboardDisplayName,
   recalculatePredictionPoints,
+  resolveLeaderboardCenter,
   type LeaderboardInputUser,
 } from "@/lib/product-logic";
 
@@ -603,5 +604,99 @@ describe("leaderboard rules", () => {
     ]);
 
     expect(rows.map((row) => row.name)).toEqual(["Adam", "Zara"]);
+  });
+
+  // ─── Center leaderboard selector requirements ────────────────────────────────
+
+  const multiCenterUsers: LeaderboardInputUser[] = [
+    {
+      id: "k1",
+      displayName: "Kortrijk Player",
+      email: "k1@example.com",
+      nationality: "Belgium",
+      competitionCenter: { name: "GARRINCHA Kortrijk" },
+      predictions: [{ pointsAwarded: 3 }],
+      pointEvents: [],
+    },
+    {
+      id: "g1",
+      displayName: "Gent Player",
+      email: "g1@example.com",
+      nationality: "Belgium",
+      competitionCenter: { name: "GARRINCHA Gent The Loop" },
+      predictions: [{ pointsAwarded: 5 }],
+      pointEvents: [],
+    },
+    {
+      id: "a1",
+      displayName: "Antwerpen Player",
+      email: "a1@example.com",
+      nationality: "Belgium",
+      competitionCenter: { name: "GARRINCHA Antwerpen Noord" },
+      predictions: [{ pointsAwarded: 2 }],
+      pointEvents: [],
+    },
+    {
+      id: "l1",
+      displayName: "Luik Player",
+      email: "l1@example.com",
+      nationality: "Morocco",
+      competitionCenter: { name: "GARRINCHA Luik" },
+      predictions: [{ pointsAwarded: 4 }],
+      pointEvents: [],
+    },
+  ];
+
+  it("global leaderboard includes players from all centers", () => {
+    const rows = createLeaderboardRows(multiCenterUsers);
+    const centersInResult = new Set(rows.map((r) => r.center));
+    expect(centersInResult).toContain("GARRINCHA Kortrijk");
+    expect(centersInResult).toContain("GARRINCHA Gent The Loop");
+    expect(centersInResult).toContain("GARRINCHA Antwerpen Noord");
+    expect(centersInResult).toContain("GARRINCHA Luik");
+    expect(rows).toHaveLength(4);
+  });
+
+  it("center filter correctly isolates only the selected center's players", () => {
+    const rows = createLeaderboardRows(multiCenterUsers);
+    const gent = filterLeaderboardByCenter(rows, "GARRINCHA Gent The Loop");
+    expect(gent).toHaveLength(1);
+    expect(gent[0].center).toBe("GARRINCHA Gent The Loop");
+    expect(gent[0].name).toBe("Gent Player");
+
+    const luik = filterLeaderboardByCenter(rows, "GARRINCHA Luik");
+    expect(luik).toHaveLength(1);
+    expect(luik[0].center).toBe("GARRINCHA Luik");
+  });
+
+  it("center filter works for any center — Kortrijk receives no special treatment", () => {
+    const rows = createLeaderboardRows(multiCenterUsers);
+    const centers = [
+      "GARRINCHA Kortrijk",
+      "GARRINCHA Gent The Loop",
+      "GARRINCHA Antwerpen Noord",
+      "GARRINCHA Luik",
+    ];
+    for (const center of centers) {
+      const filtered = filterLeaderboardByCenter(rows, center);
+      expect(filtered.length).toBeGreaterThan(0);
+      expect(filtered.every((r) => r.center === center)).toBe(true);
+    }
+  });
+
+  it("resolveLeaderboardCenter defaults to user center, respects valid URL param, ignores invalid one", () => {
+    const validIds = new Set(["id-kortrijk", "id-gent", "id-antwerpen"]);
+
+    // URL param takes priority when it is a valid center id
+    expect(resolveLeaderboardCenter("id-gent", "id-kortrijk", validIds)).toBe("id-gent");
+
+    // Falls back to user's competition center when no URL param provided
+    expect(resolveLeaderboardCenter(undefined, "id-kortrijk", validIds)).toBe("id-kortrijk");
+
+    // Returns null when neither URL param nor user center is available
+    expect(resolveLeaderboardCenter(undefined, null, validIds)).toBeNull();
+
+    // Ignores an invalid/spoofed URL param and falls back to user's center
+    expect(resolveLeaderboardCenter("not-a-real-id", "id-kortrijk", validIds)).toBe("id-kortrijk");
   });
 });
