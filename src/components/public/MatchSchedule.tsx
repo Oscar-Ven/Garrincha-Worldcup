@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import { isoCodeForTeam } from "@/lib/flags";
+import { formatBelgiumDateLong, formatBelgiumTime, getBelgiumDateKey } from "@/lib/date";
 
 type MatchTeam = {
   name: string;
@@ -89,25 +90,6 @@ function StatusBadge({ status }: { status: "SCHEDULED" | "LIVE" | "FINAL" }) {
   );
 }
 
-function formatDateHeader(isoKickoff: string): string {
-  return new Date(isoKickoff).toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-}
-
-function formatKickoffTime(isoKickoff: string): string {
-  return (
-    new Date(isoKickoff).toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "UTC",
-    }) + " UTC"
-  );
-}
 
 function MatchCard({ match }: { match: PublicMatchRow }) {
   const stageLabel = STAGE_LABELS[match.stage] ?? match.stage;
@@ -157,7 +139,7 @@ function MatchCard({ match }: { match: PublicMatchRow }) {
                 VS
               </span>
               <span className="text-[10px] font-mono text-zinc-500 mt-0.5">
-                {formatKickoffTime(match.kickoffAt)}
+                {formatBelgiumTime(match.kickoffAt)} Brussels
               </span>
             </>
           )}
@@ -223,7 +205,7 @@ export default function MatchSchedule({ matches }: { matches: PublicMatchRow[] }
   const dateGroups = useMemo(() => {
     const map = new Map<string, PublicMatchRow[]>();
     for (const m of filtered) {
-      const key = m.kickoffAt.slice(0, 10);
+      const key = getBelgiumDateKey(m.kickoffAt);
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(m);
     }
@@ -277,7 +259,7 @@ export default function MatchSchedule({ matches }: { matches: PublicMatchRow[] }
           <div key={dateKey}>
             <div className="flex items-center gap-4 mb-4">
               <span className="text-white font-black uppercase tracking-tight text-sm shrink-0">
-                {formatDateHeader(dayMatches[0].kickoffAt)}
+                {formatBelgiumDateLong(dayMatches[0].kickoffAt)}
               </span>
               <div className="flex-1 h-px bg-zinc-800" />
               <span className="text-zinc-600 text-[10px] font-mono shrink-0">

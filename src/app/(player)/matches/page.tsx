@@ -5,7 +5,7 @@ import PredictionBoard from "@/components/player/PredictionBoard";
 export const dynamic = "force-dynamic";
 
 export default async function MatchesPage() {
-  const { user, locale } = await requirePlayerContext();
+  const { user } = await requirePlayerContext();
   const data = await getPlayerDashboardData(user);
 
   return (
@@ -15,7 +15,7 @@ export default async function MatchesPage() {
         <p className="mt-2 text-sm leading-6 text-zinc-300">Track upcoming kickoffs, locked fixtures, completed results, and your prediction status for every match.</p>
       </section>
 
-      <PredictionBoard locale={locale} matches={data.allMatches} mode="matches" />
+      <PredictionBoard matches={data.allMatches} mode="matches" />
     </div>
   );
 }

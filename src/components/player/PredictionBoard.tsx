@@ -3,6 +3,7 @@
 import { startTransition, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, CheckCircle2, Clock3, Lock, Save, Trophy } from "lucide-react";
+import { formatBelgiumDateShort, formatBelgiumTime } from "@/lib/date";
 
 type MatchItem = {
   id: string;
@@ -40,29 +41,13 @@ type PredictionValues = {
 };
 
 type PredictionBoardProps = {
-  locale: string;
   matches: MatchItem[];
   mode: "predictions" | "matches";
 };
 
 type TabKey = "all" | "upcoming" | "locked" | "completed";
 
-function formatDateLabel(value: string, locale: string) {
-  return new Intl.DateTimeFormat(locale, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  }).format(new Date(value));
-}
-
-function formatTimeLabel(value: string, locale: string) {
-  return new Intl.DateTimeFormat(locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-}
-
-export default function PredictionBoard({ locale, matches, mode }: PredictionBoardProps) {
+export default function PredictionBoard({ matches, mode }: PredictionBoardProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>(mode === "predictions" ? "upcoming" : "all");
   const [values, setValues] = useState<Record<string, PredictionValues>>(
@@ -93,12 +78,12 @@ export default function PredictionBoard({ locale, matches, mode }: PredictionBoa
 
   const groupedMatches = useMemo(() => {
     return filteredMatches.reduce<Record<string, MatchItem[]>>((groups, match) => {
-      const key = `${formatDateLabel(match.kickoffAt, locale)} · ${match.stage.replaceAll("_", " ")}`;
+      const key = `${formatBelgiumDateShort(match.kickoffAt)} · ${match.stage.replaceAll("_", " ")}`;
       groups[key] ??= [];
       groups[key].push(match);
       return groups;
     }, {});
-  }, [filteredMatches, locale]);
+  }, [filteredMatches]);
 
   async function handleSave(matchId: string) {
     const match = matches.find((m) => m.id === matchId);
@@ -226,7 +211,7 @@ export default function PredictionBoard({ locale, matches, mode }: PredictionBoa
                       <div className="min-w-0">
                         <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Match {match.fifaMatchNo ?? "-"} · {match.stage.replaceAll("_", " ")}</div>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-400">
-                          <span>{formatTimeLabel(match.kickoffAt, locale)}</span>
+                          <span>{formatBelgiumTime(match.kickoffAt)} Brussels</span>
                           <span className="text-zinc-700">•</span>
                           <span className="truncate">{match.venue}</span>
                         </div>
