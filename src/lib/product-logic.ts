@@ -202,3 +202,12 @@ export function filterLeaderboardByNationality(rows: LeaderboardRow[], nationali
 export function filterLeaderboardByCenter(rows: LeaderboardRow[], center: string) {
   return rows.filter((row) => row.center === center);
 }
+
+export function resolveLeaderboardCenter(
+  centerParam: string | undefined,
+  userCenterId: string | null,
+  validIds: Set<string>,
+): string | null {
+  if (centerParam && validIds.has(centerParam)) return centerParam;
+  return userCenterId ?? null;
+}
