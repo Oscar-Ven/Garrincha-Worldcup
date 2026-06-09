@@ -79,7 +79,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
               pathname?.includes("/prizes") ? "text-lime-400" : "text-zinc-300 hover:text-lime-400"
             }`}
           >
-            Prizes
+            {t(locale, "nav_prize")}
           </Link>
         </div>
 
@@ -143,7 +143,7 @@ export default function Navbar({ locale }: { locale: Locale }) {
             onClick={() => setOpen(false)}
             className="text-base font-bold tracking-wide text-zinc-300 hover:text-lime-400 transition-colors uppercase"
           >
-            Prizes
+            {t(locale, "nav_prize")}
           </Link>
           <div className="h-px bg-zinc-800 w-full" />
           <LanguageSwitcher locale={locale} />

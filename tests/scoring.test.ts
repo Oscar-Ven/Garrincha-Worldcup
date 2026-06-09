@@ -50,6 +50,85 @@ describe("calculatePredictionPoints", () => {
   });
 });
 
+describe("penalty bonus points", () => {
+  const penalty = {
+    wentToPenalties: true,
+    penaltyWinner: "home",
+    homePenaltyScore: 4,
+    awayPenaltyScore: 3,
+  };
+
+  it("awards +2 for correct penalty winner on top of exact draw prediction", () => {
+    expect(
+      calculatePredictionPoints(
+        { homeScore: 1, awayScore: 1, penaltyWinner: "home" },
+        { homeScore: 1, awayScore: 1 },
+        penalty,
+      ),
+    ).toBe(7);
+  });
+
+  it("awards +2 +1 for correct penalty winner AND exact penalty score", () => {
+    expect(
+      calculatePredictionPoints(
+        { homeScore: 1, awayScore: 1, penaltyWinner: "home", homePenaltyScore: 4, awayPenaltyScore: 3 },
+        { homeScore: 1, awayScore: 1 },
+        penalty,
+      ),
+    ).toBe(8);
+  });
+
+  it("awards no penalty bonus for wrong penalty winner", () => {
+    expect(
+      calculatePredictionPoints(
+        { homeScore: 1, awayScore: 1, penaltyWinner: "away" },
+        { homeScore: 1, awayScore: 1 },
+        penalty,
+      ),
+    ).toBe(5);
+  });
+
+  it("awards no penalty bonus when prediction is not a draw", () => {
+    expect(
+      calculatePredictionPoints(
+        { homeScore: 2, awayScore: 1, penaltyWinner: "home" },
+        { homeScore: 2, awayScore: 1 },
+        penalty,
+      ),
+    ).toBe(5);
+  });
+
+  it("awards no penalty bonus when match did not go to penalties", () => {
+    const noPenalty = { wentToPenalties: false, penaltyWinner: null, homePenaltyScore: null, awayPenaltyScore: null };
+    expect(
+      calculatePredictionPoints(
+        { homeScore: 1, awayScore: 1, penaltyWinner: "home" },
+        { homeScore: 1, awayScore: 1 },
+        noPenalty,
+      ),
+    ).toBe(5);
+  });
+
+  it("awards no penalty bonus without penalty result (group stage)", () => {
+    expect(
+      calculatePredictionPoints(
+        { homeScore: 1, awayScore: 1, penaltyWinner: "home" },
+        { homeScore: 1, awayScore: 1 },
+      ),
+    ).toBe(5);
+  });
+
+  it("awards +2 only when penalty winner is correct but penalty score is wrong", () => {
+    expect(
+      calculatePredictionPoints(
+        { homeScore: 1, awayScore: 1, penaltyWinner: "home", homePenaltyScore: 5, awayPenaltyScore: 4 },
+        { homeScore: 1, awayScore: 1 },
+        penalty,
+      ),
+    ).toBe(7);
+  });
+});
+
 describe("isPredictionLocked", () => {
   const kickoff = new Date("2026-06-11T17:00:00.000Z");
 

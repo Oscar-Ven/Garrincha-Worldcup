@@ -43,6 +43,14 @@ export async function POST(request: NextRequest) {
   // Only save penalty fields for knockout matches where the prediction is a draw.
   const isKnockout = match.stage !== "GROUP";
   const isDraw = parsed.data.homeScore === parsed.data.awayScore;
+
+  if (isKnockout && isDraw && !parsed.data.penaltyWinner) {
+    return NextResponse.json(
+      { error: "Knockout matches that end in a draw must include a penalty shootout winner." },
+      { status: 400 },
+    );
+  }
+
   const penaltyWinner = isKnockout && isDraw ? (parsed.data.penaltyWinner ?? null) : null;
   const homePenaltyScore = penaltyWinner ? (parsed.data.homePenaltyScore ?? null) : null;
   const awayPenaltyScore = penaltyWinner ? (parsed.data.awayPenaltyScore ?? null) : null;

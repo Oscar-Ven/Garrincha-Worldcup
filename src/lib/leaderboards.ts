@@ -35,34 +35,36 @@ export async function getLeaderboard(
       },
     });
 
-    const mapped = users.map((u) => ({
-      id: u.id,
-      name:
-        u.nickname?.trim() ||
-        u.fullName?.trim() ||
-        u.displayName?.trim() ||
-        `Player ${u.id.slice(-6).toUpperCase()}`,
-      nationality: u.nationality ?? "Unspecified",
-      center: u.competitionCenter?.name ?? "Unspecified",
-      points:
-        u.predictions.reduce((s, p) => s + p.pointsAwarded, 0) +
-        u.pointEvents.reduce((s, e) => s + e.points, 0),
-      predictionCount: u.predictions.length,
-      _exactCount: u.predictions.filter((p) => p.pointsAwarded === 5).length,
-      _correctCount: u.predictions.filter((p) => p.pointsAwarded >= 2).length,
-      _createdAt: u.createdAt.getTime(),
+    const withMeta = users.map((u) => ({
+      row: {
+        id: u.id,
+        name:
+          u.nickname?.trim() ||
+          u.fullName?.trim() ||
+          u.displayName?.trim() ||
+          `Player ${u.id.slice(-6).toUpperCase()}`,
+        nationality: u.nationality ?? "Unspecified",
+        center: u.competitionCenter?.name ?? "Unspecified",
+        points:
+          u.predictions.reduce((s, p) => s + p.pointsAwarded, 0) +
+          u.pointEvents.reduce((s, e) => s + e.points, 0),
+        predictionCount: u.predictions.length,
+      },
+      exactCount: u.predictions.filter((p) => p.pointsAwarded === 5).length,
+      correctCount: u.predictions.filter((p) => p.pointsAwarded >= 2).length,
+      createdAt: u.createdAt.getTime(),
     }));
 
-    return mapped
+    return withMeta
       .sort(
         (a, b) =>
-          b.points - a.points ||
-          b._exactCount - a._exactCount ||
-          b._correctCount - a._correctCount ||
-          a._createdAt - b._createdAt,
+          b.row.points - a.row.points ||
+          b.exactCount - a.exactCount ||
+          b.correctCount - a.correctCount ||
+          a.createdAt - b.createdAt,
       )
       .slice(0, limit)
-      .map(({ _exactCount: _e, _correctCount: _c, _createdAt: _t, ...row }) => row);
+      .map((item) => item.row);
   }
 
   // Fast path — one aggregated SQL query, no in-memory fan-out
