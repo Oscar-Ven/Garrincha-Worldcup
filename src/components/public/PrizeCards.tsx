@@ -8,21 +8,21 @@ const CENTRE_PRIZES = [
   {
     rank: "1st Place",
     prize: "Premium JustPadel gift card",
-    sponsored: true,
+    sponsorLabel: "Gift card sponsored by JustPadel",
     accent: "border-lime-400/60 bg-lime-400/5",
     rankStyle: "bg-lime-400 text-zinc-950",
   },
   {
     rank: "2nd Place",
     prize: "JustPadel gift card",
-    sponsored: true,
+    sponsorLabel: "Gift card sponsored by JustPadel",
     accent: "border-zinc-700 bg-white/[0.02]",
     rankStyle: "bg-zinc-700 text-zinc-200",
   },
   {
     rank: "3rd Place",
     prize: "GARRINCHA Padel T-shirt",
-    sponsored: false,
+    sponsorLabel: "Sponsored by JustPadel",
     accent: "border-zinc-700 bg-white/[0.02]",
     rankStyle: "bg-zinc-800 text-zinc-300",
   },
@@ -56,14 +56,11 @@ export default function PrizeCards({ preview = false, prizesHref = "/en/prizes" 
             <div key={p.rank} className={`border ${p.accent} p-4`}>
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">{p.rank}</p>
               <p className="text-sm font-bold text-white leading-snug">{p.prize}</p>
-              {p.sponsored && (
-                <p className="text-[10px] text-zinc-600 mt-1.5">
-                  Sponsored by{" "}
-                  <a href={JUSTPADEL_URL} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-lime-400 transition-colors">
-                    JustPadel
-                  </a>
-                </p>
-              )}
+              <p className="text-[10px] text-zinc-600 mt-1.5">
+                <a href={JUSTPADEL_URL} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-lime-400 transition-colors">
+                  {p.sponsorLabel}
+                </a>
+              </p>
             </div>
           ))}
           <div className="border border-lime-400/30 bg-lime-400/5 p-4">
@@ -95,19 +92,16 @@ export default function PrizeCards({ preview = false, prizesHref = "/en/prizes" 
               </div>
               <p className="text-xl font-black text-white mb-1">{p.prize}</p>
               <p className="text-sm text-zinc-500 mb-4">per person</p>
-              {p.sponsored && (
-                <p className="text-xs text-zinc-600 border-t border-zinc-800 pt-3 mt-3">
-                  Gift card sponsored by{" "}
-                  <a
-                    href={JUSTPADEL_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-zinc-400 hover:text-lime-400 transition-colors underline underline-offset-2"
-                  >
-                    JustPadel
-                  </a>
-                </p>
-              )}
+              <p className="text-xs text-zinc-600 border-t border-zinc-800 pt-3 mt-3">
+                <a
+                  href={JUSTPADEL_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-zinc-400 hover:text-lime-400 transition-colors underline underline-offset-2"
+                >
+                  {p.sponsorLabel}
+                </a>
+              </p>
             </div>
           ))}
         </div>

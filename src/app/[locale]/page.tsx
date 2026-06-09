@@ -567,6 +567,9 @@ export default async function LandingPage({
                           ? "JustPadel gift card"
                           : "GARRINCHA Padel T-shirt"}
                     </div>
+                    <div className="text-zinc-600 text-[10px] mt-0.5">
+                      {n === 3 ? "Sponsored by JustPadel" : "Gift card sponsored by JustPadel"}
+                    </div>
                   </div>
                 </div>
               ))}
