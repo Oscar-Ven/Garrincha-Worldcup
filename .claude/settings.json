@@ -1,8 +1,0 @@
-{
-  "enabledPlugins": {
-    "playwright@claude-plugins-official": true
-  },
-  "permissions": {
-    "allow": []
-  }
-}
