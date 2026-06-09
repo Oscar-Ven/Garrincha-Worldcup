@@ -55,8 +55,8 @@ export default function PredictionBoard({ matches, mode }: PredictionBoardProps)
       matches.map((match) => [
         match.id,
         {
-          home: match.prediction ? String(match.prediction.homeScore) : "",
-          away: match.prediction ? String(match.prediction.awayScore) : "",
+          home: match.prediction ? String(match.prediction.homeScore) : "0",
+          away: match.prediction ? String(match.prediction.awayScore) : "0",
           penaltyWinner: match.prediction?.penaltyWinner ?? null,
           penaltyHome: match.prediction?.homePenaltyScore != null ? String(match.prediction.homePenaltyScore) : "",
           penaltyAway: match.prediction?.awayPenaltyScore != null ? String(match.prediction.awayPenaltyScore) : "",
