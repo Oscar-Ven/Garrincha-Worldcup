@@ -96,7 +96,7 @@ export default function Footer({ locale }: { locale: Locale }) {
                   href="/admin/login"
                   className="text-zinc-600 hover:text-zinc-400 transition-colors text-sm uppercase tracking-wide"
                 >
-                  Admin
+                  Dashboard
                 </Link>
               </li>
             </ul>

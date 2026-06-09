@@ -56,7 +56,7 @@ export default function AdminLoginPage() {
               priority
             />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-1">Admin Sign In</h1>
+          <h1 className="text-xl font-bold text-gray-900 mb-1">Dashboard Sign In</h1>
           <p className="text-sm text-gray-500">GARRINCHA World Cup 2026</p>
         </div>
 
