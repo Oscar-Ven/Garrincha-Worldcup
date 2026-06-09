@@ -5,7 +5,7 @@ import { QrCode, ExternalLink } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://worldcup-garrincha.com";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://worldcup.garrincha.be";
 
 export default async function AdminQrLinksPage() {
   const admin = await getCurrentUser();
