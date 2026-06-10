@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid admin credentials." }, { status: 401 });
     }
 
-    await createSession({ userId: user.id, role: user.role });
+    await createSession({ userId: user.id, role: user.role }, parsed.data.rememberMe ?? true);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[admin/login]", err);
