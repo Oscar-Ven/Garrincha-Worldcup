@@ -126,9 +126,9 @@ async function main() {
   if (jefPasswordPlain && jefPasswordPlain.length >= 8) {
     const jefPasswordHash = await hash(jefPasswordPlain, 12);
     await prisma.user.upsert({
-      where: { email: "jef@garnicha.be" },
+      where: { email: "jef@garrincha.be" },
       create: {
-        email: "jef@garnicha.be",
+        email: "jef@garrincha.be",
         passwordHash: jefPasswordHash,
         fullName: "jef",
         nickname: "jef",
@@ -149,7 +149,7 @@ async function main() {
         centerId: hq.id,
       },
     });
-    console.log("Owner account: jef@garnicha.be (jef) → Head Quarter");
+    console.log("Owner account: jef@garrincha.be (jef) → Head Quarter");
   }
 
   const teams = new Map<string, Awaited<ReturnType<typeof upsertTeam>>>();
