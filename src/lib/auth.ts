@@ -35,11 +35,12 @@ export async function verifyPassword(password: string, hash: string | null): Pro
   return compare(password, hash);
 }
 
-export async function createSession(payload: SessionPayload) {
+export async function createSession(payload: SessionPayload, rememberMe = true) {
+  const expiry = rememberMe ? "30d" : "1d";
   const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("30d")
+    .setExpirationTime(expiry)
     .sign(secret());
 
   const cookieStore = await cookies();
@@ -48,7 +49,7 @@ export async function createSession(payload: SessionPayload) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30,
+    ...(rememberMe ? { maxAge: 60 * 60 * 24 * 30 } : {}),
   });
 }
 
