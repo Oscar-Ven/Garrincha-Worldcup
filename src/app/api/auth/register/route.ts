@@ -39,13 +39,12 @@ export async function POST(request: NextRequest) {
     // 1. QR-code registration: validate activation code from centerSession
     // 2. Direct registration: use centerId provided directly by the user
     let resolvedCenterId: string;
-    let activationSession: { id: string; centerId: string } | null = null;
 
     if (activationCode && activationCode.length > 0) {
       // QR-based: validate code against centerSession
       const session = await prisma.centerSession.findFirst({
         where: { code: activationCode, expiresAt: { gt: new Date() } },
-        select: { id: true, centerId: true },
+        select: { centerId: true },
       });
       if (!session) {
         return NextResponse.json(
@@ -53,7 +52,6 @@ export async function POST(request: NextRequest) {
           { status: 422 }
         );
       }
-      activationSession = session;
       resolvedCenterId = session.centerId;
     } else if (directCenterId) {
       // Direct registration: verify centerId exists

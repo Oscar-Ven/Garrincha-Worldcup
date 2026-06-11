@@ -89,7 +89,7 @@ export default function DailyBonusAdminClient({ today, currentCode, claimCount, 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-lime-400" />
-            <h2 className="font-semibold text-white">Today's code</h2>
+            <h2 className="font-semibold text-white">Today&apos;s code</h2>
             <span className="text-xs text-zinc-500 font-mono">{today}</span>
           </div>
           <span className="text-xs text-zinc-400">{liveClaims} claim{liveClaims !== 1 ? "s" : ""} so far</span>
