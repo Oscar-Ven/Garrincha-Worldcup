@@ -33,7 +33,7 @@ describe("match data workflow", () => {
         homeTeamName: "Belgium",
         awayTeamName: "Brazil",
         status: "SCHEDULED",
-        provider: "football-data.org",
+        provider: "api-football",
       },
       now: new Date("2026-06-01T12:00:00.000Z"),
     });
@@ -94,7 +94,7 @@ describe("match data workflow", () => {
         fifaMatchNo: 1,
         kickoffAt: new Date("2026-06-11T20:00:00.000Z"),
         status: "SCHEDULED",
-        provider: "football-data.org",
+        provider: "api-football",
       },
       now: new Date("2026-06-11T19:05:00.000Z"),
     });
@@ -111,7 +111,7 @@ describe("match data workflow", () => {
         fifaMatchNo: 1,
         kickoffAt: new Date("2026-06-11T20:00:00.000Z"),
         status: "SCHEDULED",
-        provider: "football-data.org",
+        provider: "api-football",
       },
       now: new Date("2026-06-01T12:00:00.000Z"),
     });
@@ -123,11 +123,11 @@ describe("match data workflow", () => {
   it("requires campaign review for postponed and cancelled matches", () => {
     const postponed = createMatchDataWorkflowPlan({
       current,
-      incoming: { fifaMatchNo: 1, status: "POSTPONED", provider: "football-data.org" },
+      incoming: { fifaMatchNo: 1, status: "POSTPONED", provider: "api-football" },
     });
     const cancelled = createMatchDataWorkflowPlan({
       current,
-      incoming: { fifaMatchNo: 1, status: "CANCELLED", provider: "football-data.org" },
+      incoming: { fifaMatchNo: 1, status: "CANCELLED", provider: "api-football" },
     });
 
     expect(postponed.requiresAdminConfirmation).toBe(true);
@@ -138,8 +138,8 @@ describe("match data workflow", () => {
   it("keeps API integration disabled until an API key is configured", () => {
     expect(footballDataEnvStatus({}).ready).toBe(false);
     expect(footballDataEnvStatus({ FOOTBALL_DATA_API_KEY: "secret" })).toMatchObject({
-      provider: "football-data.org",
-      competitionCode: "WC",
+      provider: "api-football",
+      competitionCode: "1",
       season: "2026",
       apiKey: "set",
       ready: true,

@@ -12,7 +12,7 @@ The browser must not call the football data API directly. API keys stay server-s
 
 ## Provider Setup
 
-Recommended low-cost first provider: `football-data.org`.
+External provider: `api-football`.
 
 Expected env names:
 
@@ -21,12 +21,12 @@ Expected env names:
 - `FOOTBALL_DATA_SEASON`
 - `FOOTBALL_DATA_API_KEY`
 
-The provider can be free or paid. The app should import provider data into its own `Team` and `Match` tables instead of depending on provider responses at page render time.
+The app imports API-Football data into its own `Team` and `Match` tables instead of depending on provider responses at page render time.
 
 ## Import Workflow
 
-1. Admin or scheduled job requests provider fixtures.
-2. Provider response is normalized into internal match data.
+1. Admin or scheduled job requests API-Football fixtures.
+2. API-Football response is normalized into internal match data.
 3. Existing `Match` rows are matched by `fifaMatchNo` or stable match slot.
 4. The app updates fixture fields only:
    - `kickoffAt`
@@ -47,7 +47,7 @@ The provider can be free or paid. The app should import provider data into its o
 
 ## Final Score Workflow
 
-1. Provider may fetch a final score.
+1. API-Football may fetch a final score.
 2. The app may store or show it as a draft/review item.
 3. Admin confirms the final score.
 4. Only after admin confirmation does the existing score endpoint update the match and recalculate points.
@@ -64,10 +64,10 @@ Old predictions remain in Supabase:
 - `Prediction.calculatedAt`
 - related `PointEvent` bonus records
 
-Provider sync must never delete old predictions. Score edits overwrite `pointsAwarded` on the existing prediction rows rather than creating duplicate scoring rows.
+API-Football sync must never delete old predictions. Score edits overwrite `pointsAwarded` on the existing prediction rows rather than creating duplicate scoring rows.
 
 ## Current Implementation Status
 
-The repo now includes pure workflow logic in `src/lib/match-data-workflow.ts`.
+The repo includes workflow logic in `src/lib/match-data-workflow.ts`, an API-Football client in `src/lib/api-football-client.ts`, and the admin sync endpoint at `src/app/api/admin/sync-matches/route.ts`.
 
-It does not call an external API yet. That is intentional until the client approves the provider and supplies the API key locally or in deployment environment variables.
+The sync is server-side only and requires `FOOTBALL_DATA_PROVIDER=api-football`, `FOOTBALL_DATA_COMPETITION_CODE=1`, `FOOTBALL_DATA_SEASON=2026`, and `FOOTBALL_DATA_API_KEY`.
