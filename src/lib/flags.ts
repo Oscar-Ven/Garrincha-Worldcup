@@ -145,6 +145,11 @@ export function flagEmojiForIso(isoCode?: string | null) {
   return String.fromCodePoint(...isoCode.split("").map((letter) => 127397 + letter.charCodeAt(0)));
 }
 
+export function localFlagPathForIso(isoCode: string | null | undefined): string | null {
+  if (!isoCode) return null;
+  return `/flags/countries/${isoCode.toLowerCase()}.svg`;
+}
+
 export function flagLabel(name?: string | null, isoCode?: string | null) {
   if (!isoCode) return "Unknown flag";
   return `${name || isoCode} flag`;

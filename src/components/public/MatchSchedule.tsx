@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import { Search } from "lucide-react";
-import { isoCodeForTeam } from "@/lib/flags";
+import { isoCodeForTeam, localFlagPathForIso } from "@/lib/flags";
 import { formatBelgiumDateLong, formatBelgiumTime, getBelgiumDateKey } from "@/lib/date";
 
 type MatchTeam = {
@@ -48,7 +48,8 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 function TeamFlag({ team }: { team: MatchTeam }) {
   const isoCode = isoCodeForTeam(team);
-  if (!isoCode) {
+  const flagPath = localFlagPathForIso(isoCode);
+  if (!flagPath) {
     return (
       <div className="w-8 h-5 bg-zinc-800 rounded-sm flex items-center justify-center text-[9px] font-black text-zinc-400 shrink-0">
         {team.fifaCode.slice(0, 3)}
@@ -57,7 +58,7 @@ function TeamFlag({ team }: { team: MatchTeam }) {
   }
   return (
     <Image
-      src={`https://flagcdn.com/w40/${isoCode.toLowerCase()}.png`}
+      src={flagPath}
       alt={`${team.name} flag`}
       width={32}
       height={22}
