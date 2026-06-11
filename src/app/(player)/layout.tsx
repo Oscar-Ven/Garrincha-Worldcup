@@ -23,6 +23,7 @@ export default async function PlayerLayout({ children }: { children: React.React
         points: t(locale, "nav.points"),
         center: t(locale, "nav.center"),
         logout: t(locale, "nav.logout"),
+        dailyBonus: "Daily Bonus",
       }}
     >
       {children}

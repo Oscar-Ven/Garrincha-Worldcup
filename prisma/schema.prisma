@@ -69,6 +69,7 @@ model User {
   checkIn                     CenterCheckIn?
   centerChangeLogs            CenterChangeLog[]
   activationCodeClaims        ActivationCodeClaim[]
+  dailyBonusClaims            DailyBonusClaim[]
   createdAt                   DateTime          @default(now())
   updatedAt                   DateTime          @updatedAt
 
@@ -207,4 +208,34 @@ model ActivationCodeClaim {
 
   @@unique([userId, sessionId])
   @@index([userId])
+}
+
+model DailyBonusCode {
+  id               String            @id @default(cuid())
+  code             String
+  bonusDate        String
+  points           Int               @default(3)
+  createdByAdminId String
+  createdAt        DateTime          @default(now())
+  expiresAt        DateTime
+  isActive         Boolean           @default(true)
+  claims           DailyBonusClaim[]
+
+  @@index([bonusDate, isActive])
+  @@index([code])
+}
+
+model DailyBonusClaim {
+  id               String         @id @default(cuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyBonusCodeId String
+  code             DailyBonusCode @relation(fields: [dailyBonusCodeId], references: [id], onDelete: Cascade)
+  bonusDate        String
+  pointsAwarded    Int            @default(3)
+  claimedAt        DateTime       @default(now())
+
+  @@unique([userId, bonusDate])
+  @@index([userId])
+  @@index([bonusDate])
 }

@@ -2,7 +2,6 @@ import { Prisma, Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { createSession } from "@/lib/auth";
 import { getLocaleFromRequest, rotateAndSendAccessLink } from "@/lib/access-link";
-import { claimActivationBonus } from "@/lib/activation-code";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
@@ -116,10 +115,6 @@ export async function POST(request: NextRequest) {
       await rotateAndSendAccessLink(user.id, email, getLocaleFromRequest(request));
     } catch (emailErr) {
       console.error("[auth/register] Email send failed (user created, can request new link):", (emailErr as Error).message);
-    }
-
-    if (activationSession) {
-      await claimActivationBonus(user.id, activationSession.id);
     }
 
     await createSession({ userId: user.id, role: user.role });

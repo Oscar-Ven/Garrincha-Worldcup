@@ -15,6 +15,7 @@ import {
   Target,
   Trophy,
   X,
+  Zap,
 } from "lucide-react";
 
 type PlayerNavLabels = {
@@ -26,6 +27,7 @@ type PlayerNavLabels = {
   points: string;
   center: string;
   logout: string;
+  dailyBonus: string;
 };
 
 type PlayerShellProps = {
@@ -50,6 +52,7 @@ export default function PlayerShell({ user, labels, children }: PlayerShellProps
     { href: "/predictions", label: labels.predictions, icon: Target },
     { href: "/matches", label: labels.matches, icon: CalendarDays },
     { href: "/leaderboards", label: labels.leaderboard, icon: Trophy },
+    { href: "/daily-bonus", label: labels.dailyBonus, icon: Zap },
     { href: "/my-points", label: labels.points, icon: Coins },
     { href: "/center", label: labels.center, icon: Landmark },
     { href: "/prizes", label: "Prizes", icon: Gift },

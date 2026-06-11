@@ -12,7 +12,7 @@ export function generateSessionCode(length = 6): string {
 }
 
 export function sessionExpiresAt(): Date {
-  return new Date(Date.now() + 5 * 60 * 1000);
+  return new Date(Date.now() + 24 * 60 * 60 * 1000);
 }
 
 export async function getActiveSession(centerId: string) {
