@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { rejectCrossOriginRequest } from "@/lib/request-security";
 import { prisma } from "@/lib/prisma";
+import {
+  CRON_BATCH_SIZE,
+  CRON_INTERVAL_MINUTES,
+  EXPECTED_EMAILS_PER_RUN,
+} from "@/lib/import/invitation-batch";
 
 export const dynamic = "force-dynamic";
 
@@ -34,13 +39,25 @@ export async function GET(request: NextRequest) {
     total += row._count.id;
   }
 
+  const pending = counts["pending"] ?? 0;
+  const estimatedMinutesRemaining =
+    pending > 0
+      ? Math.ceil((pending / EXPECTED_EMAILS_PER_RUN) * CRON_INTERVAL_MINUTES)
+      : 0;
+
   return NextResponse.json({
-    pending: counts["pending"] ?? 0,
+    pending,
     processing: counts["processing"] ?? 0,
     sent: counts["sent"] ?? 0,
     failed: counts["failed"] ?? 0,
     skipped_unsubscribed: counts["skipped_unsubscribed"] ?? 0,
     total,
     lastSentAt: lastSent?.sentAt ?? null,
+    throughput: {
+      emailsPerRun: EXPECTED_EMAILS_PER_RUN,
+      batchSize: CRON_BATCH_SIZE,
+      cronIntervalMinutes: CRON_INTERVAL_MINUTES,
+      estimatedMinutesRemaining,
+    },
   });
 }

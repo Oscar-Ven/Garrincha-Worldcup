@@ -54,6 +54,12 @@ interface QueueStatus {
   skipped_unsubscribed: number;
   total: number;
   lastSentAt: string | null;
+  throughput?: {
+    emailsPerRun: number;
+    batchSize: number;
+    cronIntervalMinutes: number;
+    estimatedMinutesRemaining: number;
+  };
 }
 
 interface BatchResult {
@@ -212,6 +218,12 @@ export default function ImportClient() {
                 </div>
               ))}
             </div>
+            {queueStatus.throughput && queueStatus.pending > 0 && (
+              <p style={{ fontSize: "0.75rem", color: "#6b7280", margin: "0 0 0.35rem" }}>
+                Sending ~{queueStatus.throughput.emailsPerRun} emails every {queueStatus.throughput.cronIntervalMinutes} min
+                {" "}· est. {queueStatus.throughput.estimatedMinutesRemaining} min remaining
+              </p>
+            )}
             {queueStatus.lastSentAt && (
               <p style={{ fontSize: "0.75rem", color: "#6b7280", margin: 0 }}>
                 Last sent: {new Date(queueStatus.lastSentAt).toLocaleString("nl-BE")}

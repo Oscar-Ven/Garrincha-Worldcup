@@ -16,8 +16,19 @@ export interface BatchReport {
 }
 
 const BATCH_SIZE = 500;
-const CHUNK_SIZE = 4;   // concurrent Resend API calls per chunk — stay under 5 req/sec limit
+const CHUNK_SIZE = 4;        // concurrent Resend API calls per chunk — stay under 5 req/sec limit
 const CHUNK_DELAY_MS = 1200; // pause between chunks: 4 emails / 1.2 s ≈ 3.3 req/s
+
+// Derived throughput info — used by the status API so the UI can show accurate estimates.
+// With maxDuration=300s the full BATCH_SIZE fits comfortably (500 emails ≈ 152 s at 3.3/s).
+export const CRON_BATCH_SIZE = BATCH_SIZE;
+export const CRON_INTERVAL_MINUTES = 5;
+// emails/s × available seconds, capped at BATCH_SIZE
+const EMAIL_RATE_PER_SEC = CHUNK_SIZE / (CHUNK_DELAY_MS / 1000);
+export const EXPECTED_EMAILS_PER_RUN = Math.min(
+  BATCH_SIZE,
+  Math.floor(EMAIL_RATE_PER_SEC * 285), // 285 s = 300 s maxDuration minus 15 s safety buffer
+);
 
 export async function processSendBatch(): Promise<BatchReport> {
   // Reset jobs stuck in "processing" for more than 15 minutes (crash recovery)
