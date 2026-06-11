@@ -87,6 +87,7 @@ export function buildEmailContent(payload: AccessLinkEmailPayload): {
   const greeting = t(locale, "email.greeting", { name: safeName });
   const welcome = t(locale, "email.welcome");
   const accountReady = t(locale, "email.accountReady", { center: safeCenter });
+  const neverExpires = t(locale, "email.neverExpires");
   const buttonText = t(locale, "email.button");
   const copyPaste = t(locale, "email.copyPaste");
   const keepPrivate = t(locale, "email.keepPrivate");
@@ -153,6 +154,10 @@ export function buildEmailContent(payload: AccessLinkEmailPayload): {
                 </tr>
               </table>
 
+              <p style="margin:0 0 16px;font-size:13px;color:#6b7280;text-align:center;">
+                ${neverExpires}
+              </p>
+
               <p style="margin:0 0 6px;font-size:13px;color:#6b7280;text-align:center;">
                 ${copyPaste}
               </p>
@@ -203,6 +208,8 @@ export function buildEmailContent(payload: AccessLinkEmailPayload): {
     `${buttonText}:`,
     accessUrl,
     "",
+    neverExpires,
+    "",
     keepPrivate,
     "",
     ignore,
@@ -232,7 +239,7 @@ export function buildAccessLinkEmail(opts: {
   return {
     to: opts.email,
     displayName: opts.displayName ?? opts.fullName ?? "Garrincha player",
-    centerName: opts.centerName ?? "Garrincha World Cup",
+    centerName: opts.centerName ?? "GARRINCHA World Cup",
     accessUrl: opts.accessUrl,
     locale: opts.locale,
     userId: opts.userId,

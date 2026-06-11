@@ -20,7 +20,8 @@ export default defineConfig({
         "src/lib/translations.ts", // static data
         "src/lib/ui-demo-data.ts", // static demo fixtures
         "src/lib/health.ts",       // integration-only — requires live DB + external services
-        "src/lib/access-link.ts",  // integration-only — DB + email in one call
+        "src/lib/access-link.ts",           // integration-only — DB + email in one call
+        "src/lib/import/player-import-runner.ts", // integration-only — DB + email + FS
       ],
       // Reporters
       reporter: ["text-summary", "json-summary"],
