@@ -62,9 +62,7 @@ export const checkInSchema = z.object({
   code: z.string().trim().min(1).max(16).toUpperCase(),
 });
 
-export const generateCodeSchema = z.object({
-  centerId: z.string().min(1),
-});
+export const generateCodeSchema = z.object({});
 
 export const requestLinkSchema = z.object({
   email: z.string().trim().email().toLowerCase(),

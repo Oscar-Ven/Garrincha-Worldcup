@@ -25,7 +25,6 @@ const mockTransaction = prisma.$transaction as ReturnType<typeof vi.fn>;
 const VALID_CODE = {
   id: "code-1",
   code: "TEST01",
-  centerId: "center-1",
   date: "2026-06-11",
   expiresAt: new Date("2026-06-11T21:59:59.999Z"),
   isActive: true,
@@ -81,7 +80,7 @@ describe("3. getBrusselsEndOfDayUTC", () => {
 
 // ── 4. Valid code awards +3 ──────────────────────────────────────────────────
 
-describe("4. claimCheckIn — valid code awards +3", () => {
+describe("4. claimCheckIn — valid global code awards +3", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-06-11T12:00:00Z"));
@@ -98,12 +97,10 @@ describe("4. claimCheckIn — valid code awards +3", () => {
   });
 });
 
-// ── 5. Duplicate claim — unique constraint prevents double-claim ─────────────
+// ── 5. Duplicate claim prevention ────────────────────────────────────────────
 
 describe("5. Duplicate claim prevention — unique constraint on (userId, date)", () => {
   it("CheckInClaim has @@unique([userId, date]) enforcing one claim per user per day", () => {
-    // The unique key is (userId, date) — not (userId, checkInCodeId) —
-    // so a player cannot claim twice on the same day regardless of code.
     const existingClaims = [{ userId: "user-1", date: "2026-06-11" }];
     const newClaim = { userId: "user-1", date: "2026-06-11" };
     const isDuplicate = existingClaims.some(
@@ -152,12 +149,9 @@ describe("6. claimCheckIn — multiple players each get +3", () => {
 describe("7. claimCheckIn — expired code is rejected", () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-06-12T10:00:00Z")); // day after code date
+    vi.setSystemTime(new Date("2026-06-12T10:00:00Z"));
     vi.clearAllMocks();
-    mockFindFirst.mockResolvedValue({
-      ...VALID_CODE,
-      date: "2026-06-11", // yesterday
-    });
+    mockFindFirst.mockResolvedValue({ ...VALID_CODE, date: "2026-06-11" });
   });
   afterEach(() => vi.useRealTimers());
 
@@ -204,7 +198,7 @@ describe("9. Only owner role can generate codes", () => {
 // ── 10. Registration without code gives no bonus ─────────────────────────────
 
 describe("10. Registration without check-in code gives no bonus", () => {
-  it("checkInCodeForBonus is null when activationCode is empty", () => {
+  it("checkInCodeForBonus is null when activationCode is absent", () => {
     const hasCode = (code: string | undefined) => !!(code && code.length > 0);
     expect(hasCode("")).toBe(false);
     expect(hasCode(undefined)).toBe(false);
@@ -234,5 +228,27 @@ describe("12. Prediction scoring is unaffected by check-in system", () => {
     expect(calculatePredictionPoints({ homeScore: 2, awayScore: 1 }, { homeScore: 2, awayScore: 1 })).toBe(5);
     expect(calculatePredictionPoints({ homeScore: 2, awayScore: 1 }, { homeScore: 3, awayScore: 0 })).toBe(2);
     expect(calculatePredictionPoints({ homeScore: 2, awayScore: 1 }, { homeScore: 0, awayScore: 3 })).toBe(0);
+  });
+});
+
+// ── 13. Global code — no centerId on CheckInCode or CheckInClaim ─────────────
+
+describe("13. Global code — no center coupling", () => {
+  it("VALID_CODE fixture has no centerId field", () => {
+    expect(Object.keys(VALID_CODE)).not.toContain("centerId");
+  });
+
+  it("claimCheckIn succeeds for a valid global code (no centerId required)", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-11T12:00:00Z"));
+    vi.clearAllMocks();
+    mockFindFirst.mockResolvedValue(VALID_CODE);
+    mockTransaction.mockResolvedValue([{}, {}]);
+
+    const result = await claimCheckIn("user-1", "TEST01");
+    expect(result).toEqual({ ok: true, pointsAwarded: 3 });
+    expect(mockTransaction).toHaveBeenCalledOnce();
+
+    vi.useRealTimers();
   });
 });
