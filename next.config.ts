@@ -16,7 +16,7 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://www.garrincha.be https://media.api-sports.io https://flagcdn.com",
+      "img-src 'self' data: blob: https://www.garrincha.be https://media.api-sports.io",
       "font-src 'self' https://fonts.gstatic.com",
       // Sentry ingest endpoint for error reporting
       "connect-src 'self' https://*.ingest.de.sentry.io https://*.ingest.sentry.io",
@@ -35,7 +35,6 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "media.api-sports.io" },
-      { protocol: "https", hostname: "flagcdn.com" },
     ],
   },
   async redirects() {

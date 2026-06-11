@@ -16,7 +16,7 @@ import FAQAccordion from "@/components/public/FAQAccordion";
 import PrizeCards from "@/components/public/PrizeCards";
 import CountdownTimer from "@/components/public/CountdownTimer";
 import { prisma } from "@/lib/prisma";
-import { flagLabel, isoCodeForTeam } from "@/lib/flags";
+import { flagLabel, isoCodeForTeam, localFlagPathForIso } from "@/lib/flags";
 import { getLeaderboard } from "@/lib/leaderboards";
 
 export const revalidate = 300;
@@ -82,7 +82,8 @@ function formatFeaturedDate(date: Date, locale: Locale) {
 
 function FlagMark({ team }: { team: FeaturedFixture["homeTeam"] }) {
   const isoCode = isoCodeForTeam(team);
-  if (!isoCode) {
+  const flagPath = localFlagPathForIso(isoCode);
+  if (!flagPath) {
     return (
       <span className="flex h-5 w-7 items-center justify-center rounded-sm bg-zinc-800 text-[10px] font-black text-white">
         {team.fifaCode.slice(0, 2)}
@@ -92,11 +93,12 @@ function FlagMark({ team }: { team: FeaturedFixture["homeTeam"] }) {
 
   return (
     <Image
-      src={`https://flagcdn.com/w40/${isoCode.toLowerCase()}.png`}
+      src={flagPath}
       alt={flagLabel(team.name, isoCode)}
       width={28}
       height={20}
       className="rounded-sm shrink-0"
+      unoptimized
     />
   );
 }

@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { AlertCircle, CheckCircle2, Clock3, Lock, Save, Trophy } from "lucide-react";
 import { formatBelgiumDateShort, formatBelgiumTime } from "@/lib/date";
-import { isoCodeForTeam } from "@/lib/flags";
+import { isoCodeForTeam, localFlagPathForIso } from "@/lib/flags";
 
 function TeamFlag({ flagUrl, name }: { flagUrl: string; name: string }) {
   const isoCode = isoCodeForTeam({ flagUrl, name });
-  if (!isoCode) {
+  const flagPath = localFlagPathForIso(isoCode);
+  if (!flagPath) {
     return (
       <span className="inline-flex h-4 w-6 shrink-0 items-center justify-center rounded-sm bg-white/10 text-[9px] font-bold text-zinc-400">
         {name.slice(0, 3).toUpperCase()}
@@ -18,7 +19,7 @@ function TeamFlag({ flagUrl, name }: { flagUrl: string; name: string }) {
   }
   return (
     <Image
-      src={`https://flagcdn.com/w40/${isoCode.toLowerCase()}.png`}
+      src={flagPath}
       alt={`${name} flag`}
       width={24}
       height={16}
