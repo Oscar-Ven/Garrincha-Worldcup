@@ -15,6 +15,7 @@ import {
   ANTWERPEN_NOORD,
   ANTWERPEN_ZUID,
   assignCenters,
+  centerDisplayName,
   extractFirstName,
   generateNickname,
   parseCsvBuffer,
@@ -285,20 +286,18 @@ export async function runAntwerpenImport(
     };
   }
 
-  // Step 7: Resolve center IDs
-  const [zuidCenter, noordCenter] = await Promise.all([
-    prisma.garrinchaCenter.findFirst({
-      where: { name: ANTWERPEN_ZUID },
-      select: { id: true },
-    }),
-    prisma.garrinchaCenter.findFirst({
-      where: { name: ANTWERPEN_NOORD },
-      select: { id: true },
-    }),
-  ]);
+  // Step 7: Resolve center IDs dynamically from whatever centers are in the assignments
+  const uniqueCenterNames = [...new Set(assignments.map((a) => a.centerName))];
+  const foundCenters = await prisma.garrinchaCenter.findMany({
+    where: { name: { in: uniqueCenterNames } },
+    select: { id: true, name: true },
+  });
+  const centerIdMap = new Map(foundCenters.map((c) => [c.name, c.id]));
+  const centerDisplayMap = new Map(foundCenters.map((c) => [c.id, centerDisplayName(c.name)]));
 
-  if (!zuidCenter || !noordCenter) {
-    const msg = `Centers not found in DB. Expected "${ANTWERPEN_ZUID}" and "${ANTWERPEN_NOORD}". Run seed first.`;
+  const missingCenters = uniqueCenterNames.filter((n) => !centerIdMap.has(n));
+  if (missingCenters.length > 0) {
+    const msg = `Centers not found in DB: ${missingCenters.join(", ")}. Run seed first.`;
     return emptyReport({ ...dryRun, criticalErrors: [msg] });
   }
 
@@ -307,9 +306,10 @@ export async function runAntwerpenImport(
 
   // Step 9: Bulk-create all user accounts in one INSERT ... RETURNING
   const importRunId = crypto.randomUUID();
+  const fallbackCenterId = foundCenters[0].id;
   const userInsertData = newRows.map((row) => {
     const centerName = centerMap.get(row.email) ?? ANTWERPEN_ZUID;
-    const centerId = centerName === ANTWERPEN_NOORD ? noordCenter.id : zuidCenter.id;
+    const centerId = centerIdMap.get(centerName) ?? fallbackCenterId;
     const nickname =
       nicknameMap.get(row.email) ??
       generateNickname(extractFirstName(row.fullName), 999);
@@ -346,8 +346,7 @@ export async function runAntwerpenImport(
       userId: u.id,
       email: u.email,
       displayName: emailToFullName.get(u.email) ?? u.email,
-      centerName:
-        u.centerId === zuidCenter.id ? ANTWERPEN_ZUID : ANTWERPEN_NOORD,
+      centerName: centerDisplayMap.get(u.centerId) ?? u.centerId,
       importRunId,
       status: "pending",
     }));
