@@ -145,14 +145,14 @@ Set these in **Vercel Dashboard → Project → Settings → Environment Variabl
 | `SENTRY_PROJECT`          | `garrincha-worldcup`                           |
 | `SENTRY_AUTH_TOKEN`       | Required for source map uploads during builds  |
 
-### Football Data (optional)
+### Football Data
 
 | Variable                         | Notes                              |
 |----------------------------------|------------------------------------|
-| `FOOTBALL_DATA_PROVIDER`         | Provider name, optional future use |
-| `FOOTBALL_DATA_COMPETITION_CODE` | Competition code, optional         |
-| `FOOTBALL_DATA_SEASON`           | Season, optional                   |
-| `FOOTBALL_DATA_API_KEY`          | API key, optional                  |
+| `FOOTBALL_DATA_PROVIDER`         | `api-football`                     |
+| `FOOTBALL_DATA_COMPETITION_CODE` | API-Football league id, default `1` |
+| `FOOTBALL_DATA_SEASON`           | `2026`                             |
+| `FOOTBALL_DATA_API_KEY`          | API-Football API key               |
 
 ---
 

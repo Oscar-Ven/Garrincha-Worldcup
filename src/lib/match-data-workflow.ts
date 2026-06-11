@@ -1,6 +1,6 @@
 import { isPredictionLocked, type PenaltyResult, type Score } from "@/lib/scoring";
 
-export type MatchDataProvider = "manual" | "football-data.org" | "sportmonks" | "api-football";
+export type MatchDataProvider = "manual" | "api-football";
 
 export type ExternalMatchStatus =
   | "SCHEDULED"
@@ -62,8 +62,8 @@ export function isUnknownTeamName(name: string) {
 }
 
 export function footballDataEnvStatus(env: Partial<NodeJS.ProcessEnv> = process.env): FootballDataEnvStatus {
-  const provider = env.FOOTBALL_DATA_PROVIDER?.trim() || "football-data.org";
-  const competitionCode = env.FOOTBALL_DATA_COMPETITION_CODE?.trim() || "WC";
+  const provider = env.FOOTBALL_DATA_PROVIDER?.trim() || "api-football";
+  const competitionCode = env.FOOTBALL_DATA_COMPETITION_CODE?.trim() || "1";
   const season = env.FOOTBALL_DATA_SEASON?.trim() || "2026";
   const apiKey = env.FOOTBALL_DATA_API_KEY?.trim() ? "set" : "missing";
 

@@ -48,7 +48,7 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 function TeamFlag({ team }: { team: MatchTeam }) {
   const isoCode = isoCodeForTeam(team);
-  if (!isoCode || isoCode.startsWith("GB-")) {
+  if (!isoCode) {
     return (
       <div className="w-8 h-5 bg-zinc-800 rounded-sm flex items-center justify-center text-[9px] font-black text-zinc-400 shrink-0">
         {team.fifaCode.slice(0, 3)}

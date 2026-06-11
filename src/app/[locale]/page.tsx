@@ -82,7 +82,7 @@ function formatFeaturedDate(date: Date, locale: Locale) {
 
 function FlagMark({ team }: { team: FeaturedFixture["homeTeam"] }) {
   const isoCode = isoCodeForTeam(team);
-  if (!isoCode || isoCode.startsWith("GB-")) {
+  if (!isoCode) {
     return (
       <span className="flex h-5 w-7 items-center justify-center rounded-sm bg-zinc-800 text-[10px] font-black text-white">
         {team.fifaCode.slice(0, 2)}
