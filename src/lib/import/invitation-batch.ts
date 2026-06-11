@@ -16,7 +16,8 @@ export interface BatchReport {
 }
 
 const BATCH_SIZE = 500;
-const CHUNK_SIZE = 10; // concurrent Resend API calls per chunk
+const CHUNK_SIZE = 4;   // concurrent Resend API calls per chunk — stay under 5 req/sec limit
+const CHUNK_DELAY_MS = 1200; // pause between chunks: 4 emails / 1.2 s ≈ 3.3 req/s
 
 export async function processSendBatch(): Promise<BatchReport> {
   // Reset jobs stuck in "processing" for more than 15 minutes (crash recovery)
@@ -67,6 +68,7 @@ export async function processSendBatch(): Promise<BatchReport> {
 
   // Process in chunks of CHUNK_SIZE for controlled concurrency
   for (let i = 0; i < pending.length; i += CHUNK_SIZE) {
+    if (i > 0) await new Promise((r) => setTimeout(r, CHUNK_DELAY_MS));
     const chunk = pending.slice(i, i + CHUNK_SIZE);
 
     const results = await Promise.all(
