@@ -152,29 +152,46 @@ function emptyReport(dryRun: DryRunReport): ImportReport {
 // Main runner
 // ---------------------------------------------------------------------------
 
-export async function runAntwerpenImport(): Promise<ImportReport> {
-  // Step 1: Locate the import file
-  const found = findImportFile();
-  if (!found) {
-    return emptyReport(
-      emptyDryRun([
-        `File not found. Searched: ${IMPORT_FILE_VARIANTS.map((p) => path.basename(p)).join(", ")}`,
-      ]),
-    );
-  }
+export interface ImportFileOverride {
+  buffer: Buffer;
+  isCsv: boolean;
+  fileName: string;
+}
 
-  const { filePath, isCsv } = found;
-
-  // Step 2: Read buffer
+export async function runAntwerpenImport(
+  override?: ImportFileOverride,
+): Promise<ImportReport> {
+  let filePath: string;
+  let isCsv: boolean;
   let buffer: Buffer;
-  try {
-    buffer = fs.readFileSync(filePath);
-  } catch (err) {
-    return emptyReport(
-      emptyDryRun([
-        `File cannot be read: ${err instanceof Error ? err.message : String(err)}`,
-      ]),
-    );
+
+  if (override) {
+    filePath = override.fileName;
+    isCsv = override.isCsv;
+    buffer = override.buffer;
+  } else {
+    // Step 1: Locate the import file on the local filesystem
+    const found = findImportFile();
+    if (!found) {
+      return emptyReport(
+        emptyDryRun([
+          `File not found on server. Upload the CSV using the file picker, or deploy the file to: ${IMPORT_FILE_VARIANTS.map((p) => path.basename(p)).join(", ")}`,
+        ]),
+      );
+    }
+    filePath = found.filePath;
+    isCsv = found.isCsv;
+
+    // Step 2: Read buffer
+    try {
+      buffer = fs.readFileSync(filePath);
+    } catch (err) {
+      return emptyReport(
+        emptyDryRun([
+          `File cannot be read: ${err instanceof Error ? err.message : String(err)}`,
+        ]),
+      );
+    }
   }
 
   // Step 3: Parse (CSV or Excel)

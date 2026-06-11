@@ -75,6 +75,7 @@ export default function ImportClient() {
   const [importLoading, setImportLoading] = useState(false);
   const [importReport, setImportReport] = useState<ImportReport | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [batchLoading, setBatchLoading] = useState(false);
   const [batchResult, setBatchResult] = useState<BatchResult | null>(null);
@@ -108,10 +109,21 @@ export default function ImportClient() {
     setImportError(null);
 
     try {
-      const res = await fetch("/api/admin/import/antwerpen", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      let res: Response;
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        res = await fetch("/api/admin/import/antwerpen", {
+          method: "POST",
+          body: formData,
+          // No Content-Type header — browser sets multipart boundary automatically
+        });
+      } else {
+        res = await fetch("/api/admin/import/antwerpen", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+      }
       if (!res.ok) {
         const body = await res.json().catch(() => ({})) as { error?: string };
         setImportError(body.error ?? `HTTP ${res.status}`);
@@ -211,6 +223,26 @@ export default function ImportClient() {
 
         {!queueStatus && !queueError && (
           <p style={{ color: "#6b7280", fontSize: "0.875rem", margin: 0 }}>Loading…</p>
+        )}
+      </div>
+
+      {/* File picker */}
+      <div style={card}>
+        <h2 style={{ ...sectionHead, marginBottom: "0.5rem" }}>Import File</h2>
+        <p style={{ fontSize: "0.8rem", color: "#6b7280", marginBottom: "0.75rem", marginTop: 0 }}>
+          Upload the Antwerpen CSV file. If left empty, the server will try to use the file bundled with the deployment.
+          The file is never stored permanently — it is parsed in memory and discarded.
+        </p>
+        <input
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
+          style={{ fontSize: "0.875rem", color: "#374151" }}
+        />
+        {selectedFile && (
+          <p style={{ fontSize: "0.8rem", color: "#16a34a", margin: "0.4rem 0 0" }}>
+            ✓ {selectedFile.name} ({(selectedFile.size / 1024).toFixed(0)} KB) — will be uploaded on import
+          </p>
         )}
       </div>
 
