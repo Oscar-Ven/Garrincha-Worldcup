@@ -4,7 +4,6 @@
  * Safe to import in tests without mocking infrastructure.
  */
 import "server-only";
-import * as XLSX from "xlsx";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -144,103 +143,6 @@ export function normalizeCenterName(raw: string): string | null {
 
 function findCol(headers: string[], ...terms: string[]): number {
   return headers.findIndex((h) => terms.some((t) => h.includes(t)));
-}
-
-// ---------------------------------------------------------------------------
-// Excel parsing
-// ---------------------------------------------------------------------------
-
-/**
- * Parse a raw Excel file buffer and return validated rows + critical errors.
- * Pure function — no DB, no FS, no email.
- */
-export function parseExcelBuffer(buffer: Buffer): {
-  rows: ParsedRow[];
-  criticalErrors: string[];
-} {
-  let workbook: XLSX.WorkBook;
-  try {
-    workbook = XLSX.read(buffer, { type: "buffer", cellDates: false });
-  } catch (err) {
-    return {
-      rows: [],
-      criticalErrors: [
-        `File cannot be parsed: ${err instanceof Error ? err.message : String(err)}`,
-      ],
-    };
-  }
-
-  const sheetName = workbook.SheetNames[0];
-  if (!sheetName) {
-    return { rows: [], criticalErrors: ["Excel file has no sheets."] };
-  }
-
-  const rawData = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets[sheetName], {
-    header: 1,
-    defval: "",
-  });
-
-  if (rawData.length < 2) {
-    return { rows: [], criticalErrors: ["Excel file has no data rows."] };
-  }
-
-  const headers = (rawData[0] as unknown[]).map((h) =>
-    String(h ?? "").trim().toUpperCase()
-  );
-
-  const nameCol = findCol(headers, "NAME", "NAAM", "NOM");
-  const emailCol = findCol(headers, "MAIL", "EMAIL");
-  const phoneCol = findCol(headers, "PHONE", "GSM", "MOBILE", "NUMMER", "TELEPHONE");
-
-  const criticalErrors: string[] = [];
-  if (nameCol === -1) {
-    criticalErrors.push(
-      "Missing FULL NAME column. Expected a column containing 'NAME', 'NAAM', or 'NOM'."
-    );
-  }
-  if (emailCol === -1) {
-    criticalErrors.push(
-      "Missing MAIL column. Expected a column containing 'MAIL' or 'EMAIL'."
-    );
-  }
-  if (criticalErrors.length > 0) return { rows: [], criticalErrors };
-
-  const rows: ParsedRow[] = [];
-
-  for (let i = 1; i < rawData.length; i++) {
-    const row = rawData[i] as unknown[];
-    const rawName = String(row[nameCol] ?? "").trim();
-    const rawEmail = String(row[emailCol] ?? "").trim();
-    const rawPhone = phoneCol >= 0 ? String(row[phoneCol] ?? "").trim() : "";
-
-    if (!rawName && !rawEmail && !rawPhone) continue;
-
-    const errors: string[] = [];
-    const warnings: string[] = [];
-
-    if (!rawName) errors.push("Missing FULL NAME");
-    if (!rawEmail) errors.push("Missing MAIL");
-
-    const email = normalizeEmail(rawEmail);
-    if (rawEmail && !isValidEmail(email)) {
-      errors.push(`Invalid email format: ${rawEmail}`);
-    }
-
-    if (!rawPhone) warnings.push("Missing PHONE (optional)");
-
-    rows.push({
-      rowIndex: i + 1,
-      fullName: rawName,
-      email,
-      rawEmail,
-      phone: rawPhone,
-      valid: errors.length === 0,
-      errors,
-      warnings,
-    });
-  }
-
-  return { rows, criticalErrors: [] };
 }
 
 // ---------------------------------------------------------------------------

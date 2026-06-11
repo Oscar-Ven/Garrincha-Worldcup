@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest";
-import * as XLSX from "xlsx";
 import {
   normalizeEmail,
   isValidEmail,
@@ -7,22 +6,10 @@ import {
   generateNickname,
   assignCenters,
   normalizeCenterName,
-  parseExcelBuffer,
   parseCsvBuffer,
   ANTWERPEN_ZUID,
   ANTWERPEN_NOORD,
 } from "@/lib/import/player-import";
-
-// ---------------------------------------------------------------------------
-// Helper — build an Excel XLSX buffer from an array-of-arrays
-// ---------------------------------------------------------------------------
-
-function makeXlsx(data: unknown[][]): Buffer {
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-  return Buffer.from(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
-}
 
 // ---------------------------------------------------------------------------
 // normalizeEmail
@@ -153,205 +140,6 @@ describe("assignCenters", () => {
 });
 
 // ---------------------------------------------------------------------------
-// parseExcelBuffer — required columns
-// ---------------------------------------------------------------------------
-
-describe("parseExcelBuffer — column handling", () => {
-  it("returns a critical error when FULL NAME column is absent", () => {
-    const { criticalErrors } = parseExcelBuffer(
-      makeXlsx([
-        ["MAIL", "PHONE"],
-        ["alice@example.com", "+32491123456"],
-      ]),
-    );
-    expect(criticalErrors.some((e) => e.includes("FULL NAME"))).toBe(true);
-  });
-
-  it("returns a critical error when MAIL column is absent", () => {
-    const { criticalErrors } = parseExcelBuffer(
-      makeXlsx([
-        ["FULL NAME", "PHONE"],
-        ["Alice Smith", "+32491123456"],
-      ]),
-    );
-    expect(criticalErrors.some((e) => e.includes("MAIL"))).toBe(true);
-  });
-
-  it("returns both critical errors when both required columns are absent", () => {
-    const { criticalErrors } = parseExcelBuffer(
-      makeXlsx([
-        ["PHONE"],
-        ["+32491123456"],
-      ]),
-    );
-    expect(criticalErrors).toHaveLength(2);
-  });
-
-  it("accepts NAAM as an alternative to NAME (Dutch)", () => {
-    const { rows, criticalErrors } = parseExcelBuffer(
-      makeXlsx([
-        ["NAAM", "MAIL"],
-        ["Alice Smith", "alice@example.com"],
-      ]),
-    );
-    expect(criticalErrors).toHaveLength(0);
-    expect(rows[0].valid).toBe(true);
-  });
-
-  it("parses file without PHONE column (phone becomes empty string)", () => {
-    const { rows, criticalErrors } = parseExcelBuffer(
-      makeXlsx([
-        ["FULL NAME", "MAIL"],
-        ["Alice Smith", "alice@example.com"],
-      ]),
-    );
-    expect(criticalErrors).toHaveLength(0);
-    expect(rows[0].valid).toBe(true);
-    expect(rows[0].phone).toBe("");
-  });
-
-  it("matches column names case-insensitively", () => {
-    const { rows, criticalErrors } = parseExcelBuffer(
-      makeXlsx([
-        ["Full Name", "Email", "Phone"],
-        ["Alice Smith", "alice@example.com", "+32491123456"],
-      ]),
-    );
-    expect(criticalErrors).toHaveLength(0);
-    expect(rows[0].valid).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// parseExcelBuffer — row validation
-// ---------------------------------------------------------------------------
-
-describe("parseExcelBuffer — row validation", () => {
-  it("parses valid rows correctly", () => {
-    const { rows, criticalErrors } = parseExcelBuffer(
-      makeXlsx([
-        ["FULL NAME", "MAIL", "PHONE"],
-        ["Alice Smith", "alice@example.com", "+32491123456"],
-        ["Bob Jones", "bob@example.com", "+32491654321"],
-      ]),
-    );
-    expect(criticalErrors).toHaveLength(0);
-    expect(rows).toHaveLength(2);
-    expect(rows[0].fullName).toBe("Alice Smith");
-    expect(rows[0].email).toBe("alice@example.com");
-    expect(rows[0].valid).toBe(true);
-  });
-
-  it("normalizes email to lowercase and stores original rawEmail", () => {
-    const { rows } = parseExcelBuffer(
-      makeXlsx([
-        ["FULL NAME", "MAIL"],
-        ["Alice Smith", "Alice@EXAMPLE.COM"],
-      ]),
-    );
-    expect(rows[0].email).toBe("alice@example.com");
-    expect(rows[0].rawEmail).toBe("Alice@EXAMPLE.COM");
-  });
-
-  it("marks row invalid when MAIL is empty", () => {
-    const { rows } = parseExcelBuffer(
-      makeXlsx([
-        ["FULL NAME", "MAIL", "PHONE"],
-        ["Alice Smith", "", "+32491123456"],
-      ]),
-    );
-    expect(rows[0].valid).toBe(false);
-    expect(rows[0].errors).toContain("Missing MAIL");
-  });
-
-  it("marks row invalid when FULL NAME is empty", () => {
-    const { rows } = parseExcelBuffer(
-      makeXlsx([
-        ["FULL NAME", "MAIL", "PHONE"],
-        ["", "alice@example.com", "+32491123456"],
-      ]),
-    );
-    expect(rows[0].valid).toBe(false);
-    expect(rows[0].errors).toContain("Missing FULL NAME");
-  });
-
-  it("marks row invalid for a malformed email address", () => {
-    const { rows } = parseExcelBuffer(
-      makeXlsx([
-        ["FULL NAME", "MAIL"],
-        ["Alice Smith", "not-an-email"],
-      ]),
-    );
-    expect(rows[0].valid).toBe(false);
-    expect(rows[0].errors.some((e) => e.includes("Invalid email format"))).toBe(true);
-  });
-
-  it("allows missing PHONE — row is valid with a warning", () => {
-    const { rows } = parseExcelBuffer(
-      makeXlsx([
-        ["FULL NAME", "MAIL", "PHONE"],
-        ["Alice Smith", "alice@example.com", ""],
-      ]),
-    );
-    expect(rows[0].valid).toBe(true);
-    expect(rows[0].errors).toHaveLength(0);
-    expect(rows[0].warnings).toContain("Missing PHONE (optional)");
-    expect(rows[0].phone).toBe("");
-  });
-
-  it("account can be created with missing PHONE (phone stored as empty string)", () => {
-    const { rows } = parseExcelBuffer(
-      makeXlsx([
-        ["FULL NAME", "MAIL"],
-        ["Bob Jones", "bob@example.com"],
-      ]),
-    );
-    expect(rows[0].valid).toBe(true);
-    expect(rows[0].phone).toBe(""); // empty string — stored safely in DB
-  });
-
-  it("silently skips fully blank rows", () => {
-    const { rows } = parseExcelBuffer(
-      makeXlsx([
-        ["FULL NAME", "MAIL", "PHONE"],
-        ["Alice Smith", "alice@example.com", ""],
-        ["", "", ""],
-        ["Bob Jones", "bob@example.com", ""],
-      ]),
-    );
-    expect(rows).toHaveLength(2);
-  });
-
-  it("returns a critical error for a buffer with no data rows", () => {
-    // SheetJS parses arbitrary text as a 1-row sheet — no header + data → "no data rows"
-    const { criticalErrors } = parseExcelBuffer(
-      Buffer.from("this is not an excel file with data"),
-    );
-    expect(criticalErrors.length).toBeGreaterThan(0);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Duplicate detection (within the Excel file)
-// ---------------------------------------------------------------------------
-
-describe("parseExcelBuffer — duplicate handling", () => {
-  it("returns all rows as-is (duplicate detection is the runner's responsibility)", () => {
-    // parseExcelBuffer does not deduplicate — that happens in the runner
-    const { rows } = parseExcelBuffer(
-      makeXlsx([
-        ["FULL NAME", "MAIL"],
-        ["Alice Smith", "alice@example.com"],
-        ["Alice Smith Again", "alice@example.com"],
-      ]),
-    );
-    // Both rows are returned — duplicates marked by runner, not parser
-    expect(rows).toHaveLength(2);
-    expect(rows.every((r) => r.valid)).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Idempotency
 // ---------------------------------------------------------------------------
 
@@ -367,13 +155,10 @@ describe("idempotency", () => {
     expect(normalizeEmail(raw)).toBe("alice@example.com");
   });
 
-  it("parsing the same buffer twice returns identical rows", () => {
-    const buf = makeXlsx([
-      ["FULL NAME", "MAIL"],
-      ["Alice Smith", "ALICE@EXAMPLE.COM"],
-    ]);
-    const r1 = parseExcelBuffer(buf);
-    const r2 = parseExcelBuffer(buf);
+  it("parsing the same CSV buffer twice returns identical rows", () => {
+    const buf = Buffer.from("FULL NAME,MAIL\nAlice Smith,ALICE@EXAMPLE.COM", "utf8");
+    const r1 = parseCsvBuffer(buf);
+    const r2 = parseCsvBuffer(buf);
     expect(r1.rows[0].email).toBe(r2.rows[0].email);
     expect(r1.rows[0].email).toBe("alice@example.com");
   });

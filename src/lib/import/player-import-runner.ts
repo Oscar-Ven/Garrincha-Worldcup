@@ -18,7 +18,6 @@ import {
   extractFirstName,
   generateNickname,
   parseCsvBuffer,
-  parseExcelBuffer,
   type DryRunReport,
   type ImportReport,
 } from "./player-import";
@@ -29,16 +28,12 @@ import {
 
 const IMPORT_FILE_VARIANTS = [
   path.join(process.cwd(), "data", "import", "antwerpen_import_ready_with_centers.csv"),
-  path.join(process.cwd(), "data", "import", "antwerpen.xls"),
-  path.join(process.cwd(), "data", "import", "Antwerpen.xlsx"),
-  path.join(process.cwd(), "data", "import", "antwerpen.xlsx"),
-  path.join(process.cwd(), "data", "import", "Antwerpen.xls"),
 ];
 
-export function findImportFile(): { filePath: string; isCsv: boolean } | null {
+export function findImportFile(): { filePath: string } | null {
   for (const p of IMPORT_FILE_VARIANTS) {
     if (fs.existsSync(p)) {
-      return { filePath: p, isCsv: p.endsWith(".csv") };
+      return { filePath: p };
     }
   }
   return null;
@@ -154,7 +149,6 @@ function emptyReport(dryRun: DryRunReport): ImportReport {
 
 export interface ImportFileOverride {
   buffer: Buffer;
-  isCsv: boolean;
   fileName: string;
 }
 
@@ -162,12 +156,10 @@ export async function runAntwerpenImport(
   override?: ImportFileOverride,
 ): Promise<ImportReport> {
   let filePath: string;
-  let isCsv: boolean;
   let buffer: Buffer;
 
   if (override) {
     filePath = override.fileName;
-    isCsv = override.isCsv;
     buffer = override.buffer;
   } else {
     // Step 1: Locate the import file on the local filesystem
@@ -180,7 +172,6 @@ export async function runAntwerpenImport(
       );
     }
     filePath = found.filePath;
-    isCsv = found.isCsv;
 
     // Step 2: Read buffer
     try {
@@ -194,10 +185,8 @@ export async function runAntwerpenImport(
     }
   }
 
-  // Step 3: Parse (CSV or Excel)
-  const { rows: allRows, criticalErrors: parseErrors } = isCsv
-    ? parseCsvBuffer(buffer)
-    : parseExcelBuffer(buffer);
+  // Step 3: Parse CSV
+  const { rows: allRows, criticalErrors: parseErrors } = parseCsvBuffer(buffer);
 
   if (parseErrors.length > 0) {
     return emptyReport(emptyDryRun(parseErrors));

@@ -39,13 +39,9 @@ export async function POST(request: NextRequest) {
 
     const file = formData.get("file");
     if (file instanceof File && file.size > 0) {
-      const fileName = file.name.toLowerCase();
-      const isCsv = fileName.endsWith(".csv");
-      const isExcel =
-        fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
-      if (!isCsv && !isExcel) {
+      if (!file.name.toLowerCase().endsWith(".csv")) {
         return NextResponse.json(
-          { error: "Only CSV (.csv) and Excel (.xlsx / .xls) files are accepted." },
+          { error: "Only CSV (.csv) files are accepted." },
           { status: 400 },
         );
       }
@@ -58,7 +54,6 @@ export async function POST(request: NextRequest) {
       const arrayBuffer = await file.arrayBuffer();
       override = {
         buffer: Buffer.from(arrayBuffer),
-        isCsv,
         fileName: file.name,
       };
     }

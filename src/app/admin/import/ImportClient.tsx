@@ -96,11 +96,13 @@ export default function ImportClient() {
     }
   }, []);
 
-  // Load queue on mount; auto-refresh every 10 s
+  // Load queue on mount; auto-refresh every 10 s.
+  // Initial fetch is deferred via setTimeout so setState is called inside a callback,
+  // not synchronously in the effect body (satisfies @eslint-react/hooks-extra rule).
   useEffect(() => {
-    void refreshQueue();
-    const timer = setInterval(() => void refreshQueue(), 10_000);
-    return () => clearInterval(timer);
+    const init = setTimeout(() => void refreshQueue(), 0);
+    const poll = setInterval(() => void refreshQueue(), 10_000);
+    return () => { clearTimeout(init); clearInterval(poll); };
   }, [refreshQueue]);
 
   async function handleImport() {
@@ -235,7 +237,7 @@ export default function ImportClient() {
         </p>
         <input
           type="file"
-          accept=".csv,.xlsx,.xls"
+          accept=".csv"
           onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
           style={{ fontSize: "0.875rem", color: "#374151" }}
         />
