@@ -46,6 +46,7 @@ export default async function AdminPage() {
       centers,
       recentLogs,
       leaderboardUsers,
+      invitationJobStats,
     ] = await Promise.all([
       prisma.user.count({ where: { role: "USER" } }),
       prisma.user.count({ where: { role: "CENTER_ADMIN" } }),
@@ -91,10 +92,20 @@ export default async function AdminPage() {
           pointEvents: { select: { points: true } },
         },
       }) as unknown as Promise<LeaderboardInputUser[]>,
+      prisma.invitationJob.groupBy({ by: ["status"], _count: { id: true } }),
     ]);
 
     const bonusPointsAwarded = bonusAwardedAggr._sum.points ?? 0;
     const globalLeaderboard = createLeaderboardRows(leaderboardUsers, 5);
+
+    const invJobs = {
+      pending: invitationJobStats.find((g) => g.status === "pending")?._count.id ?? 0,
+      processing: invitationJobStats.find((g) => g.status === "processing")?._count.id ?? 0,
+      sent: invitationJobStats.find((g) => g.status === "sent")?._count.id ?? 0,
+      failed: invitationJobStats.find((g) => g.status === "failed")?._count.id ?? 0,
+      skipped: invitationJobStats.find((g) => g.status === "skipped_unsubscribed")?._count.id ?? 0,
+    };
+    const totalInvited = Object.values(invJobs).reduce((a, b) => a + b, 0);
     const centerSummaries = centers.map((ctr) => ({
       id: ctr.id,
       name: ctr.name.replace("GARRINCHA ", ""),
@@ -143,6 +154,55 @@ export default async function AdminPage() {
             </div>
           ))}
         </div>
+
+        {/* Invitation pipeline — only rendered when import has been run */}
+        {totalInvited > 0 && (
+          <div className="bg-white border border-gray-200 shadow-sm">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <Users className="w-4 h-4 text-green-600" />
+                Invitation Pipeline
+              </h2>
+              <Link
+                href="/admin/import"
+                className="text-xs text-green-600 hover:text-green-800 font-semibold flex items-center gap-1 transition-colors"
+              >
+                Manage <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+            <div className="px-6 py-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              {[
+                { label: "Total Invited", value: totalInvited, color: "text-gray-900" },
+                { label: "Pending", value: invJobs.pending, color: "text-amber-600" },
+                { label: "Processing", value: invJobs.processing, color: "text-blue-600" },
+                { label: "Sent", value: invJobs.sent, color: "text-green-700" },
+                { label: "Failed", value: invJobs.failed, color: "text-red-600" },
+                { label: "Unsubscribed", value: invJobs.skipped, color: "text-gray-400" },
+              ].map(({ label, value, color }) => (
+                <div key={label} className="text-center">
+                  <div className={`text-2xl font-bold tabular-nums ${color}`}>
+                    {value.toLocaleString()}
+                  </div>
+                  <div className="text-[11px] text-gray-500 font-medium mt-0.5">{label}</div>
+                </div>
+              ))}
+            </div>
+            {invJobs.pending > 0 && (
+              <div className="px-6 pb-4">
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2">
+                  {invJobs.pending.toLocaleString()} invitations pending — Vercel Cron sends up to 500 every 5 min automatically.
+                </p>
+              </div>
+            )}
+            {invJobs.sent === totalInvited && totalInvited > 0 && (
+              <div className="px-6 pb-4">
+                <p className="text-xs text-green-700 bg-green-50 border border-green-200 px-3 py-2">
+                  All {totalInvited.toLocaleString()} invitations sent.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Mid layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
