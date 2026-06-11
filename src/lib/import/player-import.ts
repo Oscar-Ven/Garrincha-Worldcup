@@ -11,6 +11,8 @@ import "server-only";
 
 export const ANTWERPEN_ZUID = "GARRINCHA Antwerpen Zuid";
 export const ANTWERPEN_NOORD = "GARRINCHA Antwerpen Noord";
+export const GENT_ARSENAAL = "GARRINCHA Gent Arsenaal";
+export const GENT_THE_LOOP = "GARRINCHA Gent The Loop";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -134,7 +136,19 @@ export function normalizeCenterName(raw: string): string | null {
   const lower = raw.trim().toLowerCase();
   if (lower.includes("antwerpen") && lower.includes("noord")) return ANTWERPEN_NOORD;
   if (lower.includes("antwerpen") && lower.includes("zuid")) return ANTWERPEN_ZUID;
+  if (lower.includes("gent") && lower.includes("arsenaal")) return GENT_ARSENAAL;
+  if (lower.includes("gent") && lower.includes("loop")) return GENT_THE_LOOP;
   return null;
+}
+
+/**
+ * Map a DB center name to the display name used in invitation emails.
+ * Gent sub-centers both show as "GARRINCHA Gent".
+ */
+export function centerDisplayName(centerName: string): string {
+  const lower = centerName.toLowerCase();
+  if (lower.includes("gent")) return "GARRINCHA Gent";
+  return centerName;
 }
 
 // ---------------------------------------------------------------------------
