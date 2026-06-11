@@ -9,12 +9,23 @@ import { isLocale, type Locale } from "@/lib/translations";
  * Rotates the access token for a user and sends a new permanent access-link email.
  * Safe to call on every "request new link" action — the previous token is invalidated.
  * Accepts an optional locale so the email is sent in the user's language.
+ * Skips send if the user has unsubscribed from emails.
  */
 export async function rotateAndSendAccessLink(
   userId: string,
   email: string,
   locale?: Locale,
 ): Promise<void> {
+  const existing = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { emailUnsubscribedAt: true },
+  });
+
+  if (existing?.emailUnsubscribedAt) {
+    console.log("[email] Skipping send — user has unsubscribed", { userId });
+    return;
+  }
+
   const { raw: token, hash: accessTokenHash } = generateAccessToken();
   const now = new Date();
 
@@ -29,7 +40,7 @@ export async function rotateAndSendAccessLink(
   });
 
   const accessUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/auth/access?token=${token}`;
-  await sendEmail(buildAccessLinkEmail({ email, accessUrl, locale }));
+  await sendEmail(buildAccessLinkEmail({ email, accessUrl, locale, userId }));
 }
 
 /** Reads the garrincha_locale cookie value from a request's Cookie header. */

@@ -71,6 +71,7 @@ model User {
   activationCodeClaims        ActivationCodeClaim[]
   dailyBonusClaims            DailyBonusClaim[]
   checkInClaims               CheckInClaim[]
+  emailUnsubscribedAt         DateTime?
   createdAt                   DateTime          @default(now())
   updatedAt                   DateTime          @updatedAt
 
