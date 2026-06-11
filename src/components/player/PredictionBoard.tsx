@@ -8,8 +8,8 @@ import { formatBelgiumDateShort, formatBelgiumTime } from "@/lib/date";
 import { isoCodeForTeam } from "@/lib/flags";
 
 function TeamFlag({ flagUrl, name }: { flagUrl: string; name: string }) {
-  const isoCode = isoCodeForTeam({ flagUrl });
-  if (!isoCode || isoCode.startsWith("GB-")) {
+  const isoCode = isoCodeForTeam({ flagUrl, name });
+  if (!isoCode) {
     return (
       <span className="inline-flex h-4 w-6 shrink-0 items-center justify-center rounded-sm bg-white/10 text-[9px] font-bold text-zinc-400">
         {name.slice(0, 3).toUpperCase()}
