@@ -72,6 +72,7 @@ model User {
   dailyBonusClaims            DailyBonusClaim[]
   checkInClaims               CheckInClaim[]
   emailUnsubscribedAt         DateTime?
+  invitationJob               InvitationJob?
   createdAt                   DateTime          @default(now())
   updatedAt                   DateTime          @updatedAt
 
@@ -269,4 +270,23 @@ model CheckInClaim {
   @@unique([userId, date])
   @@index([userId])
   @@index([date])
+}
+
+model InvitationJob {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email       String    @unique
+  displayName String
+  centerName  String
+  importRunId String?
+  status      String    @default("pending")
+  attempts    Int       @default(0)
+  lastError   String?
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+  @@index([importRunId])
 }

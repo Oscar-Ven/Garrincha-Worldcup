@@ -1,19 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 // ---------------------------------------------------------------------------
-// Types (mirror player-import.ts — kept local to avoid server-only imports)
+// Types
 // ---------------------------------------------------------------------------
-
-type EmailStatus =
-  | "pending"
-  | "sent"
-  | "failed"
-  | "skipped_existing"
-  | "skipped_duplicate"
-  | "skipped_invalid"
-  | "skipped_unsubscribed";
 
 interface CenterAssignment {
   email: string;
@@ -46,44 +37,31 @@ interface DryRunReport {
   emailConfigured: boolean;
 }
 
-interface ImportedPlayer {
-  email: string;
-  fullName: string;
-  userId: string;
-  nickname: string;
-  centerName: string;
-  emailStatus: EmailStatus;
-  emailError?: string;
-}
-
 interface ImportReport {
   dryRun: DryRunReport;
   accountsCreated: number;
   accountsSkippedExisting: number;
   accountsFailedCreate: number;
-  emailsSent: number;
-  emailsFailed: number;
-  emailsSkippedExisting: number;
-  emailsSkippedUnsubscribed: number;
-  players: ImportedPlayer[];
+  jobsCreated: number;
   errors: string[];
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+interface QueueStatus {
+  pending: number;
+  processing: number;
+  sent: number;
+  failed: number;
+  skipped_unsubscribed: number;
+  total: number;
+  lastSentAt: string | null;
+}
 
-function statusColor(s: EmailStatus): string {
-  switch (s) {
-    case "sent": return "#16a34a";
-    case "failed": return "#dc2626";
-    case "skipped_existing":
-    case "skipped_unsubscribed":
-    case "skipped_duplicate":
-    case "skipped_invalid":
-      return "#6b7280";
-    default: return "#6b7280";
-  }
+interface BatchResult {
+  processed: number;
+  sent: number;
+  failed: number;
+  skipped: number;
+  errors: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -91,78 +69,203 @@ function statusColor(s: EmailStatus): string {
 // ---------------------------------------------------------------------------
 
 export default function ImportClient() {
-  const [loading, setLoading] = useState(false);
-  const [report, setReport] = useState<ImportReport | null>(null);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [queueStatus, setQueueStatus] = useState<QueueStatus | null>(null);
+  const [queueError, setQueueError] = useState<string | null>(null);
+
+  const [importLoading, setImportLoading] = useState(false);
+  const [importReport, setImportReport] = useState<ImportReport | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+
+  const [batchLoading, setBatchLoading] = useState(false);
+  const [batchResult, setBatchResult] = useState<BatchResult | null>(null);
+  const [batchError, setBatchError] = useState<string | null>(null);
+
+  const refreshQueue = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/import/antwerpen/status");
+      if (res.ok) {
+        setQueueStatus(await res.json() as QueueStatus);
+        setQueueError(null);
+      } else {
+        const body = await res.json().catch(() => ({})) as { error?: string };
+        setQueueError(body.error ?? `HTTP ${res.status}`);
+      }
+    } catch (err) {
+      setQueueError(err instanceof Error ? err.message : "Failed to load queue status");
+    }
+  }, []);
+
+  // Load queue on mount; auto-refresh every 10 s
+  useEffect(() => {
+    void refreshQueue();
+    const timer = setInterval(() => void refreshQueue(), 10_000);
+    return () => clearInterval(timer);
+  }, [refreshQueue]);
 
   async function handleImport() {
-    setLoading(true);
-    setReport(null);
-    setFetchError(null);
+    setImportLoading(true);
+    setImportReport(null);
+    setImportError(null);
 
     try {
       const res = await fetch("/api/admin/import/antwerpen", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-
       if (!res.ok) {
         const body = await res.json().catch(() => ({})) as { error?: string };
-        setFetchError(body.error ?? `HTTP ${res.status}`);
+        setImportError(body.error ?? `HTTP ${res.status}`);
         return;
       }
-
-      setReport(await res.json() as ImportReport);
+      setImportReport(await res.json() as ImportReport);
+      await refreshQueue();
     } catch (err) {
-      setFetchError(err instanceof Error ? err.message : "Unexpected error");
+      setImportError(err instanceof Error ? err.message : "Unexpected error");
     } finally {
-      setLoading(false);
+      setImportLoading(false);
     }
   }
 
-  const dr = report?.dryRun;
+  async function handleSendBatch() {
+    setBatchLoading(true);
+    setBatchResult(null);
+    setBatchError(null);
+
+    try {
+      const res = await fetch("/api/admin/import/antwerpen/send-batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { error?: string };
+        setBatchError(body.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setBatchResult(await res.json() as BatchResult);
+      await refreshQueue();
+    } catch (err) {
+      setBatchError(err instanceof Error ? err.message : "Unexpected error");
+    } finally {
+      setBatchLoading(false);
+    }
+  }
+
+  const dr = importReport?.dryRun;
   const hasCritical = (dr?.criticalErrors?.length ?? 0) > 0;
+  const hasPending = (queueStatus?.pending ?? 0) > 0;
 
   return (
     <div style={{ padding: "2rem", maxWidth: "960px", margin: "0 auto", fontFamily: "Arial, sans-serif" }}>
       <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "0.4rem" }}>
-        Import Antwerpen Players
+        Antwerpen Player Import
       </h1>
       <p style={{ color: "#6b7280", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
-        Reads <code style={{ background: "#f3f4f6", padding: "2px 6px", borderRadius: "4px" }}>data/import/antwerpen.xls</code>.
-        Runs a dry-run first, then automatically creates new player accounts and sends invitation
-        emails. Existing players are skipped. Import is idempotent — safe to re-run.
+        <strong>Step 1 — Run Import:</strong> reads the CSV, creates player accounts, queues invitation jobs.<br />
+        <strong>Step 2 — Send emails:</strong> Vercel Cron sends up to 500 invitations every 5 minutes automatically.
+        Use <em>Send Next Batch</em> to dispatch immediately.
       </p>
 
-      <button
-        onClick={handleImport}
-        disabled={loading}
-        style={{
-          padding: "12px 32px",
-          background: loading ? "#9ca3af" : "#111111",
-          color: "#ffffff",
-          border: "none",
-          borderRadius: "6px",
-          fontSize: "15px",
-          fontWeight: 700,
-          cursor: loading ? "not-allowed" : "pointer",
-          marginBottom: "2rem",
-          display: "block",
-        }}
-      >
-        {loading ? "Importing… (this may take a minute)" : "Run Import"}
-      </button>
+      {/* Queue status */}
+      <div style={card}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <h2 style={{ ...sectionHead, marginBottom: 0 }}>Invitation Queue</h2>
+          <button
+            onClick={() => void refreshQueue()}
+            style={{ fontSize: "0.75rem", color: "#6b7280", background: "none", border: "none", cursor: "pointer" }}
+          >
+            ↻ Refresh
+          </button>
+        </div>
 
-      {/* Fetch-level error */}
-      {fetchError && (
+        {queueError && (
+          <p style={{ color: "#dc2626", fontSize: "0.875rem" }}>Status unavailable: {queueError}</p>
+        )}
+
+        {queueStatus && (
+          <>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))", gap: "0.75rem", marginBottom: "0.75rem" }}>
+              {[
+                { label: "Pending", value: queueStatus.pending, color: "#f59e0b" },
+                { label: "Processing", value: queueStatus.processing, color: "#3b82f6" },
+                { label: "Sent", value: queueStatus.sent, color: "#16a34a" },
+                { label: "Failed", value: queueStatus.failed, color: "#dc2626" },
+                { label: "Unsubscribed", value: queueStatus.skipped_unsubscribed, color: "#6b7280" },
+                { label: "Total", value: queueStatus.total, color: "#111111" },
+              ].map(({ label, value, color }) => (
+                <div key={label} style={{ textAlign: "center", padding: "0.5rem", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "6px" }}>
+                  <div style={{ fontSize: "1.5rem", fontWeight: 700, color }}>{value.toLocaleString()}</div>
+                  <div style={{ fontSize: "0.7rem", color: "#6b7280", marginTop: "2px" }}>{label}</div>
+                </div>
+              ))}
+            </div>
+            {queueStatus.lastSentAt && (
+              <p style={{ fontSize: "0.75rem", color: "#6b7280", margin: 0 }}>
+                Last sent: {new Date(queueStatus.lastSentAt).toLocaleString("nl-BE")}
+              </p>
+            )}
+            {queueStatus.total === 0 && (
+              <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: 0 }}>No invitation jobs yet. Run the import first.</p>
+            )}
+          </>
+        )}
+
+        {!queueStatus && !queueError && (
+          <p style={{ color: "#6b7280", fontSize: "0.875rem", margin: 0 }}>Loading…</p>
+        )}
+      </div>
+
+      {/* Action buttons */}
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
+        <button
+          onClick={() => void handleImport()}
+          disabled={importLoading}
+          style={actionBtn(importLoading, "#111111")}
+        >
+          {importLoading ? "Importing… (please wait)" : "Run Import"}
+        </button>
+
+        <button
+          onClick={() => void handleSendBatch()}
+          disabled={batchLoading || !hasPending}
+          style={actionBtn(batchLoading || !hasPending, "#1d4ed8")}
+        >
+          {batchLoading ? "Sending… (up to 500 emails)" : "Send Next Batch"}
+        </button>
+      </div>
+
+      {/* Import error */}
+      {importError && (
         <div style={alertBox("error")}>
-          <strong>Error:</strong> {fetchError}
+          <strong>Import error:</strong> {importError}
         </div>
       )}
 
-      {report && (
+      {/* Batch result */}
+      {batchResult && (
+        <div style={alertBox(batchResult.failed > 0 ? "warn" : "success")}>
+          <strong>Batch complete:</strong>{" "}
+          {batchResult.sent} sent · {batchResult.failed} failed · {batchResult.skipped} unsubscribed
+          {" "}({batchResult.processed} processed total)
+          {batchResult.errors.length > 0 && (
+            <ul style={{ margin: "0.5rem 0 0", paddingLeft: "1.25rem", fontSize: "0.8rem" }}>
+              {batchResult.errors.slice(0, 10).map((e, i) => <li key={i}>{e}</li>)}
+              {batchResult.errors.length > 10 && (
+                <li>…and {batchResult.errors.length - 10} more</li>
+              )}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {batchError && (
+        <div style={alertBox("error")}>
+          <strong>Batch error:</strong> {batchError}
+        </div>
+      )}
+
+      {/* Import report */}
+      {importReport && (
         <>
-          {/* Critical errors — import was blocked */}
           {hasCritical && (
             <div style={alertBox("error")}>
               <strong>Critical errors — import was not executed:</strong>
@@ -172,32 +275,28 @@ export default function ImportClient() {
             </div>
           )}
 
-          {/* Summary table */}
           <div style={card}>
             <h2 style={sectionHead}>Import Report</h2>
             <table style={{ borderCollapse: "collapse", width: "100%", fontSize: "0.875rem" }}>
               <tbody>
-                {[
-                  ["File path", dr?.filePath ?? "—"],
+                {([
+                  ["File", dr?.filePath ?? "—"],
                   ["Total rows in file", dr?.totalRows ?? 0],
-                  ["Valid rows", dr?.validRowCount ?? 0],
-                  ["Invalid rows (skipped)", dr?.invalidRowCount ?? 0],
-                  ["New accounts to create", dr?.newAccountCount ?? 0],
-                  ["New accounts created", report.accountsCreated],
-                  ["Existing accounts skipped", report.accountsSkippedExisting],
-                  ["Accounts failed to create", report.accountsFailedCreate],
-                  ["Duplicate emails in file (skipped)", dr?.excelDuplicateCount ?? 0],
-                  ["Missing phone numbers", dr?.missingPhoneCount ?? 0],
-                  ["Missing phone — allowed", "Yes (optional field)"],
+                  ["Valid rows (after dedup)", dr?.validRowCount ?? 0],
+                  ["Invalid rows skipped", dr?.invalidRowCount ?? 0],
+                  ["Duplicate emails in file", dr?.excelDuplicateCount ?? 0],
+                  ["Already in database", dr?.existingAccountCount ?? 0],
+                  ["New rows to process", dr?.newAccountCount ?? 0],
+                  ["Accounts created", importReport.accountsCreated],
+                  ["Accounts skipped (already exist)", importReport.accountsSkippedExisting],
+                  ["Accounts failed", importReport.accountsFailedCreate],
+                  ["Invitation jobs queued", importReport.jobsCreated],
                   ["Garrincha Antwerpen Zuid assigned", dr?.zuidCount ?? 0],
                   ["Garrincha Antwerpen Noord assigned", dr?.noordCount ?? 0],
-                  ["Emails sent", report.emailsSent],
-                  ["Emails failed", report.emailsFailed],
-                  ["Emails skipped (existing accounts)", report.emailsSkippedExisting],
-                  ["Emails skipped (unsubscribed)", report.emailsSkippedUnsubscribed],
+                  ["Missing phone numbers (allowed)", dr?.missingPhoneCount ?? 0],
                   ["Email sender configured", dr?.emailConfigured ? "Yes" : "No — check RESEND_API_KEY"],
-                ].map(([label, value]) => (
-                  <tr key={String(label)} style={{ borderBottom: "1px solid #e5e7eb" }}>
+                ] as [string, string | number][]).map(([label, value]) => (
+                  <tr key={label} style={{ borderBottom: "1px solid #e5e7eb" }}>
                     <td style={{ padding: "6px 0", color: "#374151", fontWeight: 500, width: "55%" }}>{label}</td>
                     <td style={{ padding: "6px 0 6px 1rem", color: "#111111" }}>{String(value)}</td>
                   </tr>
@@ -206,45 +305,6 @@ export default function ImportClient() {
             </table>
           </div>
 
-          {/* Processed players */}
-          {report.players.length > 0 && (
-            <div style={{ marginBottom: "1.5rem" }}>
-              <h2 style={sectionHead}>Processed Players ({report.players.length})</h2>
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ borderCollapse: "collapse", width: "100%", fontSize: "0.8rem", minWidth: "640px" }}>
-                  <thead>
-                    <tr style={{ background: "#f3f4f6" }}>
-                      {["Email", "Full name", "Nickname", "Center", "Email status"].map((h) => (
-                        <th key={h} style={{ padding: "8px 10px", textAlign: "left", border: "1px solid #e5e7eb" }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {report.players.map((p, i) => (
-                      <tr key={i} style={{ background: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
-                        <td style={cell}>{p.email}</td>
-                        <td style={cell}>{p.fullName}</td>
-                        <td style={cell}>{p.nickname || "—"}</td>
-                        <td style={cell}>{p.centerName}</td>
-                        <td style={cell}>
-                          <span style={{ color: statusColor(p.emailStatus), fontWeight: 600 }}>
-                            {p.emailStatus}
-                          </span>
-                          {p.emailError && (
-                            <span style={{ display: "block", color: "#9ca3af", fontSize: "0.7rem", marginTop: "2px" }}>
-                              {p.emailError}
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Invalid rows */}
           {(dr?.invalidRows?.length ?? 0) > 0 && (
             <div style={{ marginBottom: "1.5rem" }}>
               <h2 style={sectionHead}>Invalid Rows Skipped ({dr!.invalidRows.length})</h2>
@@ -259,7 +319,6 @@ export default function ImportClient() {
             </div>
           )}
 
-          {/* Duplicate emails in file */}
           {(dr?.excelDuplicateEmails?.length ?? 0) > 0 && (
             <div style={{ marginBottom: "1.5rem" }}>
               <h2 style={sectionHead}>Duplicate Emails in File (2nd+ occurrence skipped)</h2>
@@ -269,12 +328,11 @@ export default function ImportClient() {
             </div>
           )}
 
-          {/* Run-time errors */}
-          {report.errors.length > 0 && (
+          {importReport.errors.length > 0 && (
             <div style={alertBox("warn")}>
               <strong>Runtime errors:</strong>
               <ul style={{ margin: "0.5rem 0 0", paddingLeft: "1.25rem" }}>
-                {report.errors.map((e, i) => <li key={i}>{e}</li>)}
+                {importReport.errors.map((e, i) => <li key={i}>{e}</li>)}
               </ul>
             </div>
           )}
@@ -285,19 +343,36 @@ export default function ImportClient() {
 }
 
 // ---------------------------------------------------------------------------
-// Inline style helpers
+// Style helpers
 // ---------------------------------------------------------------------------
 
-function alertBox(type: "error" | "warn"): React.CSSProperties {
-  const isError = type === "error";
+function alertBox(type: "error" | "warn" | "success"): React.CSSProperties {
+  const colors = {
+    error:   { bg: "#fef2f2", border: "#fecaca", text: "#7f1d1d" },
+    warn:    { bg: "#fffbeb", border: "#fde68a", text: "#78350f" },
+    success: { bg: "#f0fdf4", border: "#bbf7d0", text: "#14532d" },
+  }[type];
   return {
-    background: isError ? "#fef2f2" : "#fffbeb",
-    border: `1px solid ${isError ? "#fecaca" : "#fde68a"}`,
+    background: colors.bg,
+    border: `1px solid ${colors.border}`,
     borderRadius: "6px",
     padding: "1rem",
     marginBottom: "1.5rem",
-    color: isError ? "#7f1d1d" : "#78350f",
+    color: colors.text,
     fontSize: "0.875rem",
+  };
+}
+
+function actionBtn(disabled: boolean, baseColor: string): React.CSSProperties {
+  return {
+    padding: "12px 28px",
+    background: disabled ? "#9ca3af" : baseColor,
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "15px",
+    fontWeight: 700,
+    cursor: disabled ? "not-allowed" : "pointer",
   };
 }
 
@@ -314,10 +389,4 @@ const sectionHead: React.CSSProperties = {
   fontWeight: 700,
   marginBottom: "0.75rem",
   marginTop: 0,
-};
-
-const cell: React.CSSProperties = {
-  padding: "6px 10px",
-  border: "1px solid #e5e7eb",
-  verticalAlign: "top",
 };

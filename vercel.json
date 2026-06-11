@@ -3,6 +3,10 @@
     {
       "path": "/api/admin/sync-matches",
       "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/send-invitation-batch",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

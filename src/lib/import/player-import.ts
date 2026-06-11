@@ -20,9 +20,10 @@ export const ANTWERPEN_NOORD = "GARRINCHA Antwerpen Noord";
 export interface ParsedRow {
   rowIndex: number;
   fullName: string;
-  email: string;     // normalized: trimmed + lowercase
-  rawEmail: string;  // original value from cell
+  email: string;      // normalized: trimmed + lowercase
+  rawEmail: string;   // original value from cell/column
   phone: string;
+  centerName?: string; // from CENTER column if present (already normalized to DB name)
   valid: boolean;
   errors: string[];
   warnings: string[];
@@ -68,26 +69,12 @@ export interface DryRunReport {
   emailConfigured: boolean;
 }
 
-export interface ImportedPlayerResult {
-  email: string;
-  fullName: string;
-  userId: string;
-  nickname: string;
-  centerName: string;
-  emailStatus: EmailStatus;
-  emailError?: string;
-}
-
 export interface ImportReport {
   dryRun: DryRunReport;
   accountsCreated: number;
   accountsSkippedExisting: number;
   accountsFailedCreate: number;
-  emailsSent: number;
-  emailsFailed: number;
-  emailsSkippedExisting: number;
-  emailsSkippedUnsubscribed: number;
-  players: ImportedPlayerResult[];
+  jobsCreated: number;
   errors: string[];
 }
 
@@ -125,7 +112,7 @@ export function generateNickname(firstName: string, num: number): string {
 }
 
 // ---------------------------------------------------------------------------
-// Center assignment
+// Center helpers
 // ---------------------------------------------------------------------------
 
 /**
@@ -140,13 +127,28 @@ export function assignCenters(emails: string[]): CenterAssignment[] {
   }));
 }
 
+/**
+ * Map a raw CENTER column value (as found in the CSV) to the canonical DB name.
+ * Returns null if the value is unrecognized.
+ */
+export function normalizeCenterName(raw: string): string | null {
+  const lower = raw.trim().toLowerCase();
+  if (lower.includes("antwerpen") && lower.includes("noord")) return ANTWERPEN_NOORD;
+  if (lower.includes("antwerpen") && lower.includes("zuid")) return ANTWERPEN_ZUID;
+  return null;
+}
+
 // ---------------------------------------------------------------------------
-// Excel parsing
+// Shared column finder
 // ---------------------------------------------------------------------------
 
 function findCol(headers: string[], ...terms: string[]): number {
   return headers.findIndex((h) => terms.some((t) => h.includes(t)));
 }
+
+// ---------------------------------------------------------------------------
+// Excel parsing
+// ---------------------------------------------------------------------------
 
 /**
  * Parse a raw Excel file buffer and return validated rows + critical errors.
@@ -186,7 +188,6 @@ export function parseExcelBuffer(buffer: Buffer): {
     String(h ?? "").trim().toUpperCase()
   );
 
-  // Case-insensitive substring matching for flexible column names
   const nameCol = findCol(headers, "NAME", "NAAM", "NOM");
   const emailCol = findCol(headers, "MAIL", "EMAIL");
   const phoneCol = findCol(headers, "PHONE", "GSM", "MOBILE", "NUMMER", "TELEPHONE");
@@ -212,7 +213,6 @@ export function parseExcelBuffer(buffer: Buffer): {
     const rawEmail = String(row[emailCol] ?? "").trim();
     const rawPhone = phoneCol >= 0 ? String(row[phoneCol] ?? "").trim() : "";
 
-    // Silently skip completely blank rows
     if (!rawName && !rawEmail && !rawPhone) continue;
 
     const errors: string[] = [];
@@ -229,11 +229,118 @@ export function parseExcelBuffer(buffer: Buffer): {
     if (!rawPhone) warnings.push("Missing PHONE (optional)");
 
     rows.push({
-      rowIndex: i + 1, // 1-based for human-readable display
+      rowIndex: i + 1,
       fullName: rawName,
       email,
       rawEmail,
       phone: rawPhone,
+      valid: errors.length === 0,
+      errors,
+      warnings,
+    });
+  }
+
+  return { rows, criticalErrors: [] };
+}
+
+// ---------------------------------------------------------------------------
+// CSV parsing
+// ---------------------------------------------------------------------------
+
+function splitCsvLine(line: string): string[] {
+  const cells: string[] = [];
+  let current = "";
+  let inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuote && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuote = !inQuote;
+      }
+    } else if (ch === "," && !inQuote) {
+      cells.push(current);
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  cells.push(current);
+  return cells;
+}
+
+/**
+ * Parse a UTF-8 CSV buffer (with optional BOM) and return validated rows.
+ * Supports CENTER column — values are normalized to canonical DB names.
+ */
+export function parseCsvBuffer(buffer: Buffer): {
+  rows: ParsedRow[];
+  criticalErrors: string[];
+} {
+  let text = buffer.toString("utf8");
+  // Strip UTF-8 BOM if present
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+
+  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  if (lines.length < 2) {
+    return { rows: [], criticalErrors: ["CSV file has no data rows."] };
+  }
+
+  const headers = splitCsvLine(lines[0]).map((h) => h.trim().toUpperCase());
+  const nameCol = findCol(headers, "NAME", "NAAM", "NOM");
+  const emailCol = findCol(headers, "MAIL", "EMAIL");
+  const phoneCol = findCol(headers, "PHONE", "GSM", "MOBILE", "NUMMER", "TELEPHONE");
+  const centerCol = findCol(headers, "CENTER", "CENTRE", "CENTRUM");
+
+  const criticalErrors: string[] = [];
+  if (nameCol === -1) {
+    criticalErrors.push(
+      "Missing FULL NAME column. Expected a column containing 'NAME', 'NAAM', or 'NOM'."
+    );
+  }
+  if (emailCol === -1) {
+    criticalErrors.push(
+      "Missing MAIL column. Expected a column containing 'MAIL' or 'EMAIL'."
+    );
+  }
+  if (criticalErrors.length > 0) return { rows: [], criticalErrors };
+
+  const rows: ParsedRow[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const cells = splitCsvLine(lines[i]);
+    const rawName = cells[nameCol]?.trim() ?? "";
+    const rawEmail = cells[emailCol]?.trim() ?? "";
+    const rawPhone = phoneCol >= 0 ? (cells[phoneCol]?.trim() ?? "") : "";
+    const rawCenter = centerCol >= 0 ? (cells[centerCol]?.trim() ?? "") : "";
+
+    if (!rawName && !rawEmail && !rawPhone) continue;
+
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    if (!rawName) errors.push("Missing FULL NAME");
+    if (!rawEmail) errors.push("Missing MAIL");
+
+    const email = normalizeEmail(rawEmail);
+    if (rawEmail && !isValidEmail(email)) {
+      errors.push(`Invalid email format: ${rawEmail}`);
+    }
+
+    if (!rawPhone) warnings.push("Missing PHONE (optional)");
+
+    // Normalize center name: "Garrincha Antwerpen Noord" → "GARRINCHA Antwerpen Noord"
+    const centerName = rawCenter ? (normalizeCenterName(rawCenter) ?? undefined) : undefined;
+
+    rows.push({
+      rowIndex: i + 1,
+      fullName: rawName,
+      email,
+      rawEmail,
+      phone: rawPhone,
+      centerName,
       valid: errors.length === 0,
       errors,
       warnings,

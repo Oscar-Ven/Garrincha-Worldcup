@@ -1,112 +1,118 @@
 /**
- * Antwerpen player import runner.
- * Handles file discovery, dry-run, account creation, and batched email dispatch.
- * Excluded from test coverage — integration-only (DB + email + FS).
+ * Antwerpen player import runner — queue-based.
+ * Creates accounts in batch, queues InvitationJob records for deferred email delivery.
+ * Email dispatch happens separately via /api/admin/import/antwerpen/send-batch.
+ * Excluded from test coverage — integration-only (DB + FS).
  */
 import "server-only";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { generateAccessToken } from "@/lib/auth";
-import { buildAccessLinkEmail, isEmailConfigured, sendEmail } from "@/lib/email";
+import { isEmailConfigured } from "@/lib/email";
 import {
   ANTWERPEN_NOORD,
   ANTWERPEN_ZUID,
   assignCenters,
   extractFirstName,
   generateNickname,
+  parseCsvBuffer,
   parseExcelBuffer,
   type DryRunReport,
   type ImportReport,
-  type ImportedPlayerResult,
 } from "./player-import";
 
 // ---------------------------------------------------------------------------
-// File discovery — tries multiple path/case variants
+// File discovery — CSV takes priority over Excel variants
 // ---------------------------------------------------------------------------
 
 const IMPORT_FILE_VARIANTS = [
+  path.join(process.cwd(), "data", "import", "antwerpen_import_ready_with_centers.csv"),
   path.join(process.cwd(), "data", "import", "antwerpen.xls"),
   path.join(process.cwd(), "data", "import", "Antwerpen.xlsx"),
   path.join(process.cwd(), "data", "import", "antwerpen.xlsx"),
   path.join(process.cwd(), "data", "import", "Antwerpen.xls"),
 ];
 
-export function findImportFile(): string | null {
-  return IMPORT_FILE_VARIANTS.find((p) => fs.existsSync(p)) ?? null;
-}
-
-// ---------------------------------------------------------------------------
-// Nickname generation with DB uniqueness guarantee
-// ---------------------------------------------------------------------------
-
-async function generateUniqueNickname(firstName: string): Promise<string> {
-  for (let i = 0; i < 50; i++) {
-    const num = 100 + Math.floor(Math.random() * 900); // 100–999
-    const candidate = generateNickname(firstName, num);
-    const existing = await prisma.user.findUnique({
-      where: { nickname: candidate },
-      select: { id: true },
-    });
-    if (!existing) return candidate;
+export function findImportFile(): { filePath: string; isCsv: boolean } | null {
+  for (const p of IMPORT_FILE_VARIANTS) {
+    if (fs.existsSync(p)) {
+      return { filePath: p, isCsv: p.endsWith(".csv") };
+    }
   }
-  // Ultimate fallback — epoch-mod suffix guarantees uniqueness within a run
-  return generateNickname(firstName, Date.now() % 1_000_000);
+  return null;
 }
 
 // ---------------------------------------------------------------------------
-// Access token generation + invitation email dispatch
-// Mirrors rotateAndSendAccessLink but also passes centerName and displayName.
+// Batch nickname generation — 2–3 DB queries for any number of rows
 // ---------------------------------------------------------------------------
 
-async function sendInvitationEmail(
-  userId: string,
-  email: string,
-  displayName: string,
-  centerName: string,
-): Promise<{ status: "sent" | "failed" | "skipped_unsubscribed"; error?: string }> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { emailUnsubscribedAt: true },
+async function generateBatchNicknames(
+  rows: Array<{ email: string; fullName: string }>,
+): Promise<Map<string, string>> {
+  const result = new Map<string, string>();
+  const usedInBatch = new Set<string>();
+
+  // Round 1: Generate candidates, deduplicated within the batch
+  const candidates = rows.map((row) => {
+    const firstName = extractFirstName(row.fullName);
+    let nickname = "";
+    for (let attempt = 0; attempt < 200; attempt++) {
+      const num = 100 + Math.floor(Math.random() * 900);
+      const candidate = generateNickname(firstName, num);
+      if (!usedInBatch.has(candidate)) {
+        nickname = candidate;
+        usedInBatch.add(candidate);
+        break;
+      }
+    }
+    if (!nickname) {
+      // Widen range if all 900 slots were taken by same first name
+      const num = 1000 + Math.floor(Math.random() * 9000);
+      nickname = generateNickname(firstName, num);
+      usedInBatch.add(nickname);
+    }
+    return { email: row.email, nickname, firstName };
   });
 
-  if (user?.emailUnsubscribedAt) {
-    return { status: "skipped_unsubscribed" };
+  // Round 2: One batch query to find DB conflicts
+  const existingInDb = new Set(
+    (
+      await prisma.user.findMany({
+        where: { nickname: { in: candidates.map((c) => c.nickname) } },
+        select: { nickname: true },
+      })
+    ).map((u) => u.nickname),
+  );
+
+  // Round 3: Regenerate the (rare) DB conflicts with a wider number range
+  for (const c of candidates) {
+    if (existingInDb.has(c.nickname)) {
+      let resolved = "";
+      for (let attempt = 0; attempt < 500; attempt++) {
+        const num = 10_000 + Math.floor(Math.random() * 90_000);
+        const candidate = generateNickname(c.firstName, num);
+        if (!usedInBatch.has(candidate) && !existingInDb.has(candidate)) {
+          resolved = candidate;
+          usedInBatch.delete(c.nickname);
+          usedInBatch.add(resolved);
+          break;
+        }
+      }
+      if (!resolved) {
+        resolved = generateNickname(c.firstName, Date.now() % 10_000_000);
+      }
+      c.nickname = resolved;
+    }
+    result.set(c.email, c.nickname);
   }
 
-  const { raw: token, hash: accessTokenHash } = generateAccessToken();
-  const now = new Date();
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      accessTokenHash,
-      accessTokenCreatedAt: now,
-      accessTokenRevokedAt: null,
-      lastAccessLinkSentAt: now,
-    },
-  });
-
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://worldcup.garrincha.be";
-  const accessUrl = `${appUrl}/auth/access?token=${token}`;
-
-  try {
-    await sendEmail(
-      buildAccessLinkEmail({ email, accessUrl, displayName, centerName, userId }),
-    );
-    return { status: "sent" };
-  } catch (err) {
-    return {
-      status: "failed",
-      error: err instanceof Error ? err.message : String(err),
-    };
-  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
-// Empty dry-run report helper
+// Helpers
 // ---------------------------------------------------------------------------
 
 function emptyDryRun(criticalErrors: string[]): DryRunReport {
@@ -131,75 +137,59 @@ function emptyDryRun(criticalErrors: string[]): DryRunReport {
   };
 }
 
+function emptyReport(dryRun: DryRunReport): ImportReport {
+  return {
+    dryRun,
+    accountsCreated: 0,
+    accountsSkippedExisting: 0,
+    accountsFailedCreate: 0,
+    jobsCreated: 0,
+    errors: dryRun.criticalErrors,
+  };
+}
+
 // ---------------------------------------------------------------------------
-// Main runner — dry-run then import (single call, no second confirmation)
+// Main runner
 // ---------------------------------------------------------------------------
 
 export async function runAntwerpenImport(): Promise<ImportReport> {
-  const runErrors: string[] = [];
-
-  // --- Step 1: Locate file ---
-  const filePath = findImportFile();
-  if (!filePath) {
-    return {
-      dryRun: emptyDryRun([
+  // Step 1: Locate the import file
+  const found = findImportFile();
+  if (!found) {
+    return emptyReport(
+      emptyDryRun([
         `File not found. Searched: ${IMPORT_FILE_VARIANTS.map((p) => path.basename(p)).join(", ")}`,
       ]),
-      accountsCreated: 0,
-      accountsSkippedExisting: 0,
-      accountsFailedCreate: 0,
-      emailsSent: 0,
-      emailsFailed: 0,
-      emailsSkippedExisting: 0,
-      emailsSkippedUnsubscribed: 0,
-      players: [],
-      errors: [],
-    };
+    );
   }
 
-  // --- Step 2: Read + parse ---
+  const { filePath, isCsv } = found;
+
+  // Step 2: Read buffer
   let buffer: Buffer;
   try {
     buffer = fs.readFileSync(filePath);
   } catch (err) {
-    return {
-      dryRun: emptyDryRun([
+    return emptyReport(
+      emptyDryRun([
         `File cannot be read: ${err instanceof Error ? err.message : String(err)}`,
       ]),
-      accountsCreated: 0,
-      accountsSkippedExisting: 0,
-      accountsFailedCreate: 0,
-      emailsSent: 0,
-      emailsFailed: 0,
-      emailsSkippedExisting: 0,
-      emailsSkippedUnsubscribed: 0,
-      players: [],
-      errors: [],
-    };
+    );
   }
 
-  const { rows: allRows, criticalErrors: parseErrors } = parseExcelBuffer(buffer);
+  // Step 3: Parse (CSV or Excel)
+  const { rows: allRows, criticalErrors: parseErrors } = isCsv
+    ? parseCsvBuffer(buffer)
+    : parseExcelBuffer(buffer);
+
   if (parseErrors.length > 0) {
-    return {
-      dryRun: emptyDryRun(parseErrors),
-      accountsCreated: 0,
-      accountsSkippedExisting: 0,
-      accountsFailedCreate: 0,
-      emailsSent: 0,
-      emailsFailed: 0,
-      emailsSkippedExisting: 0,
-      emailsSkippedUnsubscribed: 0,
-      players: [],
-      errors: [],
-    };
+    return emptyReport(emptyDryRun(parseErrors));
   }
 
-  // --- Step 3: Dry-run analysis ---
-
+  // Step 4: Classify rows — deduplicate within the file
   const validRows = allRows.filter((r) => r.valid);
   const invalidRows = allRows.filter((r) => !r.valid);
 
-  // Detect in-file duplicates — keep first occurrence of each email
   const seenInFile = new Set<string>();
   const excelDuplicateEmails: string[] = [];
   const deduplicatedValid = validRows.filter((r) => {
@@ -211,7 +201,7 @@ export async function runAntwerpenImport(): Promise<ImportReport> {
     return true;
   });
 
-  // Check which emails already exist in the database
+  // Step 5: Check which emails already exist in DB (one batch query)
   const candidateEmails = deduplicatedValid.map((r) => r.email);
   let existingEmails: string[] = [];
   try {
@@ -221,40 +211,36 @@ export async function runAntwerpenImport(): Promise<ImportReport> {
     });
     existingEmails = found.map((u) => u.email);
   } catch (err) {
-    return {
-      dryRun: emptyDryRun([
+    return emptyReport(
+      emptyDryRun([
         `Database connection failure: ${err instanceof Error ? err.message : String(err)}`,
       ]),
-      accountsCreated: 0,
-      accountsSkippedExisting: 0,
-      accountsFailedCreate: 0,
-      emailsSent: 0,
-      emailsFailed: 0,
-      emailsSkippedExisting: 0,
-      emailsSkippedUnsubscribed: 0,
-      players: [],
-      errors: [],
-    };
-  }
-
-  const existingSet = new Set(existingEmails);
-  const newEmails = deduplicatedValid
-    .filter((r) => !existingSet.has(r.email))
-    .map((r) => r.email);
-
-  const dryRunCriticals: string[] = [];
-  if (!isEmailConfigured()) {
-    dryRunCriticals.push(
-      "Existing invitation email sender cannot be called: RESEND_API_KEY or EMAIL_FROM is not configured.",
     );
   }
 
-  // Deterministic center assignment — sorted emails, alternating
-  const assignments = assignCenters(newEmails);
+  const existingSet = new Set(existingEmails);
+  const newRows = deduplicatedValid.filter((r) => !existingSet.has(r.email));
+  const newEmails = newRows.map((r) => r.email);
+
+  // Step 6: Determine center assignments
+  // Prefer CENTER column from CSV; fall back to deterministic 50/50 split.
+  const hasCenterColumn = allRows.some((r) => r.centerName !== undefined);
+  let assignments: Array<{ email: string; centerName: string }>;
+
+  if (hasCenterColumn) {
+    assignments = newRows.map((r) => ({
+      email: r.email,
+      centerName: r.centerName ?? ANTWERPEN_ZUID,
+    }));
+  } else {
+    assignments = assignCenters(newEmails);
+  }
+
   const centerMap = new Map(assignments.map((a) => [a.email, a.centerName]));
   const zuidCount = assignments.filter((a) => a.centerName === ANTWERPEN_ZUID).length;
   const noordCount = assignments.filter((a) => a.centerName === ANTWERPEN_NOORD).length;
 
+  // Build dry-run report
   const dryRun: DryRunReport = {
     filePath,
     totalRows: allRows.length,
@@ -277,27 +263,23 @@ export async function runAntwerpenImport(): Promise<ImportReport> {
       errors: r.errors,
       warnings: r.warnings,
     })),
-    criticalErrors: dryRunCriticals,
+    criticalErrors: [],
     emailConfigured: isEmailConfigured(),
   };
 
-  // Stop immediately if any critical errors found in dry-run
-  if (dryRunCriticals.length > 0) {
+  // Nothing new to do
+  if (newRows.length === 0) {
     return {
       dryRun,
       accountsCreated: 0,
       accountsSkippedExisting: existingEmails.length,
       accountsFailedCreate: 0,
-      emailsSent: 0,
-      emailsFailed: 0,
-      emailsSkippedExisting: existingEmails.length,
-      emailsSkippedUnsubscribed: 0,
-      players: [],
-      errors: dryRunCriticals,
+      jobsCreated: 0,
+      errors: [],
     };
   }
 
-  // --- Step 4: Resolve center IDs ---
+  // Step 7: Resolve center IDs
   const [zuidCenter, noordCenter] = await Promise.all([
     prisma.garrinchaCenter.findFirst({
       where: { name: ANTWERPEN_ZUID },
@@ -311,139 +293,84 @@ export async function runAntwerpenImport(): Promise<ImportReport> {
 
   if (!zuidCenter || !noordCenter) {
     const msg = `Centers not found in DB. Expected "${ANTWERPEN_ZUID}" and "${ANTWERPEN_NOORD}". Run seed first.`;
-    return {
-      dryRun: { ...dryRun, criticalErrors: [msg] },
-      accountsCreated: 0,
-      accountsSkippedExisting: existingEmails.length,
-      accountsFailedCreate: 0,
-      emailsSent: 0,
-      emailsFailed: 0,
-      emailsSkippedExisting: existingEmails.length,
-      emailsSkippedUnsubscribed: 0,
-      players: [],
-      errors: [msg],
-    };
+    return emptyReport({ ...dryRun, criticalErrors: [msg] });
   }
 
-  // --- Step 5: Create accounts + send emails ---
-  const newRows = deduplicatedValid.filter((r) => !existingSet.has(r.email));
-  const players: ImportedPlayerResult[] = [];
-  let accountsCreated = 0;
-  let accountsFailedCreate = 0;
-  let emailsSent = 0;
-  let emailsFailed = 0;
-  let emailsSkippedUnsubscribed = 0;
+  // Step 8: Generate all nicknames — at most 3 DB queries regardless of batch size
+  const nicknameMap = await generateBatchNicknames(newRows);
 
-  for (const row of newRows) {
+  // Step 9: Bulk-create all user accounts in one INSERT ... RETURNING
+  const importRunId = crypto.randomUUID();
+  const userInsertData = newRows.map((row) => {
     const centerName = centerMap.get(row.email) ?? ANTWERPEN_ZUID;
-    const centerId =
-      centerName === ANTWERPEN_NOORD ? noordCenter.id : zuidCenter.id;
-    const firstName = extractFirstName(row.fullName);
-
-    // Generate nickname with DB uniqueness check
-    let nickname: string;
-    try {
-      nickname = await generateUniqueNickname(firstName);
-    } catch (err) {
-      const msg = `Nickname generation failed for ${row.email}: ${err instanceof Error ? err.message : String(err)}`;
-      runErrors.push(msg);
-      players.push({
-        email: row.email,
-        fullName: row.fullName,
-        userId: "",
-        nickname: "",
-        centerName,
-        emailStatus: "failed",
-        emailError: msg,
-      });
-      accountsFailedCreate++;
-      continue;
-    }
-
-    // Create user — catch P2002 (unique constraint) as idempotency protection
-    let userId: string;
-    try {
-      const user = await prisma.user.create({
-        data: {
-          email: row.email,
-          fullName: row.fullName,
-          nickname,
-          displayName: nickname,
-          phoneNumber: row.phone || "",
-          role: Role.USER,
-          centerId,
-          competitionCenterId: centerId,
-          firstActivatedAt: new Date(),
-        },
-      });
-      userId = user.id;
-      accountsCreated++;
-    } catch (err: unknown) {
-      const code = (err as { code?: string })?.code;
-      if (code === "P2002") {
-        // Concurrent insert — treat as already-existing, skip silently
-        players.push({
-          email: row.email,
-          fullName: row.fullName,
-          userId: "",
-          nickname: "",
-          centerName,
-          emailStatus: "skipped_existing",
-        });
-        continue;
-      }
-      const msg = `Account creation failed for ${row.email}: ${err instanceof Error ? err.message : String(err)}`;
-      runErrors.push(msg);
-      players.push({
-        email: row.email,
-        fullName: row.fullName,
-        userId: "",
-        nickname: "",
-        centerName,
-        emailStatus: "failed",
-        emailError: msg,
-      });
-      accountsFailedCreate++;
-      continue;
-    }
-
-    // Dispatch invitation email (uses existing template + sender)
-    const { status: emailStatus, error: emailError } =
-      await sendInvitationEmail(userId, row.email, row.fullName, centerName);
-
-    if (emailStatus === "sent") {
-      emailsSent++;
-    } else if (emailStatus === "failed") {
-      emailsFailed++;
-      if (emailError) runErrors.push(`Email failed for ${row.email}: ${emailError}`);
-    } else if (emailStatus === "skipped_unsubscribed") {
-      emailsSkippedUnsubscribed++;
-    }
-
-    players.push({
+    const centerId = centerName === ANTWERPEN_NOORD ? noordCenter.id : zuidCenter.id;
+    const nickname =
+      nicknameMap.get(row.email) ??
+      generateNickname(extractFirstName(row.fullName), 999);
+    return {
       email: row.email,
       fullName: row.fullName,
-      userId,
       nickname,
-      centerName,
-      emailStatus,
-      emailError,
-    });
+      displayName: nickname,
+      phoneNumber: row.phone || "",
+      role: Role.USER,
+      centerId,
+      competitionCenterId: centerId,
+      firstActivatedAt: new Date(),
+    };
+  });
 
-    // 150 ms courtesy delay between emails — avoids burst on Resend
-    await new Promise<void>((resolve) => setTimeout(resolve, 150));
+  let createdUsers: Array<{ id: string; email: string; centerId: string }>;
+  try {
+    createdUsers = await prisma.user.createManyAndReturn({
+      data: userInsertData,
+      skipDuplicates: true,
+      select: { id: true, email: true, centerId: true },
+    });
+  } catch (err) {
+    const msg = `Bulk user creation failed: ${err instanceof Error ? err.message : String(err)}`;
+    return emptyReport({ ...dryRun, criticalErrors: [msg] });
+  }
+
+  // Step 10: Create InvitationJob records for newly created users
+  let jobsCreated = 0;
+  if (createdUsers.length > 0) {
+    const emailToFullName = new Map(newRows.map((r) => [r.email, r.fullName]));
+    const jobInsertData = createdUsers.map((u) => ({
+      userId: u.id,
+      email: u.email,
+      displayName: emailToFullName.get(u.email) ?? u.email,
+      centerName:
+        u.centerId === zuidCenter.id ? ANTWERPEN_ZUID : ANTWERPEN_NOORD,
+      importRunId,
+      status: "pending",
+    }));
+
+    try {
+      const result = await prisma.invitationJob.createMany({
+        data: jobInsertData,
+        skipDuplicates: true,
+      });
+      jobsCreated = result.count;
+    } catch (err) {
+      const msg = `Invitation job creation failed: ${err instanceof Error ? err.message : String(err)}`;
+      return {
+        dryRun,
+        accountsCreated: createdUsers.length,
+        accountsSkippedExisting: existingEmails.length,
+        accountsFailedCreate: newRows.length - createdUsers.length,
+        jobsCreated: 0,
+        errors: [msg],
+      };
+    }
   }
 
   return {
     dryRun,
-    accountsCreated,
+    accountsCreated: createdUsers.length,
     accountsSkippedExisting: existingEmails.length,
-    accountsFailedCreate,
-    emailsSent,
-    emailsFailed,
-    emailsSkippedExisting: existingEmails.length,
-    emailsSkippedUnsubscribed,
-    players,
-    errors: runErrors,
+    accountsFailedCreate: newRows.length - createdUsers.length,
+    jobsCreated,
+    errors: [],
   };
 }

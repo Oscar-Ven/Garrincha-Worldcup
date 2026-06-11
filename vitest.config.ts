@@ -22,6 +22,8 @@ export default defineConfig({
         "src/lib/health.ts",       // integration-only — requires live DB + external services
         "src/lib/access-link.ts",           // integration-only — DB + email in one call
         "src/lib/import/player-import-runner.ts", // integration-only — DB + email + FS
+        "src/lib/import/invitation-sender.ts",    // integration-only — DB + email
+        "src/lib/import/invitation-batch.ts",     // integration-only — DB + email
       ],
       // Reporters
       reporter: ["text-summary", "json-summary"],
