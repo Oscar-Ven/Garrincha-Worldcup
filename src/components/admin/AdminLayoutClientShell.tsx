@@ -19,7 +19,6 @@ import {
   History,
   ClipboardList,
   Link2,
-  Zap,
 } from "lucide-react";
 
 interface AdminUser {
@@ -75,19 +74,13 @@ export default function AdminLayoutClientShell({ user, children }: Props) {
       roles: ["SUPER_ADMIN", "ADMIN", "CENTER_ADMIN"],
     },
     {
-      label: "Daily Bonus Code",
-      href: "/admin/daily-bonus",
-      icon: Zap,
-      roles: ["SUPER_ADMIN", "ADMIN", "CENTER_ADMIN"],
-    },
-    {
       label: "Award Bonus Points",
       href: "/admin/bonus",
       icon: Coins,
       roles: ["SUPER_ADMIN", "ADMIN", "CENTER_ADMIN"],
     },
     {
-      label: isOwner ? "Check-in Codes" : "Center Check-Ins",
+      label: "Attendance & Check-in",
       href: "/admin/checkin",
       icon: QrCode,
       roles: ["SUPER_ADMIN", "ADMIN", "CENTER_ADMIN"],

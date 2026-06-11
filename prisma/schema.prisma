@@ -38,6 +38,7 @@ model GarrinchaCenter {
   activatedUsers  User[]          @relation("ActivationCenter")
   competingUsers  User[]          @relation("CompetitionCenter")
   sessions        CenterSession[]
+  checkInCodes    CheckInCode[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 }
@@ -70,6 +71,7 @@ model User {
   centerChangeLogs            CenterChangeLog[]
   activationCodeClaims        ActivationCodeClaim[]
   dailyBonusClaims            DailyBonusClaim[]
+  checkInClaims               CheckInClaim[]
   createdAt                   DateTime          @default(now())
   updatedAt                   DateTime          @updatedAt
 
@@ -238,4 +240,36 @@ model DailyBonusClaim {
   @@unique([userId, bonusDate])
   @@index([userId])
   @@index([bonusDate])
+}
+
+model CheckInCode {
+  id              String          @id @default(cuid())
+  code            String
+  centerId        String
+  center          GarrinchaCenter @relation(fields: [centerId], references: [id])
+  date            String
+  expiresAt       DateTime
+  createdByUserId String
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  claims          CheckInClaim[]
+
+  @@index([code, isActive])
+  @@index([centerId, date])
+}
+
+model CheckInClaim {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checkInCodeId String
+  checkInCode   CheckInCode @relation(fields: [checkInCodeId], references: [id], onDelete: Cascade)
+  centerId      String
+  date          String
+  pointsAwarded Int         @default(3)
+  claimedAt     DateTime    @default(now())
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
 }

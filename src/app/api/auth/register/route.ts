@@ -2,6 +2,7 @@ import { Prisma, Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { createSession } from "@/lib/auth";
 import { getLocaleFromRequest, rotateAndSendAccessLink } from "@/lib/access-link";
+import { getBrusselsDate } from "@/lib/check-in-code";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
@@ -36,23 +37,30 @@ export async function POST(request: NextRequest) {
 
   try {
     // ── Resolve center ──────────────────────────────────────────────────────
-    // 1. QR-code registration: validate activation code from centerSession
+    // 1. Check-in code: validate against CheckInCode (daily, per-center) → +3 bonus
     // 2. Direct registration: use centerId provided directly by the user
     let resolvedCenterId: string;
+    let checkInCodeForBonus: { id: string; centerId: string } | null = null;
 
     if (activationCode && activationCode.length > 0) {
-      // QR-based: validate code against centerSession
-      const session = await prisma.centerSession.findFirst({
-        where: { code: activationCode, expiresAt: { gt: new Date() } },
-        select: { centerId: true },
+      const today = getBrusselsDate();
+      const checkInCode = await prisma.checkInCode.findFirst({
+        where: {
+          code: activationCode.trim().toUpperCase(),
+          isActive: true,
+          date: today,
+          expiresAt: { gt: new Date() },
+        },
+        select: { id: true, centerId: true },
       });
-      if (!session) {
+      if (!checkInCode) {
         return NextResponse.json(
-          { error: "Invalid or expired QR code. Please rescan at a GARRINCHA Center." },
+          { error: "Invalid or expired center check-in code." },
           { status: 422 }
         );
       }
-      resolvedCenterId = session.centerId;
+      resolvedCenterId = checkInCode.centerId;
+      checkInCodeForBonus = checkInCode;
     } else if (directCenterId) {
       // Direct registration: verify centerId exists
       const center = await prisma.garrinchaCenter.findUnique({
@@ -105,6 +113,33 @@ export async function POST(request: NextRequest) {
         role: Role.USER,
       },
     });
+
+    // Award +3 check-in bonus if registration used a valid check-in code
+    if (checkInCodeForBonus) {
+      try {
+        await prisma.$transaction([
+          prisma.checkInClaim.create({
+            data: {
+              userId: user.id,
+              checkInCodeId: checkInCodeForBonus.id,
+              centerId: checkInCodeForBonus.centerId,
+              date: getBrusselsDate(),
+              pointsAwarded: 3,
+            },
+          }),
+          prisma.pointEvent.create({
+            data: {
+              userId: user.id,
+              points: 3,
+              reason: "Attendance check-in bonus",
+              awardedBy: "system",
+            },
+          }),
+        ]);
+      } catch {
+        // Duplicate claim on same day is safe to ignore (shouldn't happen on fresh registration)
+      }
+    }
 
     // Send access link — non-blocking: user is already created.
     // If email fails (Resend not configured, domain unverified, etc.)

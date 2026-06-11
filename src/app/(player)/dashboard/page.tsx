@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, CalendarDays, Coins, Landmark, Target, Trophy } from "lucide-react";
+import { ArrowRight, CalendarDays, Coins, Landmark, ShieldCheck, Target, Trophy } from "lucide-react";
 import PrizeCards from "@/components/public/PrizeCards";
+import AttendanceCheckInForm from "@/components/player/AttendanceCheckInForm";
+import { getBrusselsDate } from "@/lib/check-in-code";
 import { prisma } from "@/lib/prisma";
 import { getUserCenterRank, getUserRankAndPoints } from "@/lib/leaderboards";
 import { isPredictionLocked } from "@/lib/scoring";
@@ -18,7 +20,9 @@ export default async function DashboardPage() {
     redirect("/center");
   }
 
-  const [predictions, matches, pointEvents, checkIn, rankData, centerRank] = await Promise.all([
+  const today = getBrusselsDate();
+
+  const [predictions, matches, pointEvents, alreadyClaimed, rankData, centerRank] = await Promise.all([
     prisma.prediction.findMany({
       where: { userId: user.id },
       select: { matchId: true, pointsAwarded: true },
@@ -36,7 +40,7 @@ export default async function DashboardPage() {
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
-    prisma.centerCheckIn.findUnique({ where: { userId: user.id } }),
+    prisma.checkInClaim.findUnique({ where: { userId_date: { userId: user.id, date: today } } }).then(Boolean),
     getUserRankAndPoints(user.id),
     user.competitionCenterId
       ? getUserCenterRank(user.id, user.competitionCenterId)
@@ -204,10 +208,6 @@ export default async function DashboardPage() {
                 <div className="mt-2 font-medium text-white">{user.competitionCenter?.name ?? user.center.name}</div>
               </div>
               <div className="rounded-3xl border border-white/8 bg-white/[0.03] px-4 py-4">
-                <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">Attendance / check-in</div>
-                <div className="mt-2 font-medium text-white">{checkIn ? "Checked in for a session" : "No active check-in record yet"}</div>
-              </div>
-              <div className="rounded-3xl border border-white/8 bg-white/[0.03] px-4 py-4">
                 <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">Recent bonus activity</div>
                 <div className="mt-2 space-y-2">
                   {pointEvents.length === 0 ? (
@@ -225,6 +225,14 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="rounded-[28px] border border-white/8 bg-black/20 p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <ShieldCheck className="h-5 w-5 text-lime-400 shrink-0" />
+          <h2 className="text-base font-semibold text-white">Attendance &amp; Check-in</h2>
+        </div>
+        <AttendanceCheckInForm alreadyClaimed={alreadyClaimed} />
       </section>
 
       <PrizeCards preview prizesHref="/prizes" />
