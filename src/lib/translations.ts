@@ -242,7 +242,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "email.greeting": "Hello {name},",
     "email.welcome": "You have been invited to join the Garrincha WorldCup Prediction Game.",
     "email.accountReady": "Your account is ready for {center}.",
-    "email.neverExpires": "Your personal access link never expires — use it anytime to log in.",
+    "email.neverExpires": "Your access link is valid for 30 days — use it anytime within this period to log in.",
     "email.button": "Access my account",
     "email.copyPaste": "Or copy and paste this link into your browser:",
     "email.keepPrivate": "Keep this link private. It gives full access to your account — do not share it publicly or forward this email to others.",
