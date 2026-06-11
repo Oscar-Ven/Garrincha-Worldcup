@@ -34,12 +34,10 @@ export default function RegisterForm({
     centerId: initialCenterId,
     termsAccepted: false,
   });
-  const [manualCode, setManualCode] = useState("");
+  const [manualCode, setManualCode] = useState(activationCode ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-
-  const hasActivationCode = Boolean(activationCode);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,7 +45,7 @@ export default function RegisterForm({
       setError(t(locale, "err_consent"));
       return;
     }
-    if (!hasActivationCode && !manualCode.trim() && !form.centerId) {
+    if (!form.centerId) {
       setError(t(locale, "form.selectCenter"));
       return;
     }
@@ -62,11 +60,10 @@ export default function RegisterForm({
         nickname: form.nickname,
         phoneNumber: form.phoneNumber,
         termsAccepted: form.termsAccepted,
+        centerId: form.centerId,
       };
       if (form.nationality) body.nationality = form.nationality;
-      if (hasActivationCode) body.activationCode = activationCode!;
-      else if (manualCode.trim()) body.activationCode = manualCode.trim().toUpperCase();
-      else body.centerId = form.centerId;
+      if (manualCode.trim()) body.activationCode = manualCode.trim().toUpperCase();
 
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -172,66 +169,45 @@ export default function RegisterForm({
         />
       </div>
 
-      {/* Center selection */}
-      {hasActivationCode ? (
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
-            {t(locale, "form.center")}
-          </label>
-          <input
-            type="text"
-            value={`QR Code: ${activationCode}`}
-            disabled
-            className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 text-zinc-400 text-sm cursor-not-allowed"
-          />
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
-              Activation code
-            </label>
-            <input
-              type="text"
-              value={manualCode}
-              onChange={(e) => setManualCode(e.target.value.toUpperCase())}
-              placeholder="e.g. A3BX7R"
-              maxLength={16}
-              disabled={loading}
-              className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-lime-400 transition-colors font-mono uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
-            />
-            <p className="mt-1.5 text-xs text-zinc-600">
-              Enter the code provided by your GARRINCHA Center admin.
-            </p>
-          </div>
+      {/* GARRINCHA Center — always required */}
+      <div>
+        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+          {t(locale, "form.center")}
+        </label>
+        <select
+          value={form.centerId}
+          onChange={(e) => setForm((f) => ({ ...f, centerId: e.target.value }))}
+          required
+          disabled={loading}
+          className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 text-white text-sm focus:outline-none focus:border-lime-400 transition-colors appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <option value="">{t(locale, "form.selectCenter")}</option>
+          {centers.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
-          {!manualCode.trim() && (
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                {t(locale, "form.center")}
-              </label>
-              <select
-                value={form.centerId}
-                onChange={(e) => setForm((f) => ({ ...f, centerId: e.target.value }))}
-                disabled={loading}
-                className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 text-white text-sm focus:outline-none focus:border-lime-400 transition-colors appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value="">{t(locale, "form.selectCenter")}</option>
-                {centers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              {fromQr && form.centerId && (
-                <p className="mt-1.5 text-xs text-lime-400">
-                  Center pre-selected from QR code. You can change it if needed.
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Attendance code — optional, awards +3 bonus points */}
+      <div>
+        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+          Attendance code <span className="text-zinc-600 normal-case font-normal">(optional — earn +3 bonus points)</span>
+        </label>
+        <input
+          type="text"
+          value={manualCode}
+          onChange={(e) => setManualCode(e.target.value.toUpperCase())}
+          placeholder="e.g. A3BX7R"
+          maxLength={16}
+          disabled={loading}
+          className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-lime-400 transition-colors font-mono uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
+        />
+        <p className="mt-1.5 text-xs text-zinc-600">
+          Enter today&apos;s check-in code from your center admin to receive +3 bonus points.
+        </p>
+      </div>
 
       {/* Terms */}
       <label className={`flex items-start gap-3 group ${loading ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>

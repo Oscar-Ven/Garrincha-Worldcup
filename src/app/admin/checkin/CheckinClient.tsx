@@ -15,58 +15,43 @@ import {
   Clock,
 } from "lucide-react";
 
-interface CenterRow {
-  id: string;
-  name: string;
-  city: string;
-}
-
 interface ClaimRow {
   id: string;
   createdAt: string;
   fullName: string;
   nickname: string;
   email: string;
-  centerId: string;
 }
 
 interface Props {
   currentUserRole: string;
-  adminCenterId: string;
-  initialCenters: CenterRow[];
-  initialClaims: ClaimRow[];
   initialActiveCode: string;
   initialExpiresAt: string;
   initialClaimCount: number;
+  initialClaims: ClaimRow[];
   today: string;
 }
 
 export default function CheckinClient({
   currentUserRole,
-  adminCenterId,
-  initialCenters,
-  initialClaims,
   initialActiveCode,
   initialExpiresAt,
   initialClaimCount,
+  initialClaims,
   today,
 }: Props) {
   const router = useRouter();
   const isOwner = currentUserRole === "SUPER_ADMIN" || currentUserRole === "ADMIN";
-
-  const [selectedCenterId, setSelectedCenterId] = useState(
-    isOwner ? initialCenters[0]?.id ?? "" : adminCenterId,
-  );
 
   const [activeCode, setActiveCode] = useState(initialActiveCode);
   const [expiresAt, setExpiresAt] = useState(initialExpiresAt);
   const [claimCount, setClaimCount] = useState(initialClaimCount);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [codeLoading, setCodeLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [copyText, setCopyText] = useState("Copy");
+  const [timeLeft, setTimeLeft] = useState("");
 
   const filteredClaims = initialClaims.filter((c) => {
     const term = searchQuery.toLowerCase();
@@ -76,68 +61,6 @@ export default function CheckinClient({
       c.email.toLowerCase().includes(term)
     );
   });
-
-  async function fetchActiveCode(centerId: string) {
-    if (!centerId) return;
-    setCodeLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/admin/check-in-codes?centerId=${centerId}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to retrieve check-in code.");
-      setActiveCode(data.code ?? "");
-      setExpiresAt(data.expiresAt ?? "");
-      setClaimCount(data.claimCount ?? 0);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load active code.");
-      setActiveCode("");
-      setExpiresAt("");
-      setClaimCount(0);
-    } finally {
-      setCodeLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    if (isOwner) fetchActiveCode(selectedCenterId);
-  }, [selectedCenterId]);
-
-  async function handleGenerateCode() {
-    if (!selectedCenterId) {
-      setError("Please select a center first.");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      const res = await fetch("/api/admin/check-in-codes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ centerId: selectedCenterId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to generate code.");
-      setActiveCode(data.code);
-      setExpiresAt(data.expiresAt);
-      setClaimCount(0);
-      setSuccess(`New check-in code generated for today (${today}).`);
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate code.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function handleCopy() {
-    if (!activeCode) return;
-    navigator.clipboard.writeText(activeCode);
-    setCopyText("Copied!");
-    setTimeout(() => setCopyText("Copy"), 2000);
-  }
-
-  const [timeLeft, setTimeLeft] = useState("");
 
   useEffect(() => {
     if (!expiresAt) {
@@ -163,6 +86,38 @@ export default function CheckinClient({
     return () => clearInterval(interval);
   }, [expiresAt]);
 
+  async function handleGenerateCode() {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await fetch("/api/admin/check-in-codes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to generate code.");
+      setActiveCode(data.code);
+      setExpiresAt(data.expiresAt);
+      setClaimCount(0);
+      setSuccess(`New check-in code generated for today (${today}).`);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate code.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleCopy() {
+    if (!activeCode) return;
+    navigator.clipboard.writeText(activeCode);
+    setCopyText("Copied!");
+    setTimeout(() => setCopyText("Copy"), 2000);
+  }
+
+  const codeActive = activeCode && timeLeft !== "EXPIRED";
+
   return (
     <div className="space-y-6 font-sans">
       <div>
@@ -172,8 +127,8 @@ export default function CheckinClient({
         </div>
         <p className="text-sm text-gray-500">
           {isOwner
-            ? "Generate daily check-in codes for each center and monitor who claimed their bonus."
-            : "View today's check-in code for your center and see who has claimed their bonus."}
+            ? "Generate today's global check-in code. Share it with all center managers."
+            : "Today's check-in code for your center. Share it with players to award +3 points."}
         </p>
       </div>
 
@@ -182,34 +137,12 @@ export default function CheckinClient({
         <div className="lg:col-span-1">
           <div className="bg-white border border-gray-200 shadow-sm p-6 space-y-5">
             <h2 className="text-sm font-semibold text-gray-900 border-b border-gray-100 pb-3">
-              {isOwner ? "Daily Code Generator" : "Today's Check-in Code"}
+              Today&apos;s Code — {today}
             </h2>
-
-            {/* Center select — owner only */}
-            {isOwner && (
-              <div>
-                <label className="block text-xs font-medium text-gray-600 uppercase tracking-wider mb-1.5">
-                  Center
-                </label>
-                <select
-                  value={selectedCenterId}
-                  onChange={(e) => setSelectedCenterId(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-300 text-gray-900 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
-                >
-                  {initialCenters.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.city})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
 
             {/* Code display */}
             <div className="border border-gray-200 bg-gray-50 flex flex-col items-center justify-center py-8 px-4 min-h-36">
-              {codeLoading ? (
-                <Loader2 className="w-7 h-7 text-green-600 animate-spin" />
-              ) : activeCode && timeLeft !== "EXPIRED" ? (
+              {codeActive ? (
                 <div className="text-center space-y-2">
                   <span className="font-mono text-4xl font-black text-gray-900 tracking-widest block">
                     {activeCode}
@@ -225,7 +158,7 @@ export default function CheckinClient({
                 <div className="text-center text-gray-400 py-2">
                   <AlertCircle className="w-7 h-7 mx-auto mb-2 text-gray-300" />
                   <p className="text-xs font-medium">
-                    {isOwner ? "No code generated yet today." : "No active code for today."}
+                    {isOwner ? "No code generated yet today." : "No active code today."}
                   </p>
                   {!isOwner && (
                     <p className="text-xs text-gray-400 mt-1">Ask the owner to generate one.</p>
@@ -264,11 +197,11 @@ export default function CheckinClient({
                   ) : (
                     <RefreshCw className="w-4 h-4" />
                   )}
-                  Generate New Code
+                  {codeActive ? "Delete & Generate New" : "Generate Today's Code"}
                 </button>
               )}
 
-              {activeCode && timeLeft !== "EXPIRED" && (
+              {codeActive && (
                 <button
                   onClick={handleCopy}
                   className="w-full flex items-center justify-center gap-2 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium text-sm transition-colors"

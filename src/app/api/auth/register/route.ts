@@ -36,12 +36,29 @@ export async function POST(request: NextRequest) {
   } = parsed.data;
 
   try {
-    // ── Resolve center ──────────────────────────────────────────────────────
-    // 1. Check-in code: validate against CheckInCode (daily, per-center) → +3 bonus
-    // 2. Direct registration: use centerId provided directly by the user
-    let resolvedCenterId: string;
-    let checkInCodeForBonus: { id: string; centerId: string } | null = null;
+    // ── Center resolution ───────────────────────────────────────────────────
+    // centerId is always required. activationCode is an optional +3 bonus only.
+    if (!directCenterId) {
+      return NextResponse.json(
+        { error: "Please select a GARRINCHA Center to register." },
+        { status: 422 }
+      );
+    }
 
+    const center = await prisma.garrinchaCenter.findUnique({
+      where: { id: directCenterId },
+      select: { id: true },
+    });
+    if (!center) {
+      return NextResponse.json(
+        { error: "Please select a valid GARRINCHA Center." },
+        { status: 422 }
+      );
+    }
+    const resolvedCenterId = directCenterId;
+
+    // ── Optional check-in code for +3 bonus ─────────────────────────────────
+    let checkInCodeForBonus: { id: string } | null = null;
     if (activationCode && activationCode.length > 0) {
       const today = getBrusselsDate();
       const checkInCode = await prisma.checkInCode.findFirst({
@@ -51,34 +68,15 @@ export async function POST(request: NextRequest) {
           date: today,
           expiresAt: { gt: new Date() },
         },
-        select: { id: true, centerId: true },
+        select: { id: true },
       });
       if (!checkInCode) {
         return NextResponse.json(
-          { error: "Invalid or expired center check-in code." },
+          { error: "Invalid or expired check-in code." },
           { status: 422 }
         );
       }
-      resolvedCenterId = checkInCode.centerId;
       checkInCodeForBonus = checkInCode;
-    } else if (directCenterId) {
-      // Direct registration: verify centerId exists
-      const center = await prisma.garrinchaCenter.findUnique({
-        where: { id: directCenterId },
-        select: { id: true },
-      });
-      if (!center) {
-        return NextResponse.json(
-          { error: "Please select a valid GARRINCHA Center." },
-          { status: 422 }
-        );
-      }
-      resolvedCenterId = directCenterId;
-    } else {
-      return NextResponse.json(
-        { error: "Please select a GARRINCHA Center to register." },
-        { status: 422 }
-      );
     }
 
     // ── Create user ─────────────────────────────────────────────────────────
@@ -114,7 +112,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Award +3 check-in bonus if registration used a valid check-in code
+    // Award +3 if a valid check-in code was provided
     if (checkInCodeForBonus) {
       try {
         await prisma.$transaction([
@@ -122,7 +120,6 @@ export async function POST(request: NextRequest) {
             data: {
               userId: user.id,
               checkInCodeId: checkInCodeForBonus.id,
-              centerId: checkInCodeForBonus.centerId,
               date: getBrusselsDate(),
               pointsAwarded: 3,
             },
@@ -137,13 +134,10 @@ export async function POST(request: NextRequest) {
           }),
         ]);
       } catch {
-        // Duplicate claim on same day is safe to ignore (shouldn't happen on fresh registration)
+        // Duplicate claim on a fresh account is safe to ignore
       }
     }
 
-    // Send access link — non-blocking: user is already created.
-    // If email fails (Resend not configured, domain unverified, etc.)
-    // the user can request a new link from /login.
     try {
       await rotateAndSendAccessLink(user.id, email, getLocaleFromRequest(request));
     } catch (emailErr) {

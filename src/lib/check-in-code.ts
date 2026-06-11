@@ -58,7 +58,6 @@ export async function claimCheckIn(userId: string, code: string): Promise<ClaimR
         data: {
           userId,
           checkInCodeId: checkInCode.id,
-          centerId: checkInCode.centerId,
           date: today,
           pointsAwarded: 3,
         },

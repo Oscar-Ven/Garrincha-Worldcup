@@ -15,29 +15,25 @@ export default async function CheckinManagerPage() {
 
   if (!isOwner && !isManager) redirect("/");
 
-  const centerId = admin.center?.id;
   const today = getBrusselsDate();
 
-  const centers = await prisma.garrinchaCenter.findMany({
-    select: { id: true, name: true, city: true },
-    orderBy: { name: "asc" },
+  // Today's active global code
+  const active = await prisma.checkInCode.findFirst({
+    where: { date: today, isActive: true },
+    include: { _count: { select: { claims: true } } },
+    orderBy: { createdAt: "desc" },
   });
 
-  // Today's claims (who already claimed check-in bonus)
-  const targetCenterId = isOwner ? centers[0]?.id : centerId;
+  // Today's claims (all centers)
   const claims = await prisma.checkInClaim.findMany({
-    where: {
-      date: today,
-      centerId: isOwner ? undefined : (centerId ?? undefined),
-    },
+    where: { date: today },
     select: {
       id: true,
       claimedAt: true,
-      centerId: true,
       user: { select: { fullName: true, nickname: true, email: true } },
     },
     orderBy: { claimedAt: "desc" },
-    take: 40,
+    take: 50,
   });
 
   const serializedClaims = claims.map((c) => ({
@@ -46,36 +42,15 @@ export default async function CheckinManagerPage() {
     fullName: c.user?.fullName ?? "Unknown",
     nickname: c.user?.nickname ?? "anonymous",
     email: c.user?.email ?? "",
-    centerId: c.centerId,
   }));
-
-  // Active check-in code for default center
-  let activeCode = "";
-  let codeExpiresAt = "";
-  let claimCount = 0;
-
-  if (targetCenterId) {
-    const active = await prisma.checkInCode.findFirst({
-      where: { centerId: targetCenterId, date: today, isActive: true },
-      include: { _count: { select: { claims: true } } },
-      orderBy: { createdAt: "desc" },
-    });
-    if (active) {
-      activeCode = active.code;
-      codeExpiresAt = active.expiresAt.toISOString();
-      claimCount = active._count.claims;
-    }
-  }
 
   return (
     <CheckinClient
       currentUserRole={admin.role}
-      adminCenterId={centerId ?? ""}
-      initialCenters={centers}
+      initialActiveCode={active?.code ?? ""}
+      initialExpiresAt={active?.expiresAt.toISOString() ?? ""}
+      initialClaimCount={active?._count.claims ?? 0}
       initialClaims={serializedClaims}
-      initialActiveCode={activeCode}
-      initialExpiresAt={codeExpiresAt}
-      initialClaimCount={claimCount}
       today={today}
     />
   );
