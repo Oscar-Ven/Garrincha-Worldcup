@@ -154,7 +154,7 @@ export function buildEmailContent(payload: AccessLinkEmailPayload): {
                 </tr>
               </table>
 
-              <p style="margin:0 0 16px;font-size:13px;color:#6b7280;text-align:center;">
+              <p style="margin:0 0 20px;font-size:13px;color:#6b7280;text-align:center;">
                 ${neverExpires}
               </p>
 
