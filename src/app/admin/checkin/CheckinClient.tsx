@@ -319,7 +319,7 @@ export default function CheckinClient({
             </div>
 
             <div className="border-t border-gray-100 pt-4 mt-4 flex justify-between items-center text-xs text-gray-500">
-              <span>Check-ins credit players +5 attendance bonus points.</span>
+              <span>Check-ins credit players +3 attendance bonus points.</span>
               <button
                 onClick={() => window.print()}
                 className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
