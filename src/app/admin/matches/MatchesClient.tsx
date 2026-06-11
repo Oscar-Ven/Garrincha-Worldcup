@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatBelgiumDateTime } from "@/lib/date";
+import { isoCodeForTeam, localFlagPathForIso } from "@/lib/flags";
 import {
   Calendar,
   Search,
@@ -47,6 +48,13 @@ interface SerializedMatch {
 interface Props {
   currentUserRole: string;
   initialMatches: SerializedMatch[];
+}
+
+function TeamFlag({ name, fifaCode, flagUrl, className }: { name: string; fifaCode: string; flagUrl: string; className?: string }) {
+  const iso = isoCodeForTeam({ name, fifaCode, flagUrl });
+  const path = localFlagPathForIso(iso);
+  if (!path) return null;
+  return <img src={path} alt={name} className={className ?? "w-8 h-6 object-cover border border-gray-200 shrink-0"} />;
 }
 
 const STAGE_LABELS: Record<string, string> = {
@@ -394,13 +402,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                 <div className="flex items-center justify-between gap-3 px-4 py-4">
                   {/* Home team */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    {match.homeTeamFlag && (
-                      <img
-                        src={match.homeTeamFlag}
-                        alt={match.homeTeamFifa}
-                        className="w-8 h-6 object-cover border border-gray-200 shrink-0"
-                      />
-                    )}
+                    <TeamFlag name={match.homeTeamName} fifaCode={match.homeTeamFifa} flagUrl={match.homeTeamFlag} />
                     <span className="font-bold text-gray-900 text-sm truncate uppercase">
                       {match.homeTeamName}
                     </span>
@@ -434,13 +436,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                     <span className="font-bold text-gray-900 text-sm truncate uppercase text-right">
                       {match.awayTeamName}
                     </span>
-                    {match.awayTeamFlag && (
-                      <img
-                        src={match.awayTeamFlag}
-                        alt={match.awayTeamFifa}
-                        className="w-8 h-6 object-cover border border-gray-200 shrink-0"
-                      />
-                    )}
+                    <TeamFlag name={match.awayTeamName} fifaCode={match.awayTeamFifa} flagUrl={match.awayTeamFlag} />
                   </div>
                 </div>
 
@@ -521,13 +517,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
               <div className="flex items-end justify-between gap-4">
                 {/* Home */}
                 <div className="flex-1 flex flex-col items-center gap-2">
-                  {selectedMatch.homeTeamFlag && (
-                    <img
-                      src={selectedMatch.homeTeamFlag}
-                      alt={selectedMatch.homeTeamFifa}
-                      className="w-10 h-7 object-cover border border-gray-200"
-                    />
-                  )}
+                  <TeamFlag name={selectedMatch.homeTeamName} fifaCode={selectedMatch.homeTeamFifa} flagUrl={selectedMatch.homeTeamFlag} className="w-10 h-7 object-cover border border-gray-200" />
                   <span className="text-xs font-semibold text-gray-700 uppercase text-center truncate w-full">
                     {selectedMatch.homeTeamName}
                   </span>
@@ -547,13 +537,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
 
                 {/* Away */}
                 <div className="flex-1 flex flex-col items-center gap-2">
-                  {selectedMatch.awayTeamFlag && (
-                    <img
-                      src={selectedMatch.awayTeamFlag}
-                      alt={selectedMatch.awayTeamFifa}
-                      className="w-10 h-7 object-cover border border-gray-200"
-                    />
-                  )}
+                  <TeamFlag name={selectedMatch.awayTeamName} fifaCode={selectedMatch.awayTeamFifa} flagUrl={selectedMatch.awayTeamFlag} className="w-10 h-7 object-cover border border-gray-200" />
                   <span className="text-xs font-semibold text-gray-700 uppercase text-center truncate w-full">
                     {selectedMatch.awayTeamName}
                   </span>
@@ -597,8 +581,8 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                         <div className="flex gap-2">
                           {(["home", "away"] as const).map((side) => {
                             const teamName = side === "home" ? selectedMatch.homeTeamName : selectedMatch.awayTeamName;
-                            const teamFlag = side === "home" ? selectedMatch.homeTeamFlag : selectedMatch.awayTeamFlag;
                             const teamFifa = side === "home" ? selectedMatch.homeTeamFifa : selectedMatch.awayTeamFifa;
+                            const teamFlagUrl = side === "home" ? selectedMatch.homeTeamFlag : selectedMatch.awayTeamFlag;
                             return (
                               <button
                                 key={side}
@@ -610,9 +594,7 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                                     : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                                 }`}
                               >
-                                {teamFlag && (
-                                  <img src={teamFlag} alt={teamFifa} className="w-5 h-3.5 object-cover border border-white/30 shrink-0" />
-                                )}
+                                <TeamFlag name={teamName} fifaCode={teamFifa} flagUrl={teamFlagUrl} className="w-5 h-3.5 object-cover border border-white/30 shrink-0" />
                                 {teamName}
                               </button>
                             );
