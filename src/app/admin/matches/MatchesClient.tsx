@@ -391,11 +391,22 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                 </div>
 
                 {/* Teams + score */}
-                <div className="flex items-center justify-between gap-4 px-4 py-4">
-                  <span className="font-bold text-gray-900 text-sm truncate flex-1 uppercase">
-                    {match.homeTeamName}
-                  </span>
+                <div className="flex items-center justify-between gap-3 px-4 py-4">
+                  {/* Home team */}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {match.homeTeamFlag && (
+                      <img
+                        src={match.homeTeamFlag}
+                        alt={match.homeTeamFifa}
+                        className="w-8 h-6 object-cover border border-gray-200 shrink-0"
+                      />
+                    )}
+                    <span className="font-bold text-gray-900 text-sm truncate uppercase">
+                      {match.homeTeamName}
+                    </span>
+                  </div>
 
+                  {/* Score */}
                   <div className="flex flex-col items-center gap-0.5 shrink-0">
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 font-mono font-bold text-sm">
                       {isCompleted || isLive ? (
@@ -418,9 +429,19 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                     )}
                   </div>
 
-                  <span className="font-bold text-gray-900 text-sm truncate flex-1 uppercase text-right">
-                    {match.awayTeamName}
-                  </span>
+                  {/* Away team */}
+                  <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+                    <span className="font-bold text-gray-900 text-sm truncate uppercase text-right">
+                      {match.awayTeamName}
+                    </span>
+                    {match.awayTeamFlag && (
+                      <img
+                        src={match.awayTeamFlag}
+                        alt={match.awayTeamFifa}
+                        className="w-8 h-6 object-cover border border-gray-200 shrink-0"
+                      />
+                    )}
+                  </div>
                 </div>
 
                 {/* Footer: venue + action */}
@@ -500,6 +521,13 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
               <div className="flex items-end justify-between gap-4">
                 {/* Home */}
                 <div className="flex-1 flex flex-col items-center gap-2">
+                  {selectedMatch.homeTeamFlag && (
+                    <img
+                      src={selectedMatch.homeTeamFlag}
+                      alt={selectedMatch.homeTeamFifa}
+                      className="w-10 h-7 object-cover border border-gray-200"
+                    />
+                  )}
                   <span className="text-xs font-semibold text-gray-700 uppercase text-center truncate w-full">
                     {selectedMatch.homeTeamName}
                   </span>
@@ -519,6 +547,13 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
 
                 {/* Away */}
                 <div className="flex-1 flex flex-col items-center gap-2">
+                  {selectedMatch.awayTeamFlag && (
+                    <img
+                      src={selectedMatch.awayTeamFlag}
+                      alt={selectedMatch.awayTeamFifa}
+                      className="w-10 h-7 object-cover border border-gray-200"
+                    />
+                  )}
                   <span className="text-xs font-semibold text-gray-700 uppercase text-center truncate w-full">
                     {selectedMatch.awayTeamName}
                   </span>
@@ -560,20 +595,28 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
                       <div>
                         <p className="text-xs font-semibold text-gray-600 mb-2">Penalty winner</p>
                         <div className="flex gap-2">
-                          {(["home", "away"] as const).map((side) => (
-                            <button
-                              key={side}
-                              type="button"
-                              onClick={() => setPenalty((p) => ({ ...p, penaltyWinner: p.penaltyWinner === side ? null : side }))}
-                              className={`flex-1 py-2 text-xs font-semibold transition-colors border rounded-sm ${
-                                penalty.penaltyWinner === side
-                                  ? "bg-green-600 text-white border-green-600"
-                                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                              }`}
-                            >
-                              {side === "home" ? selectedMatch.homeTeamName : selectedMatch.awayTeamName}
-                            </button>
-                          ))}
+                          {(["home", "away"] as const).map((side) => {
+                            const teamName = side === "home" ? selectedMatch.homeTeamName : selectedMatch.awayTeamName;
+                            const teamFlag = side === "home" ? selectedMatch.homeTeamFlag : selectedMatch.awayTeamFlag;
+                            const teamFifa = side === "home" ? selectedMatch.homeTeamFifa : selectedMatch.awayTeamFifa;
+                            return (
+                              <button
+                                key={side}
+                                type="button"
+                                onClick={() => setPenalty((p) => ({ ...p, penaltyWinner: p.penaltyWinner === side ? null : side }))}
+                                className={`flex-1 py-2 px-2 flex items-center justify-center gap-1.5 text-xs font-semibold transition-colors border rounded-sm ${
+                                  penalty.penaltyWinner === side
+                                    ? "bg-green-600 text-white border-green-600"
+                                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                                }`}
+                              >
+                                {teamFlag && (
+                                  <img src={teamFlag} alt={teamFifa} className="w-5 h-3.5 object-cover border border-white/30 shrink-0" />
+                                )}
+                                {teamName}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
 
