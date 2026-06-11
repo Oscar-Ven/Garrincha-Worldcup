@@ -2,6 +2,7 @@ import { Prisma, Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { createSession } from "@/lib/auth";
 import { getLocaleFromRequest, rotateAndSendAccessLink } from "@/lib/access-link";
+import { claimActivationBonus } from "@/lib/activation-code";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp, rejectCrossOriginRequest } from "@/lib/request-security";
@@ -39,11 +40,13 @@ export async function POST(request: NextRequest) {
     // 1. QR-code registration: validate activation code from centerSession
     // 2. Direct registration: use centerId provided directly by the user
     let resolvedCenterId: string;
+    let activationSession: { id: string; centerId: string } | null = null;
 
     if (activationCode && activationCode.length > 0) {
       // QR-based: validate code against centerSession
       const session = await prisma.centerSession.findFirst({
         where: { code: activationCode, expiresAt: { gt: new Date() } },
+        select: { id: true, centerId: true },
       });
       if (!session) {
         return NextResponse.json(
@@ -51,6 +54,7 @@ export async function POST(request: NextRequest) {
           { status: 422 }
         );
       }
+      activationSession = session;
       resolvedCenterId = session.centerId;
     } else if (directCenterId) {
       // Direct registration: verify centerId exists
@@ -112,6 +116,10 @@ export async function POST(request: NextRequest) {
       await rotateAndSendAccessLink(user.id, email, getLocaleFromRequest(request));
     } catch (emailErr) {
       console.error("[auth/register] Email send failed (user created, can request new link):", (emailErr as Error).message);
+    }
+
+    if (activationSession) {
+      await claimActivationBonus(user.id, activationSession.id);
     }
 
     await createSession({ userId: user.id, role: user.role });

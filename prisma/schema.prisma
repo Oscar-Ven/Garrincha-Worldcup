@@ -68,6 +68,7 @@ model User {
   pointEvents                 PointEvent[]
   checkIn                     CenterCheckIn?
   centerChangeLogs            CenterChangeLog[]
+  activationCodeClaims        ActivationCodeClaim[]
   createdAt                   DateTime          @default(now())
   updatedAt                   DateTime          @updatedAt
 
@@ -158,13 +159,14 @@ model PointEvent {
 }
 
 model CenterSession {
-  id        String          @id @default(cuid())
+  id        String                @id @default(cuid())
   centerId  String
-  center    GarrinchaCenter @relation(fields: [centerId], references: [id])
-  code      String          @unique
+  center    GarrinchaCenter       @relation(fields: [centerId], references: [id])
+  code      String                @unique
   expiresAt DateTime
   createdBy String
-  createdAt DateTime        @default(now())
+  createdAt DateTime              @default(now())
+  claims    ActivationCodeClaim[]
 
   @@index([centerId])
   @@index([expiresAt])
@@ -192,5 +194,17 @@ model CenterChangeLog {
   changeType   String
   createdAt    DateTime @default(now())
 
+  @@index([userId])
+}
+
+model ActivationCodeClaim {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String
+  session   CenterSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  claimedAt DateTime      @default(now())
+
+  @@unique([userId, sessionId])
   @@index([userId])
 }
