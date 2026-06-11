@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertCircle, CheckCircle2, MapPin, ShieldCheck } from "lucide-react";
 
@@ -108,7 +109,7 @@ export default function CenterClient({ currentCenterId, canChangeCenter, centers
       <div className="space-y-4 rounded-[28px] border border-white/8 bg-black/20 p-5">
         <div>
           <h2 className="text-base font-semibold text-white">Center check-in</h2>
-          <p className="mt-1 text-sm text-zinc-400">Enter the code shown at your center to confirm attendance and unlock any supported bonus flow.</p>
+          <p className="mt-1 text-sm text-zinc-400">Enter the session code from your center to record attendance. For daily bonus points, use the <Link href="/daily-bonus" className="text-lime-400 underline underline-offset-2">Daily Bonus</Link> page instead.</p>
         </div>
 
         <div className="space-y-3">
