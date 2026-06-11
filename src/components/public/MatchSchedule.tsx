@@ -62,7 +62,6 @@ function TeamFlag({ team }: { team: MatchTeam }) {
       width={32}
       height={22}
       className="rounded-sm shrink-0 object-cover"
-      unoptimized
     />
   );
 }

@@ -23,7 +23,6 @@ function TeamFlag({ flagUrl, name }: { flagUrl: string; name: string }) {
       width={24}
       height={16}
       className="shrink-0 rounded-sm object-cover"
-      unoptimized
     />
   );
 }
