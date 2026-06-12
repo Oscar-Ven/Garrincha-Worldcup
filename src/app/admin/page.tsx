@@ -265,7 +265,7 @@ export default async function AdminPage() {
                             {ctr.activeCode}
                           </span>
                         ) : (
-                          <span className="text-gray-300">â€”</span>
+                          <span className="text-gray-300">{"—"}</span>
                         )}
                       </td>
                     </tr>
