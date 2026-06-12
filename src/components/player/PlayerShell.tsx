@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -37,13 +37,22 @@ type PlayerShellProps = {
     avatarUrl: string | null;
   };
   labels: PlayerNavLabels;
+  hasLiveMatch: boolean;
   children: React.ReactNode;
 };
 
-export default function PlayerShell({ user, labels, children }: PlayerShellProps) {
+export default function PlayerShell({ user, labels, hasLiveMatch, children }: PlayerShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Auto-refresh: 30 s during a live match, 2 min otherwise.
+  // Pages are force-dynamic so every refresh fetches fresh scores + leaderboard.
+  useEffect(() => {
+    const intervalMs = hasLiveMatch ? 30_000 : 120_000;
+    const id = setInterval(() => router.refresh(), intervalMs);
+    return () => clearInterval(id);
+  }, [hasLiveMatch, router]);
 
   const links = [
     { href: "/dashboard", label: labels.home, icon: House },

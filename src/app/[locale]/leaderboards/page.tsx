@@ -5,7 +5,7 @@ import { demoLeaderboard } from "@/lib/ui-demo-data";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 type LeaderRow = {
   id: string;

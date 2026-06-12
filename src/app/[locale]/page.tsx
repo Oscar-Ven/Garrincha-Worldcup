@@ -19,7 +19,7 @@ import { prisma } from "@/lib/prisma";
 import { flagLabel, isoCodeForTeam, localFlagPathForIso } from "@/lib/flags";
 import { getLeaderboard } from "@/lib/leaderboards";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 async function getTopPlayers() {
   const rows = await getLeaderboard({}, 5);
