@@ -51,6 +51,7 @@ interface Props {
   initialUsers: SerializedUser[];
   centers: Center[];
   logs: Log[];
+  serverQuery: string;
 }
 
 const inputCls =
@@ -62,10 +63,11 @@ export default function UsersClient({
   initialUsers,
   centers,
   logs,
+  serverQuery,
 }: Props) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"players" | "managers" | "logs">("players");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(serverQuery);
 
   const isOwner = currentUserRole === "SUPER_ADMIN" || currentUserRole === "ADMIN";
 
@@ -313,9 +315,15 @@ export default function UsersClient({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search by name, email, center…"
+              placeholder="Search… (Enter to search all)"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const q = search.trim();
+                  router.push(q ? `?q=${encodeURIComponent(q)}` : "?");
+                }
+              }}
               className="w-full pl-9 pr-4 py-2 bg-white border border-gray-300 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
             />
           </div>

@@ -5,7 +5,11 @@ import UsersClient from "./UsersClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function UsersPage() {
+type PageProps = {
+  searchParams: Promise<{ q?: string }>;
+};
+
+export default async function UsersPage({ searchParams }: PageProps) {
   const admin = await getCurrentUser();
   if (!admin) {
     redirect("/dashboard/login");
@@ -18,6 +22,9 @@ export default async function UsersPage() {
     redirect("/");
   }
 
+  const { q } = await searchParams;
+  const query = q?.trim() ?? "";
+
   const centerId = admin.center?.id;
 
   // Query centers list for dropdown selections
@@ -26,12 +33,25 @@ export default async function UsersPage() {
     orderBy: { name: "asc" },
   });
 
-  // Query users dataset
+  // Optional search filter applied when ?q= is provided
+  const searchConditions = query
+    ? [
+        {
+          OR: [
+            { fullName: { contains: query, mode: "insensitive" as const } },
+            { nickname: { contains: query, mode: "insensitive" as const } },
+            { email: { contains: query, mode: "insensitive" as const } },
+          ],
+        },
+      ]
+    : [];
+
+  // Query users dataset — capped at 300 rows; use ?q= for server-side search
   let usersListQuery;
 
   if (isOwner) {
-    // Owner sees all users
     usersListQuery = prisma.user.findMany({
+      where: searchConditions.length ? { AND: searchConditions } : undefined,
       select: {
         id: true,
         email: true,
@@ -47,15 +67,15 @@ export default async function UsersPage() {
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
+      take: 300,
     });
   } else {
     // Manager only sees player users matching their assigned center
     usersListQuery = prisma.user.findMany({
       where: {
-        role: "USER",
-        OR: [
-          { centerId },
-          { competitionCenterId: centerId },
+        AND: [
+          { role: "USER", OR: [{ centerId }, { competitionCenterId: centerId }] },
+          ...searchConditions,
         ],
       },
       select: {
@@ -73,6 +93,7 @@ export default async function UsersPage() {
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
+      take: 300,
     });
   }
 
@@ -120,6 +141,7 @@ export default async function UsersPage() {
       initialUsers={serializedUsers}
       centers={centers}
       logs={serializedLogs}
+      serverQuery={query}
     />
   );
 }
