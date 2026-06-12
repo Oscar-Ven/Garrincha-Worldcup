@@ -77,7 +77,9 @@ const TEAM_NAME_ALIASES: Record<string, string> = {
   "korea dpr":       "north korea",
   "usa":             "united states",
   "cape verde":      "cabo verde",
-  "trinidad & tobago": "trinidad and tobago",
+  // Keys must use post-normalization form (& stripped, spaces collapsed)
+  "trinidad tobago": "trinidad and tobago",
+  "bosnia herzegovina": "bosnia and herzegovina",
 };
 
 function normalize(n: string) {

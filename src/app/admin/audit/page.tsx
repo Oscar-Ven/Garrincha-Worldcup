@@ -116,11 +116,11 @@ export default async function AuditViewPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="font-semibold text-gray-900">{log.playerName}</div>
-                        <div className="text-xs text-gray-500 font-mono">@{log.playerNick} Â· {log.playerEmail}</div>
+                        <div className="text-xs text-gray-500 font-mono">@{log.playerNick} &middot; {log.playerEmail}</div>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className="text-gray-600 font-medium">{log.fromCenter}</span>
-                        <span className="mx-2 text-green-600 font-bold">â†’</span>
+                        <span className="mx-2 text-green-600 font-bold">&rarr;</span>
                         <span className="text-green-700 font-semibold">{log.toCenter}</span>
                       </td>
                       <td className="px-6 py-4 text-right font-mono text-gray-500 text-xs whitespace-nowrap">

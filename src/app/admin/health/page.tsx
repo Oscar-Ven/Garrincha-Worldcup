@@ -90,7 +90,7 @@ export default async function SystemHealthPage() {
           </div>
           <span className="text-xs text-gray-500 flex items-center gap-1">
             <Database className="w-3.5 h-3.5 text-gray-400" />
-            Prisma â†’ Supabase PostgreSQL
+            Prisma &rarr; Supabase PostgreSQL
           </span>
         </div>
 
