@@ -13,6 +13,7 @@ export const ANTWERPEN_ZUID = "GARRINCHA Antwerpen Zuid";
 export const ANTWERPEN_NOORD = "GARRINCHA Antwerpen Noord";
 export const GENT_ARSENAAL = "GARRINCHA Gent Arsenaal";
 export const GENT_THE_LOOP = "GARRINCHA Gent The Loop";
+export const KORTRIJK = "GARRINCHA Kortrijk";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -138,6 +139,7 @@ export function normalizeCenterName(raw: string): string | null {
   if (lower.includes("antwerpen") && lower.includes("zuid")) return ANTWERPEN_ZUID;
   if (lower.includes("gent") && lower.includes("arsenaal")) return GENT_ARSENAAL;
   if (lower.includes("gent") && lower.includes("loop")) return GENT_THE_LOOP;
+  if (lower.includes("kortrijk")) return KORTRIJK;
   return null;
 }
 
