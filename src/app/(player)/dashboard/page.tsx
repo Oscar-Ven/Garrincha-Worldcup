@@ -22,7 +22,8 @@ export default async function DashboardPage() {
 
   const today = getBrusselsDate();
 
-  const lockCutoff = new Date(Date.now() - 5 * 60 * 1000);
+  const lockCutoff = new Date();
+  lockCutoff.setMinutes(lockCutoff.getMinutes() - 5);
 
   const [predictions, upcomingRaw, recentRaw, pointEvents, alreadyClaimed, rankData, centerRank] = await Promise.all([
     prisma.prediction.findMany({
