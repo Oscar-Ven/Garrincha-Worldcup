@@ -15,59 +15,11 @@ export async function getLeaderboard(
   where: Prisma.UserWhereInput = {},
   limit = DEFAULT_LIMIT,
 ): Promise<LeaderboardRow[]> {
-  const hasFilter = Object.keys(where).length > 0;
+  // Always use the aggregated SQL path — push all sorting and summing to the DB.
+  // The old ORM path loaded every user + all their predictions into Node.js memory
+  // (N × M rows) and sorted in-process, which blows up for large centers.
+  const centerId = (where as { competitionCenterId?: string }).competitionCenterId ?? null;
 
-  if (hasFilter) {
-    // ORM path — used for filtered sub-leaderboards (nationality, center)
-    const users = await prisma.user.findMany({
-      where: { competitionCenterId: { not: null }, ...where },
-      select: {
-        id: true,
-        nickname: true,
-        displayName: true,
-        fullName: true,
-        email: true,
-        nationality: true,
-        createdAt: true,
-        competitionCenter: { select: { name: true } },
-        predictions: { select: { pointsAwarded: true } },
-        pointEvents: { select: { points: true } },
-      },
-    });
-
-    const withMeta = users.map((u) => ({
-      row: {
-        id: u.id,
-        name:
-          u.nickname?.trim() ||
-          u.fullName?.trim() ||
-          u.displayName?.trim() ||
-          `Player ${u.id.slice(-6).toUpperCase()}`,
-        nationality: u.nationality ?? "Unspecified",
-        center: u.competitionCenter?.name ?? "Unspecified",
-        points:
-          u.predictions.reduce((s, p) => s + p.pointsAwarded, 0) +
-          u.pointEvents.reduce((s, e) => s + e.points, 0),
-        predictionCount: u.predictions.length,
-      },
-      exactCount: u.predictions.filter((p) => p.pointsAwarded === 5).length,
-      correctCount: u.predictions.filter((p) => p.pointsAwarded >= 2).length,
-      createdAt: u.createdAt.getTime(),
-    }));
-
-    return withMeta
-      .sort(
-        (a, b) =>
-          b.row.points - a.row.points ||
-          b.exactCount - a.exactCount ||
-          b.correctCount - a.correctCount ||
-          a.createdAt - b.createdAt,
-      )
-      .slice(0, limit)
-      .map((item) => item.row);
-  }
-
-  // Fast path — one aggregated SQL query, no in-memory fan-out
   type Row = {
     id: string;
     name: string;
@@ -107,6 +59,7 @@ export async function getLeaderboard(
       GROUP BY "userId"
     ) ev ON ev."userId" = u.id
     WHERE u."competitionCenterId" IS NOT NULL
+      AND (${centerId}::text IS NULL OR u."competitionCenterId" = ${centerId})
     ORDER BY
       points DESC,
       COALESCE(p.exact_cnt, 0) DESC,
