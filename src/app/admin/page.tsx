@@ -14,6 +14,7 @@ import {
   TrendingUp,
   MapPin,
   ClipboardList,
+  Wifi,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +44,7 @@ export default async function AdminPage() {
       totalPredictions,
       totalCheckins,
       bonusAwardedAggr,
+      activeSessions,
       centers,
       recentLogs,
       leaderboardUsers,
@@ -57,6 +59,9 @@ export default async function AdminPage() {
       prisma.pointEvent.aggregate({
         where: { matchId: null },
         _sum: { points: true },
+      }),
+      prisma.user.count({
+        where: { role: "USER", accessTokenHash: { not: null }, accessTokenRevokedAt: null },
       }),
       prisma.garrinchaCenter.findMany({
         select: {
@@ -116,6 +121,7 @@ export default async function AdminPage() {
 
     const kpis = [
       { icon: Users, label: "Active Players", value: String(totalPlayers) },
+      { icon: Wifi, label: "Live Sessions", value: String(activeSessions), highlight: true },
       { icon: Layers, label: "Active Managers", value: String(totalManagers) },
       { icon: MapPin, label: "Total Centers", value: String(totalCenters) },
       { icon: Activity, label: "Total Matches", value: String(totalMatches) },
@@ -141,14 +147,28 @@ export default async function AdminPage() {
         </div>
 
         {/* KPI Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-          {kpis.map(({ icon: Icon, label, value }) => (
-            <div key={label} className="bg-white border border-gray-200 shadow-sm p-5 flex flex-col gap-3">
-              <div className="w-9 h-9 bg-green-50 border border-green-100 flex items-center justify-center shrink-0">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8 gap-4">
+          {kpis.map(({ icon: Icon, label, value, highlight }) => (
+            <div
+              key={label}
+              className={`border shadow-sm p-5 flex flex-col gap-3 ${
+                highlight
+                  ? "bg-green-50 border-green-200"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <div className={`w-9 h-9 border flex items-center justify-center shrink-0 ${
+                highlight ? "bg-green-100 border-green-200" : "bg-green-50 border-green-100"
+              }`}>
                 <Icon className="w-4 h-4 text-green-600" />
               </div>
               <div>
-                <div className="text-xl font-bold text-gray-900 tracking-tight">{value}</div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xl font-bold text-gray-900 tracking-tight">{value}</span>
+                  {highlight && (
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse shrink-0" />
+                  )}
+                </div>
                 <div className="text-[11px] text-gray-500 font-medium mt-0.5 leading-tight">{label}</div>
               </div>
             </div>
