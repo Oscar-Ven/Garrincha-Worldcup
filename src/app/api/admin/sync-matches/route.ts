@@ -66,6 +66,25 @@ async function runSync(): Promise<NextResponse> {
     );
   }
 
+  // Guard: skip the external API call entirely when there are no LIVE matches
+  // and no SCHEDULED matches kicking off today (UTC). Saves api-football quota
+  // on days without fixtures.
+  const todayStart = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z");
+  const todayEnd   = new Date(new Date().toISOString().slice(0, 10) + "T23:59:59Z");
+  const activeCount = await prisma.match.count({
+    where: {
+      OR: [
+        { status: "LIVE" },
+        { status: "SCHEDULED", kickoffAt: { gte: todayStart, lte: todayEnd } },
+        // Also pick up pending_review matches that arrived via a previous sync
+        { scoreSyncStatus: "pending_review" },
+      ],
+    },
+  });
+  if (activeCount === 0) {
+    return NextResponse.json({ ok: true, message: "No matches today — sync skipped.", synced: 0, pending_review: 0, skipped: 0, warnings: [] });
+  }
+
   const leagueId = process.env.FOOTBALL_DATA_COMPETITION_CODE?.trim() ?? "1";
   const season   = process.env.FOOTBALL_DATA_SEASON?.trim() ?? "2026";
 

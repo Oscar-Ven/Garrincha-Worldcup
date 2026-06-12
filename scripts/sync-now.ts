@@ -146,6 +146,24 @@ async function main() {
   console.log(`\n=== Garrincha Sync (${DRY_RUN ? "DRY RUN" : "LIVE"}) ===`);
   console.log(`League: ${LEAGUE}  Season: ${SEASON}\n`);
 
+  // Guard: skip api-football call when no matches need syncing today
+  const todayStart = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z");
+  const todayEnd   = new Date(new Date().toISOString().slice(0, 10) + "T23:59:59Z");
+  const activeCount = await prisma.match.count({
+    where: {
+      OR: [
+        { status: "LIVE" },
+        { status: "SCHEDULED", kickoffAt: { gte: todayStart, lte: todayEnd } },
+        { scoreSyncStatus: "pending_review" },
+      ],
+    },
+  });
+  if (activeCount === 0) {
+    console.log("No matches today — sync skipped (0 api-football calls made).");
+    await prisma.$disconnect(); await pool.end();
+    return;
+  }
+
   // Fetch live + today
   console.log("Fetching fixtures...");
   const [rawLive, rawToday] = await Promise.all([
