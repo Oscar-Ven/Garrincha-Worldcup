@@ -22,17 +22,32 @@ export default async function DashboardPage() {
 
   const today = getBrusselsDate();
 
-  const [predictions, matches, pointEvents, alreadyClaimed, rankData, centerRank] = await Promise.all([
+  const lockCutoff = new Date(Date.now() - 5 * 60 * 1000);
+
+  const [predictions, upcomingRaw, recentRaw, pointEvents, alreadyClaimed, rankData, centerRank] = await Promise.all([
     prisma.prediction.findMany({
       where: { userId: user.id },
       select: { matchId: true, pointsAwarded: true },
     }),
     prisma.match.findMany({
-      include: {
+      where: { status: "SCHEDULED", kickoffAt: { gt: lockCutoff } },
+      select: {
+        id: true, kickoffAt: true,
         homeTeam: { select: { name: true, fifaCode: true, flagUrl: true } },
         awayTeam: { select: { name: true, fifaCode: true, flagUrl: true } },
       },
       orderBy: { kickoffAt: "asc" },
+      take: 6,
+    }),
+    prisma.match.findMany({
+      where: { status: "FINAL" },
+      select: {
+        id: true, homeScore: true, awayScore: true,
+        homeTeam: { select: { name: true } },
+        awayTeam: { select: { name: true } },
+      },
+      orderBy: { kickoffAt: "desc" },
+      take: 3,
     }),
     prisma.pointEvent.findMany({
       where: { userId: user.id },
@@ -54,8 +69,8 @@ export default async function DashboardPage() {
 
   const globalRank = rankData.rank;
 
-  const upcomingMatches = matches
-    .filter((match) => match.status === "SCHEDULED" && !isPredictionLocked(match.kickoffAt))
+  const upcomingMatches = upcomingRaw
+    .filter((match) => !isPredictionLocked(match.kickoffAt))
     .slice(0, 3)
     .map((match) => ({
       id: match.id,
@@ -64,16 +79,12 @@ export default async function DashboardPage() {
       predicted: predictionMap.has(match.id),
     }));
 
-  const recentCompleted = matches
-    .filter((match) => match.status === "FINAL")
-    .slice(-3)
-    .reverse()
-    .map((match) => ({
-      id: match.id,
-      label: `${match.homeTeam.name} ${match.homeScore ?? "-"}-${match.awayScore ?? "-"} ${match.awayTeam.name}`,
-      predicted: predictionMap.has(match.id),
-      points: predictionMap.get(match.id)?.pointsAwarded ?? 0,
-    }));
+  const recentCompleted = recentRaw.map((match) => ({
+    id: match.id,
+    label: `${match.homeTeam.name} ${match.homeScore ?? "-"}-${match.awayScore ?? "-"} ${match.awayTeam.name}`,
+    predicted: predictionMap.has(match.id),
+    points: predictionMap.get(match.id)?.pointsAwarded ?? 0,
+  }));
 
   const statCards = [
     { label: t(locale, "dashboard.totalPoints"), value: String(totalPoints), icon: Coins },
