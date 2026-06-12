@@ -52,7 +52,7 @@ function LeaderboardRows({
             className={`flex min-w-0 items-center justify-between gap-3 rounded-3xl border px-4 py-4 ${
               active
                 ? "border-lime-400/40 bg-lime-400/10"
-                : "border-white/8 bg-white/[0.03]"
+                : "border-white/8 bg-white/3"
             }`}
           >
             <div className="flex min-w-0 items-center gap-3">

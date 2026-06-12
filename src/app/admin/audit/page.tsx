@@ -52,7 +52,7 @@ export default async function AuditViewPage() {
     playerNick: log.user?.nickname ?? "anonymous",
     playerEmail: log.user?.email ?? "",
     fromCenter: centers.find((c) => c.id === log.fromCenterId)?.name.replace("GARRINCHA ", "") ?? "Initial Activation",
-    toCenter: centers.find((c) => c.id === log.toCenterId)?.name.replace("GARRINCHA ", "") ?? "â€”",
+    toCenter: centers.find((c) => c.id === log.toCenterId)?.name.replace("GARRINCHA ", "") ?? "—",
     actor: log.changedBy,
   }));
 
@@ -65,7 +65,7 @@ export default async function AuditViewPage() {
     points: log.points,
     reason: log.reason,
     actor: log.awardedBy ?? "System",
-    centerName: log.user?.competitionCenter?.name.replace("GARRINCHA ", "") ?? "â€”",
+    centerName: log.user?.competitionCenter?.name.replace("GARRINCHA ", "") ?? "—",
   }));
 
   const thCls = "px-6 py-3 text-gray-500 text-xs font-semibold uppercase tracking-wider";

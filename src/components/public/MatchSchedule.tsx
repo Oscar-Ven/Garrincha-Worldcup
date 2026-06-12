@@ -122,7 +122,7 @@ function MatchCard({ match }: { match: PublicMatchRow }) {
         </div>
 
         {/* Center: VS or score */}
-        <div className="flex flex-col items-center gap-0.5 shrink-0 min-w-[56px]">
+        <div className="flex flex-col items-center gap-0.5 shrink-0 min-w-14">
           {hasResult ? (
             <div className="flex items-center gap-1.5">
               <span className="text-2xl font-black tabular-nums text-white">

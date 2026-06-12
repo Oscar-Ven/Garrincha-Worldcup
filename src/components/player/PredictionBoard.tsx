@@ -210,7 +210,7 @@ export default function PredictionBoard({ matches, mode }: PredictionBoardProps)
       </div>
 
       {filteredMatches.length === 0 ? (
-        <div className="rounded-[28px] border border-dashed border-white/10 bg-white/[0.03] px-5 py-10 text-center text-sm text-zinc-400">
+        <div className="rounded-[28px] border border-dashed border-white/10 bg-white/3 px-5 py-10 text-center text-sm text-zinc-400">
           No matches found for this view.
         </div>
       ) : (
@@ -229,7 +229,7 @@ export default function PredictionBoard({ matches, mode }: PredictionBoardProps)
                 const showPenaltySection = !readOnly && isKnockout && isPredictedDraw;
 
                 return (
-                  <article key={match.id} className="rounded-[28px] border border-white/8 bg-white/[0.03] p-4 shadow-[0_14px_40px_rgba(0,0,0,0.18)] sm:p-5">
+                  <article key={match.id} className="rounded-[28px] border border-white/8 bg-white/3 p-4 shadow-[0_14px_40px_rgba(0,0,0,0.18)] sm:p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Match {match.fifaMatchNo ?? "-"} · {match.stage.replaceAll("_", " ")}</div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -37,13 +37,22 @@ type PlayerShellProps = {
     avatarUrl: string | null;
   };
   labels: PlayerNavLabels;
+  hasLiveMatch: boolean;
   children: React.ReactNode;
 };
 
-export default function PlayerShell({ user, labels, children }: PlayerShellProps) {
+export default function PlayerShell({ user, labels, hasLiveMatch, children }: PlayerShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Auto-refresh: 30 s during a live match, 2 min otherwise.
+  // Pages are force-dynamic so every refresh fetches fresh scores + leaderboard.
+  useEffect(() => {
+    const intervalMs = hasLiveMatch ? 30_000 : 120_000;
+    const id = setInterval(() => router.refresh(), intervalMs);
+    return () => clearInterval(id);
+  }, [hasLiveMatch, router]);
 
   const links = [
     { href: "/dashboard", label: labels.home, icon: House },
@@ -66,7 +75,7 @@ export default function PlayerShell({ user, labels, children }: PlayerShellProps
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#1b2a17_0%,#0a0d0a_30%,#09090b_100%)] text-zinc-100">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1440px]">
+      <div className="mx-auto flex min-h-screen w-full max-w-360">
         <aside className="hidden w-72 shrink-0 border-r border-white/6 bg-black/20 backdrop-blur xl:flex xl:flex-col">
           <div className="border-b border-white/6 px-6 py-6">
             <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-lime-400">GARRINCHA</div>

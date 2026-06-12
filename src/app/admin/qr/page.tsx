@@ -68,7 +68,7 @@ export default async function AdminQrLinksPage() {
             return (
               <QrLinkRow
                 key={center.id}
-                label={`${label} â€” ${center.city}`}
+                label={`${label} — ${center.city}`}
                 url={url}
               />
             );

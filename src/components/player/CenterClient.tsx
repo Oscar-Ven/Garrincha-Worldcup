@@ -124,7 +124,7 @@ export default function CenterClient({ currentCenterId, canChangeCenter, centers
             type="button"
             disabled={!checkInCode || busy !== null}
             onClick={handleCheckin}
-            className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-zinc-200 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm font-semibold text-zinc-200 disabled:opacity-60"
           >
             <ShieldCheck className="h-4 w-4" />
             <span>{busy === "checkin" ? "Checking..." : "Confirm check-in"}</span>

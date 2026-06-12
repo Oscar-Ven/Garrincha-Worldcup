@@ -24,14 +24,26 @@ function isCronRequest(request: NextRequest): boolean {
 // Team name normalisation for fuzzy matching
 // ---------------------------------------------------------------------------
 
+// Known discrepancies between api-football team names and FIFA/DB names
+const TEAM_NAME_ALIASES: Record<string, string> = {
+  "czech republic":    "czechia",
+  "ir iran":           "iran",
+  "korea republic":    "south korea",
+  "korea dpr":         "north korea",
+  "usa":               "united states",
+  "cape verde":        "cabo verde",
+  "trinidad & tobago": "trinidad and tobago",
+};
+
 function normalize(name: string): string {
-  return name
+  const base = name
     .toLowerCase()
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9 ]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+  return TEAM_NAME_ALIASES[base] ?? base;
 }
 
 const KICKOFF_WINDOW_MS = 20 * 60 * 1000; // ±20 min
@@ -52,6 +64,25 @@ async function runSync(): Promise<NextResponse> {
       { error: `Set FOOTBALL_DATA_PROVIDER=api-football to enable auto-sync. Current: "${provider ?? "unset"}".` },
       { status: 503 },
     );
+  }
+
+  // Guard: skip the external API call entirely when there are no LIVE matches
+  // and no SCHEDULED matches kicking off today (UTC). Saves api-football quota
+  // on days without fixtures.
+  const todayStart = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z");
+  const todayEnd   = new Date(new Date().toISOString().slice(0, 10) + "T23:59:59Z");
+  const activeCount = await prisma.match.count({
+    where: {
+      OR: [
+        { status: "LIVE" },
+        { status: "SCHEDULED", kickoffAt: { gte: todayStart, lte: todayEnd } },
+        // Also pick up pending_review matches that arrived via a previous sync
+        { scoreSyncStatus: "pending_review" },
+      ],
+    },
+  });
+  if (activeCount === 0) {
+    return NextResponse.json({ ok: true, message: "No matches today — sync skipped.", synced: 0, pending_review: 0, skipped: 0, warnings: [] });
   }
 
   const leagueId = process.env.FOOTBALL_DATA_COMPETITION_CODE?.trim() ?? "1";
