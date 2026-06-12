@@ -34,7 +34,7 @@ export default async function MyPointsPage() {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+      <section className="rounded-[28px] border border-white/8 bg-white/3 p-5">
         <h1 className="text-[clamp(1.35rem,4vw,2rem)] font-semibold tracking-tight text-white">My points</h1>
         <p className="mt-2 text-sm leading-6 text-zinc-300">Your total combines scored predictions and point events such as manual bonus allocations.</p>
       </section>
@@ -48,7 +48,7 @@ export default async function MyPointsPage() {
         ].map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="rounded-[24px] border border-white/8 bg-black/20 p-4">
+            <div key={card.label} className="rounded-3xl border border-white/8 bg-black/20 p-4">
               <div className="flex items-center justify-between gap-3">
                 <span className="text-xs text-zinc-500">{card.label}</span>
                 <Icon className="h-4 w-4 text-lime-400" />
@@ -67,7 +67,7 @@ export default async function MyPointsPage() {
               <div className="rounded-3xl border border-dashed border-white/10 px-4 py-5 text-sm text-zinc-400">No prediction history yet.</div>
             ) : (
               predictions.map((prediction) => (
-                <div key={prediction.id} className="rounded-3xl border border-white/8 bg-white/[0.03] px-4 py-4">
+                <div key={prediction.id} className="rounded-3xl border border-white/8 bg-white/3 px-4 py-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold text-white">{prediction.match.homeTeam.name} vs {prediction.match.awayTeam.name}</div>
@@ -88,7 +88,7 @@ export default async function MyPointsPage() {
               <div className="rounded-3xl border border-dashed border-white/10 px-4 py-5 text-sm text-zinc-400">No point events yet.</div>
             ) : (
               pointEvents.map((event) => (
-                <div key={event.id} className="rounded-3xl border border-white/8 bg-white/[0.03] px-4 py-4">
+                <div key={event.id} className="rounded-3xl border border-white/8 bg-white/3 px-4 py-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold text-white">{event.reason}</div>

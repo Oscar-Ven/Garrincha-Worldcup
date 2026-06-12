@@ -155,9 +155,9 @@ export default async function LandingPage({
         className="relative min-h-screen flex items-center justify-center overflow-hidden bg-zinc-950 pt-20"
       >
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900/70 to-zinc-950" />
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-lime-500/10 blur-[120px] rounded-full pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-br from-zinc-950 via-zinc-900/70 to-zinc-950" />
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-175 h-87.5 bg-lime-500/10 blur-[120px] rounded-full pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-full h-64 bg-linear-to-t from-zinc-950 to-transparent pointer-events-none" />
         </div>
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 flex flex-col items-center text-center py-20">
@@ -170,7 +170,7 @@ export default async function LandingPage({
           <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white uppercase tracking-tighter leading-[0.85] mb-8 drop-shadow-2xl">
             World Cup
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-400 italic pr-4">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-lime-400 to-green-400 italic pr-4">
               Challenge
             </span>
           </h1>
@@ -193,7 +193,7 @@ export default async function LandingPage({
                   <span className="text-[9px] font-mono text-zinc-600">
                     {formatFeaturedDate(featuredFixture.kickoffAt, locale)}
                   </span>
-                  <span className="max-w-[180px] truncate text-[9px] font-mono text-zinc-600">
+                  <span className="max-w-45 truncate text-[9px] font-mono text-zinc-600">
                     {featuredFixture.venue}
                   </span>
                 </div>
@@ -312,7 +312,7 @@ export default async function LandingPage({
           </div>
         </div>
 
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/3 h-1/2 bg-gradient-to-l from-zinc-900/30 to-transparent pointer-events-none blur-3xl" />
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/3 h-1/2 bg-linear-to-l from-zinc-900/30 to-transparent pointer-events-none blur-3xl" />
       </section>
 
       {/* ── Prediction Rules ────────────────────────────────────────────── */}
@@ -320,7 +320,7 @@ export default async function LandingPage({
         id="scoring"
         className="py-24 bg-zinc-900 relative border-y border-zinc-800"
       >
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-lime-400 via-zinc-950 to-zinc-950 pointer-events-none" />
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-lime-400 via-zinc-950 to-zinc-950 pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -500,7 +500,7 @@ export default async function LandingPage({
                     <div className="font-bold text-white text-sm">{player.name}</div>
                     <div className="text-xs text-zinc-500">{player.nationality}</div>
                   </div>
-                  <div className="hidden sm:block text-xs text-zinc-400 max-w-[180px] truncate">
+                  <div className="hidden sm:block text-xs text-zinc-400 max-w-45 truncate">
                     {player.center}
                   </div>
                   <div className="text-lime-400 font-black text-lg">{player.points}</div>
@@ -608,7 +608,7 @@ export default async function LandingPage({
 
       {/* ── Final CTA ────────────────────────────────────────────────────── */}
       <section className="py-28 bg-zinc-950 relative border-t border-zinc-900">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-lime-400/8 via-zinc-950 to-zinc-950 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-lime-400/8 via-zinc-950 to-zinc-950 pointer-events-none" />
 
         <div className="max-w-4xl mx-auto px-6 md:px-12 relative z-10 text-center">
           <p className="text-lime-400 font-bold uppercase tracking-[0.2em] text-xs mb-6">

@@ -105,7 +105,7 @@ export default async function DashboardPage() {
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="min-w-0 rounded-[24px] border border-white/8 bg-zinc-950/70 p-4">
+            <div key={card.label} className="min-w-0 rounded-3xl border border-white/8 bg-zinc-950/70 p-4">
               <div className="flex items-center justify-between gap-3">
                 <span className="text-xs font-medium text-zinc-400">{card.label}</span>
                 <Icon className="h-4 w-4 shrink-0 text-lime-400" />
@@ -134,7 +134,7 @@ export default async function DashboardPage() {
                 <div className="rounded-3xl border border-dashed border-white/10 px-4 py-5 text-sm text-zinc-400">No open fixtures right now.</div>
               ) : (
                 upcomingMatches.map((match) => (
-                  <div key={match.id} className="flex min-w-0 items-center justify-between gap-3 rounded-3xl border border-white/8 bg-white/[0.03] px-4 py-4">
+                  <div key={match.id} className="flex min-w-0 items-center justify-between gap-3 rounded-3xl border border-white/8 bg-white/3 px-4 py-4">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium text-white">{match.label}</div>
                       <div className="mt-1 text-xs text-zinc-500">{formatBelgiumDateTime(match.kickoffAt)}</div>
@@ -164,7 +164,7 @@ export default async function DashboardPage() {
                 <div className="rounded-3xl border border-dashed border-white/10 px-4 py-5 text-sm text-zinc-400">No completed matches yet.</div>
               ) : (
                 recentCompleted.map((match) => (
-                  <div key={match.id} className="flex min-w-0 items-center justify-between gap-3 rounded-3xl border border-white/8 bg-white/[0.03] px-4 py-4">
+                  <div key={match.id} className="flex min-w-0 items-center justify-between gap-3 rounded-3xl border border-white/8 bg-white/3 px-4 py-4">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium text-white">{match.label}</div>
                       <div className="mt-1 text-xs text-zinc-500">{match.predicted ? "Prediction scored" : "No prediction submitted"}</div>
@@ -191,7 +191,7 @@ export default async function DashboardPage() {
               ].map((action) => {
                 const Icon = action.icon;
                 return (
-                  <Link key={action.href} href={action.href} className="flex items-center gap-3 rounded-3xl border border-white/8 bg-white/[0.03] px-4 py-4 text-sm font-medium text-white transition-colors hover:bg-white/[0.06]">
+                  <Link key={action.href} href={action.href} className="flex items-center gap-3 rounded-3xl border border-white/8 bg-white/3 px-4 py-4 text-sm font-medium text-white transition-colors hover:bg-white/6">
                     <Icon className="h-4 w-4 shrink-0 text-lime-400" />
                     <span className="min-w-0 truncate">{action.label}</span>
                   </Link>
@@ -203,11 +203,11 @@ export default async function DashboardPage() {
           <div className="rounded-[28px] border border-white/8 bg-black/20 p-5">
             <h2 className="text-base font-semibold text-white">Center and bonus status</h2>
             <div className="mt-4 space-y-3 text-sm text-zinc-300">
-              <div className="rounded-3xl border border-white/8 bg-white/[0.03] px-4 py-4">
+              <div className="rounded-3xl border border-white/8 bg-white/3 px-4 py-4">
                 <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">Competition center</div>
                 <div className="mt-2 font-medium text-white">{user.competitionCenter?.name ?? user.center.name}</div>
               </div>
-              <div className="rounded-3xl border border-white/8 bg-white/[0.03] px-4 py-4">
+              <div className="rounded-3xl border border-white/8 bg-white/3 px-4 py-4">
                 <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">Recent bonus activity</div>
                 <div className="mt-2 space-y-2">
                   {pointEvents.length === 0 ? (

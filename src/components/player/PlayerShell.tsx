@@ -66,7 +66,7 @@ export default function PlayerShell({ user, labels, children }: PlayerShellProps
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#1b2a17_0%,#0a0d0a_30%,#09090b_100%)] text-zinc-100">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1440px]">
+      <div className="mx-auto flex min-h-screen w-full max-w-360">
         <aside className="hidden w-72 shrink-0 border-r border-white/6 bg-black/20 backdrop-blur xl:flex xl:flex-col">
           <div className="border-b border-white/6 px-6 py-6">
             <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-lime-400">GARRINCHA</div>

@@ -34,7 +34,7 @@ export default async function CenterPage() {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+      <section className="rounded-[28px] border border-white/8 bg-white/3 p-5">
         <h1 className="text-[clamp(1.35rem,4vw,2rem)] font-semibold tracking-tight text-white">Center</h1>
         <p className="mt-2 text-sm leading-6 text-zinc-300">You activate at one GARRINCHA center and compete for one center in the rankings. Global and center leaderboards both use that competition-center assignment.</p>
       </section>
@@ -55,7 +55,7 @@ export default async function CenterPage() {
             <div className="rounded-3xl border border-dashed border-white/10 px-4 py-5 text-sm text-zinc-400">No ranked players for this center yet.</div>
           ) : (
             centerRows.slice(0, 20).map((row, index) => (
-              <div key={row.id} className={`flex min-w-0 items-center justify-between gap-3 rounded-3xl border px-4 py-4 ${row.id === user.id ? "border-lime-400/40 bg-lime-400/10" : "border-white/8 bg-white/[0.03]"}`}>
+              <div key={row.id} className={`flex min-w-0 items-center justify-between gap-3 rounded-3xl border px-4 py-4 ${row.id === user.id ? "border-lime-400/40 bg-lime-400/10" : "border-white/8 bg-white/3"}`}>
                 <div className="flex min-w-0 items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-sm font-semibold text-zinc-300">#{index + 1}</div>
                   <div className="min-w-0">

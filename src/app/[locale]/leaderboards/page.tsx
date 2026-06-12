@@ -106,7 +106,7 @@ export default async function LeaderboardsPage({
                   <div className="font-bold text-white text-sm">{player.nickname}</div>
                   <div className="text-xs text-zinc-500">{player.nationality}</div>
                 </div>
-                <div className="hidden md:block text-xs text-zinc-500 max-w-[200px] truncate">
+                <div className="hidden md:block text-xs text-zinc-500 max-w-50 truncate">
                   {player.center}
                 </div>
                 <div className="text-lime-400 font-black text-xl tabular-nums">
