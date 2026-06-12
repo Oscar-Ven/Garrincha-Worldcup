@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { type LeaderboardRow } from "@/lib/product-logic";
 import { prisma } from "@/lib/prisma";
@@ -98,66 +99,72 @@ export async function getLeaderboardWithMeta(
 // Computes only the requesting user's rank and points in one focused SQL query.
 // Avoids loading the full leaderboard just to display one user's position.
 
-export async function getUserCenterRank(
-  userId: string,
-  competitionCenterId: string,
-): Promise<number> {
-  type RankRow = { rank: bigint };
-  const result = await prisma.$queryRaw<RankRow[]>`
-    WITH ranked AS (
-      SELECT
-        u.id,
-        RANK() OVER (
-          ORDER BY COALESCE(p.total, 0) + COALESCE(ev.total, 0) DESC
-        ) AS rank
-      FROM "User" u
-      LEFT JOIN (
-        SELECT "userId", SUM("pointsAwarded") AS total
-        FROM "Prediction"
-        GROUP BY "userId"
-      ) p ON p."userId" = u.id
-      LEFT JOIN (
-        SELECT "userId", SUM(points) AS total
-        FROM "PointEvent"
-        GROUP BY "userId"
-      ) ev ON ev."userId" = u.id
-      WHERE u."competitionCenterId" = ${competitionCenterId}
-    )
-    SELECT rank FROM ranked WHERE id = ${userId}
-  `;
-  return result[0] ? Number(result[0].rank) : 0;
-}
+// Rank queries run a window function over all 33k users — expensive on every
+// page load. Cache per user for 90 s; ranks only shift when a match finalises.
 
-export async function getUserRankAndPoints(
-  userId: string,
-): Promise<{ rank: number; points: number }> {
-  type RankRow = { rank: bigint; points: bigint };
-  const result = await prisma.$queryRaw<RankRow[]>`
-    WITH ranked AS (
-      SELECT
-        u.id,
-        COALESCE(p.total, 0) + COALESCE(ev.total, 0) AS points,
-        RANK() OVER (
-          ORDER BY COALESCE(p.total, 0) + COALESCE(ev.total, 0) DESC
-        ) AS rank
-      FROM "User" u
-      LEFT JOIN (
-        SELECT "userId", SUM("pointsAwarded") AS total
-        FROM "Prediction"
-        GROUP BY "userId"
-      ) p ON p."userId" = u.id
-      LEFT JOIN (
-        SELECT "userId", SUM(points) AS total
-        FROM "PointEvent"
-        GROUP BY "userId"
-      ) ev ON ev."userId" = u.id
-      WHERE u."competitionCenterId" IS NOT NULL
-    )
-    SELECT rank, points FROM ranked WHERE id = ${userId}
-  `;
-  const row = result[0];
-  return {
-    rank: row ? Number(row.rank) : 0,
-    points: row ? Number(row.points) : 0,
-  };
-}
+export const getUserCenterRank = unstable_cache(
+  async (userId: string, competitionCenterId: string): Promise<number> => {
+    type RankRow = { rank: bigint };
+    const result = await prisma.$queryRaw<RankRow[]>`
+      WITH ranked AS (
+        SELECT
+          u.id,
+          RANK() OVER (
+            ORDER BY COALESCE(p.total, 0) + COALESCE(ev.total, 0) DESC
+          ) AS rank
+        FROM "User" u
+        LEFT JOIN (
+          SELECT "userId", SUM("pointsAwarded") AS total
+          FROM "Prediction"
+          GROUP BY "userId"
+        ) p ON p."userId" = u.id
+        LEFT JOIN (
+          SELECT "userId", SUM(points) AS total
+          FROM "PointEvent"
+          GROUP BY "userId"
+        ) ev ON ev."userId" = u.id
+        WHERE u."competitionCenterId" = ${competitionCenterId}
+      )
+      SELECT rank FROM ranked WHERE id = ${userId}
+    `;
+    return result[0] ? Number(result[0].rank) : 0;
+  },
+  ["user-center-rank"],
+  { revalidate: 90 },
+);
+
+export const getUserRankAndPoints = unstable_cache(
+  async (userId: string): Promise<{ rank: number; points: number }> => {
+    type RankRow = { rank: bigint; points: bigint };
+    const result = await prisma.$queryRaw<RankRow[]>`
+      WITH ranked AS (
+        SELECT
+          u.id,
+          COALESCE(p.total, 0) + COALESCE(ev.total, 0) AS points,
+          RANK() OVER (
+            ORDER BY COALESCE(p.total, 0) + COALESCE(ev.total, 0) DESC
+          ) AS rank
+        FROM "User" u
+        LEFT JOIN (
+          SELECT "userId", SUM("pointsAwarded") AS total
+          FROM "Prediction"
+          GROUP BY "userId"
+        ) p ON p."userId" = u.id
+        LEFT JOIN (
+          SELECT "userId", SUM(points) AS total
+          FROM "PointEvent"
+          GROUP BY "userId"
+        ) ev ON ev."userId" = u.id
+        WHERE u."competitionCenterId" IS NOT NULL
+      )
+      SELECT rank, points FROM ranked WHERE id = ${userId}
+    `;
+    const row = result[0];
+    return {
+      rank: row ? Number(row.rank) : 0,
+      points: row ? Number(row.points) : 0,
+    };
+  },
+  ["user-rank-and-points"],
+  { revalidate: 90 },
+);
