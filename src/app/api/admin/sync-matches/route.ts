@@ -24,14 +24,26 @@ function isCronRequest(request: NextRequest): boolean {
 // Team name normalisation for fuzzy matching
 // ---------------------------------------------------------------------------
 
+// Known discrepancies between api-football team names and FIFA/DB names
+const TEAM_NAME_ALIASES: Record<string, string> = {
+  "czech republic":    "czechia",
+  "ir iran":           "iran",
+  "korea republic":    "south korea",
+  "korea dpr":         "north korea",
+  "usa":               "united states",
+  "cape verde":        "cabo verde",
+  "trinidad & tobago": "trinidad and tobago",
+};
+
 function normalize(name: string): string {
-  return name
+  const base = name
     .toLowerCase()
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9 ]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+  return TEAM_NAME_ALIASES[base] ?? base;
 }
 
 const KICKOFF_WINDOW_MS = 20 * 60 * 1000; // ±20 min
