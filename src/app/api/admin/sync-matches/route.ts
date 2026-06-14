@@ -84,7 +84,7 @@ async function runSync(): Promise<NextResponse> {
     },
   });
   if (activeCount === 0) {
-    return NextResponse.json({ ok: true, message: "No matches today — sync skipped.", synced: 0, pending_review: 0, skipped: 0, warnings: [] });
+    return NextResponse.json({ ok: true, message: "No matches today — sync skipped.", synced: 0, live_updated: 0, pending_review: 0, skipped: 0, warnings: [] });
   }
 
   const leagueId = process.env.FOOTBALL_DATA_COMPETITION_CODE?.trim() ?? "1";
@@ -128,7 +128,7 @@ async function runSync(): Promise<NextResponse> {
   }
 
   if (!fixtures.length) {
-    return NextResponse.json({ ok: true, message: "No fixtures today.", synced: 0, pending_review: 0, skipped: 0, warnings: [] });
+    return NextResponse.json({ ok: true, message: "No fixtures today.", synced: 0, live_updated: 0, pending_review: 0, skipped: 0, warnings: [] });
   }
 
   // Load DB matches that are not yet FINAL
@@ -141,7 +141,7 @@ async function runSync(): Promise<NextResponse> {
     },
   });
 
-  const report = { synced: 0, pending_review: 0, skipped: 0, warnings: [] as string[] };
+  const report = { synced: 0, live_updated: 0, pending_review: 0, skipped: 0, warnings: [] as string[] };
   const now = new Date();
 
   for (const fixture of fixtures) {
@@ -203,6 +203,7 @@ async function runSync(): Promise<NextResponse> {
         where: { id: dbMatch.id },
         data: { status: "LIVE", externalUpdatedAt: now, lastScoreSyncAt: now },
       });
+      report.live_updated++;
     }
 
     if (!plan.canStoreFinalScoreDraft || !fixture.finalScore) continue;
