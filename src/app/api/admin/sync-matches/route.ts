@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
-import { fetchLiveFixtures, fetchTodayFixtures, type MappedFixture } from "@/lib/api-football-client";
+import { fetchLiveFixtures, fetchTodayFixtures, fetchFixturesByIds, type MappedFixture } from "@/lib/api-football-client";
 import { prisma } from "@/lib/prisma";
 import { createMatchDataWorkflowPlan } from "@/lib/match-data-workflow";
 import { recalculatePredictionPoints } from "@/lib/product-logic";
@@ -106,6 +106,25 @@ async function runSync(): Promise<NextResponse> {
   const fixtures: MappedFixture[] = [];
   for (const f of [...live, ...today]) {
     if (!seen.has(f.externalId)) { seen.add(f.externalId); fixtures.push(f); }
+  }
+
+  // Recover stuck LIVE matches — matches the DB thinks are LIVE but didn't appear in live/today
+  // (happens when a match finishes after UTC midnight and falls off the "today" window).
+  const livDbMatches = await prisma.match.findMany({
+    where: { status: "LIVE", externalMatchId: { not: null } },
+    select: { externalMatchId: true },
+  });
+  const missingLiveIds = livDbMatches
+    .map((m) => m.externalMatchId as string)
+    .filter((id) => !seen.has(id));
+  if (missingLiveIds.length > 0) {
+    const recovered = await fetchFixturesByIds(apiKey, missingLiveIds).catch((e) => {
+      console.error("[sync-matches] stuck-live fetch failed:", e);
+      return [] as MappedFixture[];
+    });
+    for (const f of recovered) {
+      if (!seen.has(f.externalId)) { seen.add(f.externalId); fixtures.push(f); }
+    }
   }
 
   if (!fixtures.length) {
