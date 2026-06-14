@@ -154,3 +154,15 @@ export async function fetchTodayFixtures(
   const raw = await apiFetch(apiKey, `/fixtures?league=${leagueId}&season=${season}&date=${today}`);
   return raw.map(mapFixture);
 }
+
+/** Fetch specific fixtures by their api-football IDs (for recovering stuck LIVE matches). */
+export async function fetchFixturesByIds(
+  apiKey: string,
+  ids: string[],
+): Promise<MappedFixture[]> {
+  if (ids.length === 0) return [];
+  const results = await Promise.all(
+    ids.map((id) => apiFetch(apiKey, `/fixtures?id=${id}`).catch(() => [] as ApiFixture[])),
+  );
+  return results.flat().map(mapFixture);
+}

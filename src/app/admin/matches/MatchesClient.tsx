@@ -176,8 +176,6 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
   }
 
   async function handleSyncMatches() {
-    if (!confirm("Sync fixture metadata, kickoff times, and team statuses from external APIs?")) return;
-
     setSyncLoading(true);
     setError(null);
     setSuccess(null);
@@ -189,9 +187,13 @@ export default function MatchesClient({ currentUserRole, initialMatches }: Props
         throw new Error(data.error ?? "Match sync process failed.");
       }
 
-      const parts = [`${data.synced ?? 0} auto-applied`];
+      const parts: string[] = [];
+      if ((data.synced ?? 0) > 0) parts.push(`${data.synced} finalized`);
+      if ((data.live_updated ?? 0) > 0) parts.push(`${data.live_updated} now LIVE`);
       if ((data.pending_review ?? 0) > 0) parts.push(`${data.pending_review} pending review`);
-      setSuccess(`Sync complete. ${parts.join(", ")}.`);
+      if ((data.skipped ?? 0) > 0) parts.push(`${data.skipped} skipped`);
+      const summary = parts.length > 0 ? parts.join(", ") : data.message ?? "up to date";
+      setSuccess(`Sync complete — ${summary}.`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sync failure.");

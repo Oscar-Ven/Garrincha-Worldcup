@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
-import { fetchLiveFixtures, fetchTodayFixtures, type MappedFixture } from "@/lib/api-football-client";
+import { fetchLiveFixtures, fetchTodayFixtures, fetchFixturesByIds, type MappedFixture } from "@/lib/api-football-client";
 import { prisma } from "@/lib/prisma";
 import { createMatchDataWorkflowPlan } from "@/lib/match-data-workflow";
 import { recalculatePredictionPoints } from "@/lib/product-logic";
@@ -84,7 +84,7 @@ async function runSync(): Promise<NextResponse> {
     },
   });
   if (activeCount === 0) {
-    return NextResponse.json({ ok: true, message: "No matches today — sync skipped.", synced: 0, pending_review: 0, skipped: 0, warnings: [] });
+    return NextResponse.json({ ok: true, message: "No matches today — sync skipped.", synced: 0, live_updated: 0, pending_review: 0, skipped: 0, warnings: [] });
   }
 
   const leagueId = process.env.FOOTBALL_DATA_COMPETITION_CODE?.trim() ?? "1";
@@ -108,8 +108,27 @@ async function runSync(): Promise<NextResponse> {
     if (!seen.has(f.externalId)) { seen.add(f.externalId); fixtures.push(f); }
   }
 
+  // Recover stuck LIVE matches — matches the DB thinks are LIVE but didn't appear in live/today
+  // (happens when a match finishes after UTC midnight and falls off the "today" window).
+  const livDbMatches = await prisma.match.findMany({
+    where: { status: "LIVE", externalMatchId: { not: null } },
+    select: { externalMatchId: true },
+  });
+  const missingLiveIds = livDbMatches
+    .map((m) => m.externalMatchId as string)
+    .filter((id) => !seen.has(id));
+  if (missingLiveIds.length > 0) {
+    const recovered = await fetchFixturesByIds(apiKey, missingLiveIds).catch((e) => {
+      console.error("[sync-matches] stuck-live fetch failed:", e);
+      return [] as MappedFixture[];
+    });
+    for (const f of recovered) {
+      if (!seen.has(f.externalId)) { seen.add(f.externalId); fixtures.push(f); }
+    }
+  }
+
   if (!fixtures.length) {
-    return NextResponse.json({ ok: true, message: "No fixtures today.", synced: 0, pending_review: 0, skipped: 0, warnings: [] });
+    return NextResponse.json({ ok: true, message: "No fixtures today.", synced: 0, live_updated: 0, pending_review: 0, skipped: 0, warnings: [] });
   }
 
   // Load DB matches that are not yet FINAL
@@ -122,7 +141,7 @@ async function runSync(): Promise<NextResponse> {
     },
   });
 
-  const report = { synced: 0, pending_review: 0, skipped: 0, warnings: [] as string[] };
+  const report = { synced: 0, live_updated: 0, pending_review: 0, skipped: 0, warnings: [] as string[] };
   const now = new Date();
 
   for (const fixture of fixtures) {
@@ -184,6 +203,7 @@ async function runSync(): Promise<NextResponse> {
         where: { id: dbMatch.id },
         data: { status: "LIVE", externalUpdatedAt: now, lastScoreSyncAt: now },
       });
+      report.live_updated++;
     }
 
     if (!plan.canStoreFinalScoreDraft || !fixture.finalScore) continue;
